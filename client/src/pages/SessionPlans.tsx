@@ -1,17 +1,21 @@
 /*
   SESSION PLANS: Tier 1 Performance — Cold Dark Brand
-  MOBILE-FIRST: 44 pre-built session plans organized by level and sub-band.
-  Coaches can browse, filter, view full plan details, and load plans
-  directly into the Session Builder.
+  MOBILE-FIRST: 52 pre-built session plans organized by level and sub-band.
+  Includes: favorites, recently viewed, load plan into builder, draft badges.
 */
 import { useState, useMemo } from 'react';
-import { Link } from 'wouter';
+import { Link, useLocation } from 'wouter';
 import {
   Clock, ChevronDown, ChevronUp, Target, AlertTriangle,
-  Zap, ArrowRight, ClipboardList, Copy, Check, Printer
+  Zap, ArrowRight, ClipboardList, Copy, Check, Printer,
+  Star, History, Upload, AlertCircle
 } from 'lucide-react';
 import { pathwayStages, type PathwayStageId } from '@/lib/data';
 import { sessionPlans, sessionPlanLevelGroups, type SessionPlan } from '@/lib/sessionPlans';
+import { useSessionPlanFavorites } from '@/hooks/useSessionPlanFavorites';
+
+// localStorage key for loaded plan — Session Builder reads this
+const LOADED_PLAN_KEY = 'tier1-loaded-plan';
 
 // Color map for level badges
 const levelColors: Record<PathwayStageId, string> = {
@@ -32,8 +36,23 @@ const levelBgColors: Record<PathwayStageId, string> = {
   fta: 'border-l-orange-500',
 };
 
-function PlanCard({ plan, isExpanded, onToggle }: { plan: SessionPlan; isExpanded: boolean; onToggle: () => void }) {
+// Check if a plan is a draft (Foundations plans)
+function isDraftPlan(plan: SessionPlan): boolean {
+  return plan.level === 'foundations';
+}
+
+interface PlanCardProps {
+  plan: SessionPlan;
+  isExpanded: boolean;
+  onToggle: () => void;
+  isFavorite: boolean;
+  onToggleFavorite: () => void;
+  onLoadPlan: () => void;
+}
+
+function PlanCard({ plan, isExpanded, onToggle, isFavorite, onToggleFavorite, onLoadPlan }: PlanCardProps) {
   const [copiedBlock, setCopiedBlock] = useState<string | null>(null);
+  const draft = isDraftPlan(plan);
 
   const copyPlanText = () => {
     const text = [
@@ -58,6 +77,7 @@ function PlanCard({ plan, isExpanded, onToggle }: { plan: SessionPlan; isExpande
   };
 
   const handlePrint = () => {
+    const draftBanner = draft ? '<div style="background:#fef3c7;color:#92400e;padding:6px 14px;border-radius:6px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:12px;">Draft — Content to be refined</div>' : '';
     const html = `<!DOCTYPE html>
 <html><head>
 <title>${plan.name} — Tier 1 Session Plan</title>
@@ -80,13 +100,14 @@ function PlanCard({ plan, isExpanded, onToggle }: { plan: SessionPlan; isExpande
   .section-title { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: #666; margin-bottom: 4px; }
   .section ul { list-style: none; padding: 0; }
   .section li { font-size: 12px; padding: 2px 0; padding-left: 14px; position: relative; }
-  .section li::before { content: '•'; position: absolute; left: 0; color: #3b82f6; }
+  .section li::before { content: '\\2022'; position: absolute; left: 0; color: #3b82f6; }
   .footer { margin-top: 20px; padding-top: 12px; border-top: 1px solid #e5e7eb; font-size: 10px; color: #999; text-align: center; font-family: 'Oswald', sans-serif; text-transform: uppercase; letter-spacing: 0.1em; }
   @media print { body { padding: 16px; } }
 </style>
 </head><body>
+${draftBanner}
 <h1>${plan.name}</h1>
-<div class="meta">${plan.levelTag} &middot; ${plan.totalTime} min &middot; Plan #${plan.planNumber}</div>
+<div class="meta">${plan.levelTag} &middot; ${plan.totalTime} min</div>
 <div class="objective"><strong style="font-size:11px;text-transform:uppercase;letter-spacing:0.05em;color:#3b82f6;display:block;margin-bottom:4px;">Session Objective</strong>${plan.objective}</div>
 <h2>Session Blocks</h2>
 <table>
@@ -107,42 +128,68 @@ function PlanCard({ plan, isExpanded, onToggle }: { plan: SessionPlan; isExpande
   return (
     <div className={`bg-t1-surface border border-t1-border rounded-lg overflow-hidden border-l-4 ${levelBgColors[plan.level]}`}>
       {/* Card Header — always visible */}
-      <button
-        onClick={onToggle}
-        className="w-full text-left p-3 sm:p-4 flex items-start gap-3 active:bg-t1-bg/50 transition-colors"
-      >
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 flex-wrap mb-1">
-            <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${levelColors[plan.level]}`}>
-              {plan.levelTag}
-            </span>
-            <span className="text-[10px] text-t1-muted flex items-center gap-1">
-              <Clock className="w-3 h-3" />
-              {plan.totalTime} min
-            </span>
-            <span className="text-[10px] text-t1-muted/60">
-              #{plan.planNumber}
-            </span>
+      <div className="flex items-start">
+        <button
+          onClick={onToggle}
+          className="flex-1 text-left p-3 sm:p-4 flex items-start gap-3 active:bg-t1-bg/50 transition-colors min-w-0"
+        >
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 flex-wrap mb-1">
+              <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${levelColors[plan.level]}`}>
+                {plan.levelTag}
+              </span>
+              <span className="text-[10px] text-t1-muted flex items-center gap-1">
+                <Clock className="w-3 h-3" />
+                {plan.totalTime} min
+              </span>
+              {draft && (
+                <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-yellow-500/15 text-yellow-400 border border-yellow-500/20 flex items-center gap-1">
+                  <AlertCircle className="w-3 h-3" />
+                  Draft
+                </span>
+              )}
+            </div>
+            <h3 className="font-display text-sm sm:text-base font-bold text-t1-text uppercase tracking-wide leading-tight">
+              {plan.name}
+            </h3>
+            <p className="text-xs text-t1-muted mt-1 line-clamp-2">
+              {plan.objective}
+            </p>
           </div>
-          <h3 className="font-display text-sm sm:text-base font-bold text-t1-text uppercase tracking-wide leading-tight">
-            {plan.name}
-          </h3>
-          <p className="text-xs text-t1-muted mt-1 line-clamp-2">
-            {plan.objective}
-          </p>
-        </div>
-        <div className="flex-shrink-0 mt-1">
-          {isExpanded ? (
-            <ChevronUp className="w-5 h-5 text-t1-muted" />
-          ) : (
-            <ChevronDown className="w-5 h-5 text-t1-muted" />
-          )}
-        </div>
-      </button>
+          <div className="flex-shrink-0 mt-1">
+            {isExpanded ? (
+              <ChevronUp className="w-5 h-5 text-t1-muted" />
+            ) : (
+              <ChevronDown className="w-5 h-5 text-t1-muted" />
+            )}
+          </div>
+        </button>
+        {/* Favorite button — always visible */}
+        <button
+          onClick={(e) => { e.stopPropagation(); onToggleFavorite(); }}
+          className="flex-shrink-0 p-3 sm:p-4 active:scale-90 transition-transform"
+          aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
+        >
+          <Star className={`w-5 h-5 ${isFavorite ? 'text-yellow-400 fill-yellow-400' : 'text-t1-muted/40'}`} />
+        </button>
+      </div>
 
       {/* Expanded Detail */}
       {isExpanded && (
         <div className="border-t border-t1-border px-3 sm:px-4 pb-3 sm:pb-4 pt-3 space-y-3">
+          {/* Draft notice */}
+          {draft && (
+            <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-lg p-3 flex items-start gap-2">
+              <AlertCircle className="w-4 h-4 text-yellow-400 flex-shrink-0 mt-0.5" />
+              <div>
+                <p className="text-xs font-semibold text-yellow-400">Draft Plan</p>
+                <p className="text-[11px] text-t1-muted mt-0.5">
+                  Structure is ready. Content to be refined with Max. Use as a starting framework.
+                </p>
+              </div>
+            </div>
+          )}
+
           {/* Session Blocks Table */}
           <div>
             <h4 className="text-[10px] font-semibold uppercase tracking-wider text-t1-blue mb-2 flex items-center gap-1.5">
@@ -192,7 +239,7 @@ function PlanCard({ plan, isExpanded, onToggle }: { plan: SessionPlan; isExpande
             <ul className="space-y-1">
               {plan.commonMistakes.map((m, i) => (
                 <li key={i} className="text-xs text-red-400/80 flex items-start gap-1.5">
-                  <span className="text-red-500/60 mt-0.5">•</span>
+                  <span className="text-red-500/60 mt-0.5">&bull;</span>
                   {m}
                 </li>
               ))}
@@ -225,12 +272,12 @@ function PlanCard({ plan, isExpanded, onToggle }: { plan: SessionPlan; isExpande
             >
               <Printer className="w-3.5 h-3.5" /> Print
             </button>
-            <Link
-              href="/session-builder"
-              className="flex items-center gap-1.5 px-3 py-2 bg-t1-blue text-white rounded-lg text-[11px] font-semibold no-underline active:bg-t1-blue/80 transition-colors min-h-[36px] ml-auto"
+            <button
+              onClick={onLoadPlan}
+              className="flex items-center gap-1.5 px-3 py-2 bg-t1-blue text-white rounded-lg text-[11px] font-semibold active:bg-t1-blue/80 transition-colors min-h-[36px] ml-auto"
             >
-              Open Builder <ArrowRight className="w-3.5 h-3.5" />
-            </Link>
+              <Upload className="w-3.5 h-3.5" /> Load into Builder
+            </button>
           </div>
         </div>
       )}
@@ -243,6 +290,43 @@ export default function SessionPlans() {
   const [activeSubBand, setActiveSubBand] = useState<string | null>(null);
   const [expandedPlan, setExpandedPlan] = useState<string | null>(null);
   const [durationFilter, setDurationFilter] = useState<number | null>(null);
+  const [activeTab, setActiveTab] = useState<'all' | 'favorites' | 'recent'>('all');
+  const [loadedToast, setLoadedToast] = useState<string | null>(null);
+  const [, navigate] = useLocation();
+
+  const { favorites, recentIds, toggleFavorite, isFavorite, addRecent } = useSessionPlanFavorites();
+
+  // Expand a plan and mark it as recently viewed
+  const handleExpand = (planId: string) => {
+    if (expandedPlan === planId) {
+      setExpandedPlan(null);
+    } else {
+      setExpandedPlan(planId);
+      addRecent(planId);
+    }
+  };
+
+  // Load a plan into the Session Builder via localStorage
+  const handleLoadPlan = (plan: SessionPlan) => {
+    const payload = {
+      planId: plan.id,
+      planName: plan.name,
+      level: plan.level,
+      totalTime: plan.totalTime,
+      blocks: plan.blocks,
+      coachingEmphasis: plan.coachingEmphasis,
+      objective: plan.objective,
+    };
+    try {
+      localStorage.setItem(LOADED_PLAN_KEY, JSON.stringify(payload));
+    } catch { /* ignore */ }
+    addRecent(plan.id);
+    setLoadedToast(plan.name);
+    setTimeout(() => {
+      setLoadedToast(null);
+      navigate('/session-builder');
+    }, 800);
+  };
 
   // Get available levels that have plans
   const availableLevels = useMemo(() => {
@@ -255,6 +339,24 @@ export default function SessionPlans() {
     if (activeLevel === 'all') return [];
     return sessionPlanLevelGroups.filter(g => g.level === activeLevel);
   }, [activeLevel]);
+
+  // Get unique durations for the filter
+  const availableDurations = useMemo(() => {
+    const durations = new Set(sessionPlans.map(p => p.totalTime));
+    return Array.from(durations).sort((a, b) => a - b);
+  }, []);
+
+  // Favorite plans
+  const favoritePlans = useMemo(() => {
+    return sessionPlans.filter(p => favorites.includes(p.id));
+  }, [favorites]);
+
+  // Recent plans
+  const recentPlans = useMemo(() => {
+    return recentIds
+      .map(id => sessionPlans.find(p => p.id === id))
+      .filter((p): p is SessionPlan => !!p);
+  }, [recentIds]);
 
   // Filter plans
   const filteredPlans = useMemo(() => {
@@ -292,8 +394,19 @@ export default function SessionPlans() {
     setExpandedPlan(null);
   };
 
+  // Determine which plans to show based on active tab
+  const displayPlans = activeTab === 'favorites' ? favoritePlans : activeTab === 'recent' ? recentPlans : null;
+
   return (
     <div>
+      {/* Loaded toast */}
+      {loadedToast && (
+        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 bg-green-500 text-white px-4 py-2.5 rounded-lg shadow-lg flex items-center gap-2 text-sm font-semibold animate-in fade-in slide-in-from-top-2">
+          <Check className="w-4 h-4" />
+          Loaded: {loadedToast}
+        </div>
+      )}
+
       {/* Header */}
       <section className="bg-t1-navy border-b border-t1-border">
         <div className="container py-4 sm:py-6">
@@ -301,136 +414,238 @@ export default function SessionPlans() {
             Session Plans
           </h1>
           <p className="mt-1 text-t1-muted text-xs sm:text-sm">
-            44 pre-built session plans by level and sub-band. Browse, print, or use as reference.
+            {sessionPlans.length} session plans by level and sub-band. Browse, favorite, print, or load into the builder.
           </p>
         </div>
       </section>
 
       <div className="container mt-3 sm:mt-4 space-y-3 sm:space-y-4">
-        {/* Filters */}
-        <div className="bg-t1-surface border border-t1-border rounded-lg p-3 sm:p-4 space-y-3">
-          {/* Level Filter */}
-          <div>
-            <label className="text-[10px] font-semibold uppercase tracking-wider text-t1-muted mb-1.5 block">Level</label>
-            <div className="flex flex-wrap gap-1.5">
-              <button
-                onClick={() => handleLevelChange('all')}
-                className={`px-2.5 py-1.5 rounded-full text-xs font-medium border transition-colors min-h-[32px] ${
-                  activeLevel === 'all'
-                    ? 'bg-t1-blue text-white border-t1-blue'
-                    : 'bg-t1-bg border-t1-border text-t1-muted active:bg-t1-blue/10'
-                }`}
-              >
-                All ({sessionPlans.length})
-              </button>
-              {availableLevels.map(stage => {
-                const count = sessionPlans.filter(p => p.level === stage.id).length;
-                return (
-                  <button
-                    key={stage.id}
-                    onClick={() => handleLevelChange(stage.id)}
-                    className={`px-2.5 py-1.5 rounded-full text-xs font-medium border transition-colors min-h-[32px] ${
-                      activeLevel === stage.id
-                        ? 'bg-t1-blue text-white border-t1-blue'
-                        : 'bg-t1-bg border-t1-border text-t1-muted active:bg-t1-blue/10'
-                    }`}
-                  >
-                    {stage.shortName} ({count})
-                  </button>
-                );
-              })}
-            </div>
-          </div>
+        {/* Tabs: All / Favorites / Recent */}
+        <div className="flex gap-1 bg-t1-surface border border-t1-border rounded-lg p-1">
+          {[
+            { key: 'all' as const, label: 'All Plans', icon: ClipboardList, count: sessionPlans.length },
+            { key: 'favorites' as const, label: 'Favorites', icon: Star, count: favoritePlans.length },
+            { key: 'recent' as const, label: 'Recent', icon: History, count: recentPlans.length },
+          ].map(tab => (
+            <button
+              key={tab.key}
+              onClick={() => setActiveTab(tab.key)}
+              className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-md text-xs font-semibold uppercase tracking-wider transition-colors min-h-[40px] ${
+                activeTab === tab.key
+                  ? 'bg-t1-blue text-white'
+                  : 'text-t1-muted hover:text-t1-text active:bg-t1-bg'
+              }`}
+            >
+              <tab.icon className={`w-3.5 h-3.5 ${activeTab === tab.key && tab.key === 'favorites' ? 'fill-white' : ''}`} />
+              <span className="hidden sm:inline">{tab.label}</span>
+              <span className="sm:hidden">{tab.key === 'all' ? 'All' : tab.key === 'favorites' ? 'Favs' : 'Recent'}</span>
+              {tab.count > 0 && (
+                <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${
+                  activeTab === tab.key ? 'bg-white/20' : 'bg-t1-bg'
+                }`}>
+                  {tab.count}
+                </span>
+              )}
+            </button>
+          ))}
+        </div>
 
-          {/* Sub-Band Filter — only shown when a level is selected */}
-          {availableSubBands.length > 0 && (
-            <div>
-              <label className="text-[10px] font-semibold uppercase tracking-wider text-t1-muted mb-1.5 block">Sub-Band</label>
-              <div className="flex flex-wrap gap-1.5">
-                <button
-                  onClick={() => { setActiveSubBand(null); setExpandedPlan(null); }}
-                  className={`px-2.5 py-1.5 rounded-full text-xs font-medium border transition-colors min-h-[32px] ${
-                    !activeSubBand
-                      ? 'bg-t1-blue text-white border-t1-blue'
-                      : 'bg-t1-bg border-t1-border text-t1-muted active:bg-t1-blue/10'
-                  }`}
-                >
-                  All
-                </button>
-                {availableSubBands.map(g => (
-                  <button
-                    key={g.subBand}
-                    onClick={() => { setActiveSubBand(g.subBand); setExpandedPlan(null); }}
-                    className={`px-2.5 py-1.5 rounded-full text-xs font-medium border transition-colors min-h-[32px] ${
-                      activeSubBand === g.subBand
-                        ? 'bg-t1-blue text-white border-t1-blue'
-                        : 'bg-t1-bg border-t1-border text-t1-muted active:bg-t1-blue/10'
-                    }`}
-                  >
-                    {g.label} ({g.planCount})
-                  </button>
+        {/* Favorites Tab */}
+        {activeTab === 'favorites' && (
+          <>
+            {favoritePlans.length === 0 ? (
+              <div className="bg-t1-surface border border-t1-border rounded-lg p-8 text-center">
+                <Star className="w-8 h-8 text-t1-muted/30 mx-auto mb-2" />
+                <p className="text-sm text-t1-muted">No favorite plans yet.</p>
+                <p className="text-xs text-t1-muted/60 mt-1">Tap the star on any plan to save it here.</p>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {favoritePlans.map(plan => (
+                  <PlanCard
+                    key={plan.id}
+                    plan={plan}
+                    isExpanded={expandedPlan === plan.id}
+                    onToggle={() => handleExpand(plan.id)}
+                    isFavorite={true}
+                    onToggleFavorite={() => toggleFavorite(plan.id)}
+                    onLoadPlan={() => handleLoadPlan(plan)}
+                  />
                 ))}
               </div>
-            </div>
-          )}
+            )}
+          </>
+        )}
 
-          {/* Duration Filter */}
-          <div>
-            <label className="text-[10px] font-semibold uppercase tracking-wider text-t1-muted mb-1.5 block">Duration</label>
-            <div className="flex flex-wrap gap-1.5">
-              {[null, 90, 120].map(dur => (
-                <button
-                  key={dur ?? 'all'}
-                  onClick={() => { setDurationFilter(dur); setExpandedPlan(null); }}
-                  className={`px-2.5 py-1.5 rounded-full text-xs font-medium border transition-colors min-h-[32px] ${
-                    durationFilter === dur
-                      ? 'bg-t1-blue text-white border-t1-blue'
-                      : 'bg-t1-bg border-t1-border text-t1-muted active:bg-t1-blue/10'
-                  }`}
-                >
-                  {dur === null ? 'All' : `${dur} min`}
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
+        {/* Recent Tab */}
+        {activeTab === 'recent' && (
+          <>
+            {recentPlans.length === 0 ? (
+              <div className="bg-t1-surface border border-t1-border rounded-lg p-8 text-center">
+                <History className="w-8 h-8 text-t1-muted/30 mx-auto mb-2" />
+                <p className="text-sm text-t1-muted">No recently viewed plans.</p>
+                <p className="text-xs text-t1-muted/60 mt-1">Plans you expand will appear here.</p>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {recentPlans.map(plan => (
+                  <PlanCard
+                    key={plan.id}
+                    plan={plan}
+                    isExpanded={expandedPlan === plan.id}
+                    onToggle={() => handleExpand(plan.id)}
+                    isFavorite={isFavorite(plan.id)}
+                    onToggleFavorite={() => toggleFavorite(plan.id)}
+                    onLoadPlan={() => handleLoadPlan(plan)}
+                  />
+                ))}
+              </div>
+            )}
+          </>
+        )}
 
-        {/* Results Count */}
-        <div className="flex items-center justify-between">
-          <p className="text-xs text-t1-muted">
-            {filteredPlans.length} session plan{filteredPlans.length !== 1 ? 's' : ''}
-          </p>
-        </div>
+        {/* All Plans Tab — with filters */}
+        {activeTab === 'all' && (
+          <>
+            {/* Filters */}
+            <div className="bg-t1-surface border border-t1-border rounded-lg p-3 sm:p-4 space-y-3">
+              {/* Level Filter */}
+              <div>
+                <label className="text-[10px] font-semibold uppercase tracking-wider text-t1-muted mb-1.5 block">Level</label>
+                <div className="flex flex-wrap gap-1.5">
+                  <button
+                    onClick={() => handleLevelChange('all')}
+                    className={`px-2.5 py-1.5 rounded-full text-xs font-medium border transition-colors min-h-[32px] ${
+                      activeLevel === 'all'
+                        ? 'bg-t1-blue text-white border-t1-blue'
+                        : 'bg-t1-bg border-t1-border text-t1-muted active:bg-t1-blue/10'
+                    }`}
+                  >
+                    All ({sessionPlans.length})
+                  </button>
+                  {availableLevels.map(stage => {
+                    const count = sessionPlans.filter(p => p.level === stage.id).length;
+                    return (
+                      <button
+                        key={stage.id}
+                        onClick={() => handleLevelChange(stage.id)}
+                        className={`px-2.5 py-1.5 rounded-full text-xs font-medium border transition-colors min-h-[32px] ${
+                          activeLevel === stage.id
+                            ? 'bg-t1-blue text-white border-t1-blue'
+                            : 'bg-t1-bg border-t1-border text-t1-muted active:bg-t1-blue/10'
+                        }`}
+                      >
+                        {stage.shortName} ({count})
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
 
-        {/* Plans List — grouped by level tag */}
-        {groupedPlans.length === 0 ? (
-          <div className="bg-t1-surface border border-t1-border rounded-lg p-8 text-center">
-            <ClipboardList className="w-8 h-8 text-t1-muted/40 mx-auto mb-2" />
-            <p className="text-sm text-t1-muted">No session plans match your filters.</p>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {groupedPlans.map(group => (
-              <div key={group.label}>
-                <h2 className="font-display text-xs sm:text-sm font-semibold uppercase tracking-wider text-t1-muted mb-2 px-1">
-                  {group.label}
-                  <span className="text-t1-muted/50 ml-2 font-normal normal-case">
-                    {group.plans.length} plan{group.plans.length !== 1 ? 's' : ''}
-                  </span>
-                </h2>
-                <div className="space-y-2">
-                  {group.plans.map(plan => (
-                    <PlanCard
-                      key={plan.id}
-                      plan={plan}
-                      isExpanded={expandedPlan === plan.id}
-                      onToggle={() => setExpandedPlan(expandedPlan === plan.id ? null : plan.id)}
-                    />
+              {/* Sub-Band Filter */}
+              {availableSubBands.length > 0 && (
+                <div>
+                  <label className="text-[10px] font-semibold uppercase tracking-wider text-t1-muted mb-1.5 block">Sub-Band</label>
+                  <div className="flex flex-wrap gap-1.5">
+                    <button
+                      onClick={() => { setActiveSubBand(null); setExpandedPlan(null); }}
+                      className={`px-2.5 py-1.5 rounded-full text-xs font-medium border transition-colors min-h-[32px] ${
+                        !activeSubBand
+                          ? 'bg-t1-blue text-white border-t1-blue'
+                          : 'bg-t1-bg border-t1-border text-t1-muted active:bg-t1-blue/10'
+                      }`}
+                    >
+                      All
+                    </button>
+                    {availableSubBands.map(g => (
+                      <button
+                        key={g.subBand}
+                        onClick={() => { setActiveSubBand(g.subBand); setExpandedPlan(null); }}
+                        className={`px-2.5 py-1.5 rounded-full text-xs font-medium border transition-colors min-h-[32px] ${
+                          activeSubBand === g.subBand
+                            ? 'bg-t1-blue text-white border-t1-blue'
+                            : 'bg-t1-bg border-t1-border text-t1-muted active:bg-t1-blue/10'
+                        }`}
+                      >
+                        {g.label} ({g.planCount})
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Duration Filter */}
+              <div>
+                <label className="text-[10px] font-semibold uppercase tracking-wider text-t1-muted mb-1.5 block">Duration</label>
+                <div className="flex flex-wrap gap-1.5">
+                  <button
+                    onClick={() => { setDurationFilter(null); setExpandedPlan(null); }}
+                    className={`px-2.5 py-1.5 rounded-full text-xs font-medium border transition-colors min-h-[32px] ${
+                      durationFilter === null
+                        ? 'bg-t1-blue text-white border-t1-blue'
+                        : 'bg-t1-bg border-t1-border text-t1-muted active:bg-t1-blue/10'
+                    }`}
+                  >
+                    All
+                  </button>
+                  {availableDurations.map(dur => (
+                    <button
+                      key={dur}
+                      onClick={() => { setDurationFilter(dur); setExpandedPlan(null); }}
+                      className={`px-2.5 py-1.5 rounded-full text-xs font-medium border transition-colors min-h-[32px] ${
+                        durationFilter === dur
+                          ? 'bg-t1-blue text-white border-t1-blue'
+                          : 'bg-t1-bg border-t1-border text-t1-muted active:bg-t1-blue/10'
+                      }`}
+                    >
+                      {dur} min
+                    </button>
                   ))}
                 </div>
               </div>
-            ))}
-          </div>
+            </div>
+
+            {/* Results Count */}
+            <div className="flex items-center justify-between">
+              <p className="text-xs text-t1-muted">
+                {filteredPlans.length} session plan{filteredPlans.length !== 1 ? 's' : ''}
+              </p>
+            </div>
+
+            {/* Plans List — grouped by level tag */}
+            {groupedPlans.length === 0 ? (
+              <div className="bg-t1-surface border border-t1-border rounded-lg p-8 text-center">
+                <ClipboardList className="w-8 h-8 text-t1-muted/40 mx-auto mb-2" />
+                <p className="text-sm text-t1-muted">No session plans match your filters.</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {groupedPlans.map(group => (
+                  <div key={group.label}>
+                    <h2 className="font-display text-xs sm:text-sm font-semibold uppercase tracking-wider text-t1-muted mb-2 px-1">
+                      {group.label}
+                      <span className="text-t1-muted/50 ml-2 font-normal normal-case">
+                        {group.plans.length} plan{group.plans.length !== 1 ? 's' : ''}
+                      </span>
+                    </h2>
+                    <div className="space-y-2">
+                      {group.plans.map(plan => (
+                        <PlanCard
+                          key={plan.id}
+                          plan={plan}
+                          isExpanded={expandedPlan === plan.id}
+                          onToggle={() => handleExpand(plan.id)}
+                          isFavorite={isFavorite(plan.id)}
+                          onToggleFavorite={() => toggleFavorite(plan.id)}
+                          onLoadPlan={() => handleLoadPlan(plan)}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </>
         )}
 
         {/* Bottom Spacer for mobile nav */}

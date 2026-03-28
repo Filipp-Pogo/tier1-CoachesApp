@@ -2,10 +2,11 @@
   SESSION BUILDER: Tier 1 Performance — Cold Dark Brand
   MOBILE-FIRST: Large touch targets, stacked block layout on mobile,
   favorites shown first, export PDF, session notes with localStorage.
+  Supports loading pre-built session plans from the Session Plans page.
 */
 import { useState, useMemo, useEffect } from 'react';
 import { Link } from 'wouter';
-import { Plus, X, Clock, ChevronRight, Dumbbell, Printer, FileDown, Star, StickyNote, RotateCcw } from 'lucide-react';
+import { Plus, X, Clock, ChevronRight, Dumbbell, Printer, FileDown, Star, StickyNote, RotateCcw, ClipboardList, AlertCircle } from 'lucide-react';
 import { pathwayStages, sessionBlocks, drills, sessionTemplates, type PathwayStageId, type SessionBlockId } from '@/lib/data';
 import { exportSessionPDF } from '@/lib/session-pdf';
 import { useFavorites } from '@/hooks/useFavorites';
@@ -19,6 +20,18 @@ interface SessionBlockEntry {
 }
 
 const LAST_SESSION_KEY = 'tier1-last-session';
+const LOADED_PLAN_KEY = 'tier1-loaded-plan';
+
+// Loaded plan shape from Session Plans page
+interface LoadedPlan {
+  planId: string;
+  planName: string;
+  level: PathwayStageId;
+  totalTime: number;
+  blocks: { label: string; content: string }[];
+  coachingEmphasis: string;
+  objective: string;
+}
 
 function saveLastSession(data: { level: PathwayStageId; time: string; blocks: SessionBlockEntry[] }) {
   try { localStorage.setItem(LAST_SESSION_KEY, JSON.stringify(data)); } catch { /* ignore */ }
@@ -32,6 +45,33 @@ function loadLastSession(): { level: PathwayStageId; time: string; blocks: Sessi
   return null;
 }
 
+function consumeLoadedPlan(): LoadedPlan | null {
+  try {
+    const raw = localStorage.getItem(LOADED_PLAN_KEY);
+    if (raw) {
+      localStorage.removeItem(LOADED_PLAN_KEY);
+      return JSON.parse(raw);
+    }
+  } catch { /* ignore */ }
+  return null;
+}
+
+// Map plan block labels to session block IDs
+function mapLabelToBlockId(label: string): SessionBlockId {
+  const lower = label.toLowerCase().trim();
+  if (lower.includes('warm')) return 'warmup';
+  if (lower.includes('movement')) return 'movement';
+  if (lower.includes('main drill 1') || lower.includes('drill 1')) return 'feeding';
+  if (lower.includes('main drill 2') || lower.includes('drill 2')) return 'feeding';
+  if (lower.includes('serve') || lower.includes('return')) return 'serve-return';
+  if (lower.includes('point play')) return 'liveball';
+  if (lower.includes('competitive') || lower.includes('finish')) return 'competitive-finish';
+  if (lower.includes('reflection') || lower.includes('cool')) return 'reflection';
+  if (lower.includes('drill')) return 'feeding';
+  if (lower.includes('point')) return 'points';
+  return 'feeding';
+}
+
 export default function SessionBuilder() {
   const [selectedLevel, setSelectedLevel] = useState<PathwayStageId>('foundations');
   const [sessionTime, setSessionTime] = useState('60');
@@ -40,9 +80,28 @@ export default function SessionBuilder() {
   const { favorites, isFavorite } = useFavorites();
   const { notes: sessionNotes, updateNotes: setSessionNotes } = useSessionNotes();
   const [hasLastSession, setHasLastSession] = useState(false);
+  const [loadedPlanName, setLoadedPlanName] = useState<string | null>(null);
+  const [loadedPlanEmphasis, setLoadedPlanEmphasis] = useState<string | null>(null);
 
+  // Check for loaded plan on mount
   useEffect(() => {
-    setHasLastSession(!!loadLastSession());
+    const plan = consumeLoadedPlan();
+    if (plan) {
+      setSelectedLevel(plan.level);
+      setSessionTime(String(plan.totalTime));
+      setBlocks(plan.blocks.map(b => ({
+        blockId: mapLabelToBlockId(b.label),
+        duration: '',
+        notes: b.content,
+      })));
+      setShowTemplates(false);
+      setLoadedPlanName(plan.planName);
+      setLoadedPlanEmphasis(plan.coachingEmphasis);
+      // Set session notes to objective + emphasis
+      setSessionNotes(`Plan: ${plan.planName}\nObjective: ${plan.objective}\nEmphasis: ${plan.coachingEmphasis}`);
+    } else {
+      setHasLastSession(!!loadLastSession());
+    }
   }, []);
 
   useEffect(() => {
@@ -85,6 +144,8 @@ export default function SessionBuilder() {
         notes: b.notes
       })));
       setShowTemplates(false);
+      setLoadedPlanName(null);
+      setLoadedPlanEmphasis(null);
     }
   };
 
@@ -95,6 +156,8 @@ export default function SessionBuilder() {
       setSessionTime(last.time);
       setBlocks(last.blocks);
       setShowTemplates(false);
+      setLoadedPlanName(null);
+      setLoadedPlanEmphasis(null);
     }
   };
 
@@ -129,6 +192,29 @@ export default function SessionBuilder() {
       </section>
 
       <div className="container mt-3 sm:mt-4 space-y-3 sm:space-y-4">
+        {/* Loaded Plan Banner */}
+        {loadedPlanName && (
+          <div className="bg-t1-blue/10 border border-t1-blue/25 rounded-lg p-3 sm:p-4 flex items-start gap-3">
+            <ClipboardList className="w-5 h-5 text-t1-blue flex-shrink-0 mt-0.5" />
+            <div className="flex-1 min-w-0">
+              <p className="text-xs font-semibold text-t1-blue uppercase tracking-wider">Loaded from Session Plans</p>
+              <p className="text-sm font-bold text-t1-text mt-0.5">{loadedPlanName}</p>
+              {loadedPlanEmphasis && (
+                <p className="text-xs text-t1-muted mt-1">Emphasis: {loadedPlanEmphasis}</p>
+              )}
+              <p className="text-[10px] text-t1-muted/60 mt-1">
+                Block notes are pre-filled from the plan. Assign drills and adjust durations as needed.
+              </p>
+            </div>
+            <button
+              onClick={() => { setLoadedPlanName(null); setLoadedPlanEmphasis(null); }}
+              className="flex-shrink-0 text-t1-muted hover:text-t1-text"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        )}
+
         {/* Session Config */}
         <div className="bg-t1-surface border border-t1-border rounded-lg p-3 sm:p-5">
           <div className="space-y-3 sm:space-y-0 sm:flex sm:gap-4">
@@ -186,23 +272,25 @@ export default function SessionBuilder() {
           )}
         </div>
 
-        {/* Templates + Load Last Session */}
+        {/* Templates + Load Last Session + Browse Plans */}
         {showTemplates && blocks.length === 0 && (
           <div className="bg-t1-surface border border-t1-border rounded-lg p-3 sm:p-5">
             <div className="flex items-center justify-between mb-3 gap-2">
               <h2 className="font-display text-xs sm:text-sm font-semibold uppercase tracking-wider text-t1-text">
                 Start from a Template
               </h2>
-              {hasLastSession && (
-                <button
-                  onClick={loadPreviousSession}
-                  className="flex items-center gap-1.5 px-3 py-2 bg-t1-blue/10 text-t1-blue text-[10px] sm:text-xs font-semibold uppercase tracking-wider rounded-lg active:bg-t1-blue/20 transition-colors min-h-[36px] flex-shrink-0"
-                >
-                  <RotateCcw className="w-3.5 h-3.5" />
-                  <span className="hidden sm:inline">Load Last</span>
-                  <span className="sm:hidden">Last</span>
-                </button>
-              )}
+              <div className="flex items-center gap-2">
+                {hasLastSession && (
+                  <button
+                    onClick={loadPreviousSession}
+                    className="flex items-center gap-1.5 px-3 py-2 bg-t1-blue/10 text-t1-blue text-[10px] sm:text-xs font-semibold uppercase tracking-wider rounded-lg active:bg-t1-blue/20 transition-colors min-h-[36px] flex-shrink-0"
+                  >
+                    <RotateCcw className="w-3.5 h-3.5" />
+                    <span className="hidden sm:inline">Load Last</span>
+                    <span className="sm:hidden">Last</span>
+                  </button>
+                )}
+              </div>
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3">
               {sessionTemplates.map(template => (
@@ -218,6 +306,18 @@ export default function SessionBuilder() {
                 </button>
               ))}
             </div>
+
+            {/* Browse Session Plans CTA */}
+            <div className="mt-3 pt-3 border-t border-t1-border">
+              <Link
+                href="/session-plans"
+                className="flex items-center justify-center gap-2 w-full p-3 bg-t1-blue/5 border border-t1-blue/20 rounded-lg text-t1-blue text-xs font-semibold uppercase tracking-wider active:bg-t1-blue/10 transition-colors no-underline min-h-[44px]"
+              >
+                <ClipboardList className="w-4 h-4" />
+                Browse {52} Session Plans
+              </Link>
+            </div>
+
             <div className="mt-3 text-center">
               <button
                 onClick={() => setShowTemplates(false)}
@@ -257,7 +357,6 @@ export default function SessionBuilder() {
                   <div className="sm:w-24">
                     <label className="text-[10px] font-semibold uppercase tracking-wider text-t1-muted mb-1 block">Duration</label>
                     <input
-                      type="text"
                       value={block.duration}
                       onChange={(e) => updateBlock(index, { duration: e.target.value })}
                       className="w-full px-3 py-2 bg-t1-bg border border-t1-border rounded-lg text-sm text-t1-text focus:outline-none focus:ring-1 focus:ring-t1-blue/30 min-h-[36px]"
@@ -353,6 +452,12 @@ export default function SessionBuilder() {
               <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5" /> {sessionTime} min</span>
               <span>{blocks.length} blocks</span>
               <span>{pathwayStages.find(s => s.id === selectedLevel)?.shortName}</span>
+              {loadedPlanName && (
+                <span className="flex items-center gap-1 text-t1-blue">
+                  <ClipboardList className="w-3 h-3" />
+                  {loadedPlanName}
+                </span>
+              )}
             </div>
 
             {sessionNotes && (
@@ -360,7 +465,7 @@ export default function SessionBuilder() {
                 <p className="text-[10px] font-semibold uppercase tracking-wider text-t1-muted mb-1 flex items-center gap-1">
                   <StickyNote className="w-3 h-3" /> Notes
                 </p>
-                <p className="text-xs text-t1-text/70">{sessionNotes}</p>
+                <p className="text-xs text-t1-text/70 whitespace-pre-line">{sessionNotes}</p>
               </div>
             )}
 

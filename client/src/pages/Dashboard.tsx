@@ -19,7 +19,7 @@ const quickLinks = [
   { href: '/session-builder', label: 'Builder', icon: Dumbbell, description: 'Build a practice' },
   { href: '/assessments', label: 'Assessments', icon: Target, description: 'Player standards' },
   { href: '/advancement', label: 'Advancement', icon: TrendingUp, description: 'Progression decisions' },
-  { href: '/session-plans', label: 'Plans', icon: ClipboardList, description: '44 session plans by level' },
+  { href: '/session-plans', label: 'Plans', icon: ClipboardList, description: '52 session plans by level' },
   { href: '/coach-standards', label: 'Standards', icon: Shield, description: 'Coaching expectations' },
 ];
 
