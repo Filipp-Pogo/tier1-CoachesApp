@@ -10,6 +10,8 @@ import {
 } from 'lucide-react';
 import { pathwayStages, drills } from '@/lib/data';
 import { useFavorites } from '@/hooks/useFavorites';
+import { useOnboardingProgress } from '@/hooks/useOnboardingProgress';
+import { onboardingModules } from '@/lib/onboarding';
 
 const HERO_IMG = 'https://d2xsxph8kpxj0f.cloudfront.net/310519663356767696/ELbCQXq8c7BR3Zt5VxeR2S/hero-dashboard-4kNxYGLrvc7smJFKBjje6R.webp';
 
@@ -37,8 +39,12 @@ const stageColors: Record<string, string> = {
 
 export default function Dashboard() {
   const { favorites, isFavorite, toggleFavorite } = useFavorites();
+  const { hasPassed, bestQuizResult, progress } = useOnboardingProgress();
   const favoriteDrills = drills.filter(d => favorites.includes(d.id));
   const recentDrills = drills.slice(0, 4);
+  const totalLessons = onboardingModules.reduce((sum, m) => sum + m.lessons.length, 0);
+  const completedLessons = progress.completedLessons.length;
+  const lessonPercent = totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0;
 
   return (
     <div>
@@ -65,6 +71,106 @@ export default function Dashboard() {
       </section>
 
       <div className="container mt-4 sm:mt-8 space-y-6 sm:space-y-10">
+        {/* Coach Certification Badge */}
+        <section>
+          {hasPassed && bestQuizResult ? (
+            <Link
+              href="/onboarding"
+              className="block bg-gradient-to-r from-emerald-500/10 via-emerald-500/5 to-transparent border border-emerald-500/25 rounded-xl p-4 sm:p-5 no-underline hover:border-emerald-500/40 transition-all group"
+            >
+              <div className="flex items-center gap-4">
+                {/* Badge Icon */}
+                <div className="relative flex-shrink-0">
+                  <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl bg-emerald-500/15 flex items-center justify-center">
+                    <Shield className="w-7 h-7 sm:w-8 sm:h-8 text-emerald-400" />
+                  </div>
+                  <div className="absolute -top-1 -right-1 w-5 h-5 bg-emerald-500 rounded-full flex items-center justify-center">
+                    <CheckCircle className="w-3.5 h-3.5 text-white" />
+                  </div>
+                </div>
+
+                {/* Badge Content */}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <h3 className="font-display text-sm sm:text-base font-bold uppercase tracking-wide text-emerald-400">
+                      Certified Coach
+                    </h3>
+                    <span className="text-[10px] sm:text-xs bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded-full font-semibold uppercase tracking-wider">
+                      Passed
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-3 sm:gap-5 mt-1.5">
+                    <div>
+                      <span className="text-[10px] text-t1-muted uppercase tracking-wider">Score</span>
+                      <p className="text-sm sm:text-lg font-bold text-emerald-400 leading-tight">
+                        {bestQuizResult.percentage}%
+                      </p>
+                    </div>
+                    <div className="w-px h-7 bg-white/10" />
+                    <div>
+                      <span className="text-[10px] text-t1-muted uppercase tracking-wider">Result</span>
+                      <p className="text-sm sm:text-lg font-bold text-t1-text leading-tight">
+                        {bestQuizResult.score}/{bestQuizResult.total}
+                      </p>
+                    </div>
+                    <div className="w-px h-7 bg-white/10" />
+                    <div>
+                      <span className="text-[10px] text-t1-muted uppercase tracking-wider">Passed On</span>
+                      <p className="text-xs sm:text-sm font-medium text-t1-text leading-tight mt-0.5">
+                        {new Date(bestQuizResult.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <ChevronRight className="w-5 h-5 text-t1-muted/40 group-hover:text-emerald-400 transition-colors flex-shrink-0 hidden sm:block" />
+              </div>
+            </Link>
+          ) : (
+            <Link
+              href="/onboarding"
+              className="block bg-t1-surface border border-t1-border rounded-xl p-4 sm:p-5 no-underline hover:border-t1-blue/40 transition-all group"
+            >
+              <div className="flex items-center gap-4">
+                {/* Pending Icon */}
+                <div className="relative flex-shrink-0">
+                  <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl bg-t1-blue/10 flex items-center justify-center">
+                    <GraduationCap className="w-7 h-7 sm:w-8 sm:h-8 text-t1-blue" />
+                  </div>
+                </div>
+
+                {/* Content */}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <h3 className="font-display text-sm sm:text-base font-bold uppercase tracking-wide text-t1-text">
+                      Coach Onboarding
+                    </h3>
+                    <span className="text-[10px] sm:text-xs bg-amber-500/20 text-amber-300 px-2 py-0.5 rounded-full font-semibold uppercase tracking-wider">
+                      {completedLessons === 0 ? 'Not Started' : 'In Progress'}
+                    </span>
+                  </div>
+                  <p className="text-xs text-t1-muted mt-1">
+                    {completedLessons === 0
+                      ? 'Complete 6 modules and pass the quiz with 90% to get certified.'
+                      : `${lessonPercent}% complete — ${completedLessons}/${totalLessons} lessons done`
+                    }
+                  </p>
+                  {completedLessons > 0 && (
+                    <div className="mt-2 h-1.5 bg-t1-bg rounded-full overflow-hidden max-w-xs">
+                      <div
+                        className="h-full bg-t1-blue rounded-full transition-all duration-500"
+                        style={{ width: `${lessonPercent}%` }}
+                      />
+                    </div>
+                  )}
+                </div>
+
+                <ChevronRight className="w-5 h-5 text-t1-muted/40 group-hover:text-t1-blue transition-colors flex-shrink-0 hidden sm:block" />
+              </div>
+            </Link>
+          )}
+        </section>
+
         {/* Quick Links Grid — 2 col on mobile, 3 on desktop */}
         <section>
           <h2 className="font-display text-base sm:text-xl font-bold uppercase tracking-wide text-t1-text mb-3">
