@@ -6,11 +6,12 @@
 */
 import { useState, useMemo, useEffect } from 'react';
 import { Link } from 'wouter';
-import { Plus, X, Clock, ChevronRight, Dumbbell, Printer, FileDown, Star, StickyNote, RotateCcw, ClipboardList, AlertCircle } from 'lucide-react';
+import { Plus, X, Clock, ChevronRight, Dumbbell, Printer, FileDown, Star, StickyNote, RotateCcw, ClipboardList, AlertCircle, History, Check } from 'lucide-react';
 import { pathwayStages, sessionBlocks, drills, sessionTemplates, type PathwayStageId, type SessionBlockId } from '@/lib/data';
 import { exportSessionPDF } from '@/lib/session-pdf';
 import { useFavorites } from '@/hooks/useFavorites';
 import { useSessionNotes } from '@/hooks/useSessionNotes';
+import { useSessionHistory } from '@/hooks/useSessionHistory';
 
 interface SessionBlockEntry {
   blockId: SessionBlockId;
@@ -79,9 +80,12 @@ export default function SessionBuilder() {
   const [showTemplates, setShowTemplates] = useState(true);
   const { favorites, isFavorite } = useFavorites();
   const { notes: sessionNotes, updateNotes: setSessionNotes } = useSessionNotes();
+  const { addEntry } = useSessionHistory();
   const [hasLastSession, setHasLastSession] = useState(false);
   const [loadedPlanName, setLoadedPlanName] = useState<string | null>(null);
   const [loadedPlanEmphasis, setLoadedPlanEmphasis] = useState<string | null>(null);
+  const [savedToHistory, setSavedToHistory] = useState(false);
+  const [loadedPlanId, setLoadedPlanId] = useState<string | null>(null);
 
   // Check for loaded plan on mount
   useEffect(() => {
@@ -97,6 +101,7 @@ export default function SessionBuilder() {
       setShowTemplates(false);
       setLoadedPlanName(plan.planName);
       setLoadedPlanEmphasis(plan.coachingEmphasis);
+      setLoadedPlanId(plan.planId);
       // Set session notes to objective + emphasis
       setSessionNotes(`Plan: ${plan.planName}\nObjective: ${plan.objective}\nEmphasis: ${plan.coachingEmphasis}`);
     } else {
@@ -488,13 +493,38 @@ export default function SessionBuilder() {
               })}
             </div>
 
-            <div className="mt-3 pt-3 border-t border-t1-border">
+            <div className="mt-3 pt-3 border-t border-t1-border flex flex-wrap items-center gap-3">
               <button
                 onClick={handleExport}
                 className="inline-flex items-center gap-1.5 text-xs text-t1-blue font-medium hover:underline min-h-[36px]"
               >
                 <FileDown className="w-3.5 h-3.5" />
-                Save as PDF for on-court reference
+                Save as PDF
+              </button>
+              <button
+                onClick={() => {
+                  const stage = pathwayStages.find(s => s.id === selectedLevel);
+                  addEntry({
+                    planId: loadedPlanId || undefined,
+                    planName: loadedPlanName || `Custom ${stage?.shortName || ''} Session`,
+                    level: selectedLevel,
+                    subBand: undefined,
+                    duration: parseInt(sessionTime) || 60,
+                    notes: sessionNotes || '',
+                    blockCount: blocks.length,
+                  });
+                  setSavedToHistory(true);
+                  setTimeout(() => setSavedToHistory(false), 2500);
+                }}
+                disabled={savedToHistory}
+                className={`inline-flex items-center gap-1.5 text-xs font-medium min-h-[36px] transition-colors ${
+                  savedToHistory
+                    ? 'text-green-400'
+                    : 'text-t1-muted hover:text-t1-text'
+                }`}
+              >
+                {savedToHistory ? <Check className="w-3.5 h-3.5" /> : <History className="w-3.5 h-3.5" />}
+                {savedToHistory ? 'Saved to History!' : 'Log to History'}
               </button>
             </div>
           </div>

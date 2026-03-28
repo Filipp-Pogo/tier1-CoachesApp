@@ -1,14 +1,14 @@
 /*
   SESSION PLANS: Tier 1 Performance — Cold Dark Brand
   MOBILE-FIRST: 52 pre-built session plans organized by level and sub-band.
-  Includes: favorites, recently viewed, load plan into builder, draft badges.
+  Includes: search, favorites, recently viewed, load plan into builder, draft badges, comparison link.
 */
 import { useState, useMemo } from 'react';
 import { Link, useLocation } from 'wouter';
 import {
   Clock, ChevronDown, ChevronUp, Target, AlertTriangle,
   Zap, ArrowRight, ClipboardList, Copy, Check, Printer,
-  Star, History, Upload, AlertCircle
+  Star, History, Upload, AlertCircle, Search, ArrowLeftRight, X
 } from 'lucide-react';
 import { pathwayStages, type PathwayStageId } from '@/lib/data';
 import { sessionPlans, sessionPlanLevelGroups, type SessionPlan } from '@/lib/sessionPlans';
@@ -212,7 +212,9 @@ ${draftBanner}
               <Zap className="w-3.5 h-3.5" />
               Coaching Emphasis
             </h4>
-            <p className="text-sm text-t1-text font-medium">{plan.coachingEmphasis}</p>
+            <p className="text-sm text-t1-text font-medium">
+              {plan.coachingEmphasis}
+            </p>
           </div>
 
           {/* Standards */}
@@ -223,7 +225,7 @@ ${draftBanner}
             </h4>
             <div className="flex flex-wrap gap-1.5">
               {plan.standards.map((s, i) => (
-                <span key={i} className="text-[11px] px-2.5 py-1 bg-t1-bg border border-t1-border rounded-full text-t1-text">
+                <span key={i} className="text-[11px] px-2.5 py-1 bg-t1-bg border border-t1-border rounded-full text-t1-muted">
                   {s}
                 </span>
               ))}
@@ -232,14 +234,14 @@ ${draftBanner}
 
           {/* Common Mistakes */}
           <div>
-            <h4 className="text-[10px] font-semibold uppercase tracking-wider text-t1-muted mb-1.5 flex items-center gap-1.5">
+            <h4 className="text-[10px] font-semibold uppercase tracking-wider text-red-400/80 mb-1.5 flex items-center gap-1.5">
               <AlertTriangle className="w-3.5 h-3.5" />
               Common Session Mistakes
             </h4>
             <ul className="space-y-1">
               {plan.commonMistakes.map((m, i) => (
-                <li key={i} className="text-xs text-red-400/80 flex items-start gap-1.5">
-                  <span className="text-red-500/60 mt-0.5">&bull;</span>
+                <li key={i} className="text-xs text-red-400/70 flex items-start gap-1.5">
+                  <span className="text-red-400 mt-0.5">•</span>
                   {m}
                 </li>
               ))}
@@ -247,36 +249,36 @@ ${draftBanner}
           </div>
 
           {/* Match Play Transfer */}
-          <div className="bg-green-500/5 border border-green-500/15 rounded-lg p-3">
-            <h4 className="text-[10px] font-semibold uppercase tracking-wider text-green-400 mb-1">
+          <div>
+            <h4 className="text-[10px] font-semibold uppercase tracking-wider text-t1-muted mb-1 flex items-center gap-1.5">
+              <ArrowRight className="w-3.5 h-3.5" />
               Match Play Transfer
             </h4>
             <p className="text-xs text-t1-text">{plan.matchPlayTransfer}</p>
           </div>
 
           {/* Action Buttons */}
-          <div className="flex flex-wrap gap-2 pt-1">
+          <div className="flex items-center gap-2 pt-2 border-t border-t1-border/50">
             <button
               onClick={copyPlanText}
-              className="flex items-center gap-1.5 px-3 py-2 bg-t1-bg border border-t1-border rounded-lg text-[11px] font-medium text-t1-muted hover:text-t1-text active:bg-t1-surface transition-colors min-h-[36px]"
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-t1-bg border border-t1-border rounded-lg text-t1-muted hover:text-t1-text transition-colors"
             >
-              {copiedBlock === 'all' ? (
-                <><Check className="w-3.5 h-3.5 text-green-400" /> Copied</>
-              ) : (
-                <><Copy className="w-3.5 h-3.5" /> Copy Plan</>
-              )}
+              {copiedBlock === 'all' ? <Check className="w-3.5 h-3.5 text-green-400" /> : <Copy className="w-3.5 h-3.5" />}
+              {copiedBlock === 'all' ? 'Copied!' : 'Copy Plan'}
             </button>
             <button
               onClick={handlePrint}
-              className="flex items-center gap-1.5 px-3 py-2 bg-t1-bg border border-t1-border rounded-lg text-[11px] font-medium text-t1-muted hover:text-t1-text active:bg-t1-surface transition-colors min-h-[36px]"
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-t1-bg border border-t1-border rounded-lg text-t1-muted hover:text-t1-text transition-colors"
             >
-              <Printer className="w-3.5 h-3.5" /> Print
+              <Printer className="w-3.5 h-3.5" />
+              Print
             </button>
             <button
               onClick={onLoadPlan}
-              className="flex items-center gap-1.5 px-3 py-2 bg-t1-blue text-white rounded-lg text-[11px] font-semibold active:bg-t1-blue/80 transition-colors min-h-[36px] ml-auto"
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-t1-blue text-white rounded-lg hover:bg-t1-blue/90 transition-colors ml-auto"
             >
-              <Upload className="w-3.5 h-3.5" /> Load into Builder
+              <Upload className="w-3.5 h-3.5" />
+              Load into Builder
             </button>
           </div>
         </div>
@@ -292,6 +294,7 @@ export default function SessionPlans() {
   const [durationFilter, setDurationFilter] = useState<number | null>(null);
   const [activeTab, setActiveTab] = useState<'all' | 'favorites' | 'recent'>('all');
   const [loadedToast, setLoadedToast] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
   const [, navigate] = useLocation();
 
   const { favorites, recentIds, toggleFavorite, isFavorite, addRecent } = useSessionPlanFavorites();
@@ -358,6 +361,21 @@ export default function SessionPlans() {
       .filter((p): p is SessionPlan => !!p);
   }, [recentIds]);
 
+  // Search filter function
+  const matchesSearch = (plan: SessionPlan): boolean => {
+    if (!searchQuery.trim()) return true;
+    const q = searchQuery.toLowerCase();
+    return (
+      plan.name.toLowerCase().includes(q) ||
+      plan.objective.toLowerCase().includes(q) ||
+      plan.levelTag.toLowerCase().includes(q) ||
+      plan.coachingEmphasis.toLowerCase().includes(q) ||
+      plan.matchPlayTransfer.toLowerCase().includes(q) ||
+      plan.standards.some(s => s.toLowerCase().includes(q)) ||
+      plan.blocks.some(b => b.content.toLowerCase().includes(q) || b.label.toLowerCase().includes(q))
+    );
+  };
+
   // Filter plans
   const filteredPlans = useMemo(() => {
     let result = sessionPlans;
@@ -370,8 +388,11 @@ export default function SessionPlans() {
     if (durationFilter) {
       result = result.filter(p => p.totalTime === durationFilter);
     }
+    if (searchQuery.trim()) {
+      result = result.filter(matchesSearch);
+    }
     return result;
-  }, [activeLevel, activeSubBand, durationFilter]);
+  }, [activeLevel, activeSubBand, durationFilter, searchQuery]);
 
   // Group plans by level tag for display
   const groupedPlans = useMemo(() => {
@@ -397,6 +418,17 @@ export default function SessionPlans() {
   // Determine which plans to show based on active tab
   const displayPlans = activeTab === 'favorites' ? favoritePlans : activeTab === 'recent' ? recentPlans : null;
 
+  // Search-filtered favorites/recent
+  const searchFilteredFavorites = useMemo(() => {
+    if (!searchQuery.trim()) return favoritePlans;
+    return favoritePlans.filter(matchesSearch);
+  }, [favoritePlans, searchQuery]);
+
+  const searchFilteredRecent = useMemo(() => {
+    if (!searchQuery.trim()) return recentPlans;
+    return recentPlans.filter(matchesSearch);
+  }, [recentPlans, searchQuery]);
+
   return (
     <div>
       {/* Loaded toast */}
@@ -410,16 +442,56 @@ export default function SessionPlans() {
       {/* Header */}
       <section className="bg-t1-navy border-b border-t1-border">
         <div className="container py-4 sm:py-6">
-          <h1 className="font-display text-xl sm:text-4xl font-bold text-white uppercase tracking-wide">
-            Session Plans
-          </h1>
-          <p className="mt-1 text-t1-muted text-xs sm:text-sm">
-            {sessionPlans.length} session plans by level and sub-band. Browse, favorite, print, or load into the builder.
-          </p>
+          <div className="flex items-start justify-between">
+            <div>
+              <h1 className="font-display text-xl sm:text-4xl font-bold text-white uppercase tracking-wide">
+                Session Plans
+              </h1>
+              <p className="mt-1 text-t1-muted text-xs sm:text-sm">
+                {sessionPlans.length} session plans by level and sub-band. Browse, favorite, print, or load into the builder.
+              </p>
+            </div>
+            <Link
+              href="/compare-plans"
+              className="hidden sm:flex items-center gap-1.5 px-3 py-2 text-xs font-semibold bg-t1-surface border border-t1-border rounded-lg text-t1-muted hover:text-t1-text hover:bg-t1-bg transition-colors no-underline flex-shrink-0"
+            >
+              <ArrowLeftRight className="w-3.5 h-3.5" />
+              Compare Plans
+            </Link>
+          </div>
         </div>
       </section>
 
       <div className="container mt-3 sm:mt-4 space-y-3 sm:space-y-4">
+        {/* Search Bar */}
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-t1-muted" />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={e => setSearchQuery(e.target.value)}
+            placeholder="Search plans by name, drill, keyword..."
+            className="w-full pl-10 pr-10 py-3 bg-t1-surface border border-t1-border rounded-lg text-sm text-t1-text placeholder:text-t1-muted/50 focus:outline-none focus:border-t1-blue/50 transition-colors"
+          />
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery('')}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-t1-muted hover:text-t1-text"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          )}
+        </div>
+
+        {/* Mobile compare link */}
+        <Link
+          href="/compare-plans"
+          className="sm:hidden flex items-center justify-center gap-1.5 px-3 py-2.5 text-xs font-semibold bg-t1-surface border border-t1-border rounded-lg text-t1-muted hover:text-t1-text transition-colors no-underline"
+        >
+          <ArrowLeftRight className="w-3.5 h-3.5" />
+          Compare Two Plans Side by Side
+        </Link>
+
         {/* Tabs: All / Favorites / Recent */}
         <div className="flex gap-1 bg-t1-surface border border-t1-border rounded-lg p-1">
           {[
@@ -453,15 +525,19 @@ export default function SessionPlans() {
         {/* Favorites Tab */}
         {activeTab === 'favorites' && (
           <>
-            {favoritePlans.length === 0 ? (
+            {searchFilteredFavorites.length === 0 ? (
               <div className="bg-t1-surface border border-t1-border rounded-lg p-8 text-center">
                 <Star className="w-8 h-8 text-t1-muted/30 mx-auto mb-2" />
-                <p className="text-sm text-t1-muted">No favorite plans yet.</p>
-                <p className="text-xs text-t1-muted/60 mt-1">Tap the star on any plan to save it here.</p>
+                <p className="text-sm text-t1-muted">
+                  {searchQuery.trim() ? 'No favorite plans match your search.' : 'No favorite plans yet.'}
+                </p>
+                {!searchQuery.trim() && (
+                  <p className="text-xs text-t1-muted/60 mt-1">Tap the star on any plan to save it here.</p>
+                )}
               </div>
             ) : (
               <div className="space-y-2">
-                {favoritePlans.map(plan => (
+                {searchFilteredFavorites.map(plan => (
                   <PlanCard
                     key={plan.id}
                     plan={plan}
@@ -480,15 +556,19 @@ export default function SessionPlans() {
         {/* Recent Tab */}
         {activeTab === 'recent' && (
           <>
-            {recentPlans.length === 0 ? (
+            {searchFilteredRecent.length === 0 ? (
               <div className="bg-t1-surface border border-t1-border rounded-lg p-8 text-center">
                 <History className="w-8 h-8 text-t1-muted/30 mx-auto mb-2" />
-                <p className="text-sm text-t1-muted">No recently viewed plans.</p>
-                <p className="text-xs text-t1-muted/60 mt-1">Plans you expand will appear here.</p>
+                <p className="text-sm text-t1-muted">
+                  {searchQuery.trim() ? 'No recent plans match your search.' : 'No recently viewed plans.'}
+                </p>
+                {!searchQuery.trim() && (
+                  <p className="text-xs text-t1-muted/60 mt-1">Plans you expand will appear here.</p>
+                )}
               </div>
             ) : (
               <div className="space-y-2">
-                {recentPlans.map(plan => (
+                {searchFilteredRecent.map(plan => (
                   <PlanCard
                     key={plan.id}
                     plan={plan}
@@ -609,14 +689,33 @@ export default function SessionPlans() {
             <div className="flex items-center justify-between">
               <p className="text-xs text-t1-muted">
                 {filteredPlans.length} session plan{filteredPlans.length !== 1 ? 's' : ''}
+                {searchQuery.trim() && ` matching "${searchQuery}"`}
               </p>
+              {searchQuery.trim() && (
+                <button
+                  onClick={() => setSearchQuery('')}
+                  className="text-xs text-t1-blue hover:underline"
+                >
+                  Clear search
+                </button>
+              )}
             </div>
 
             {/* Plans List — grouped by level tag */}
             {groupedPlans.length === 0 ? (
               <div className="bg-t1-surface border border-t1-border rounded-lg p-8 text-center">
                 <ClipboardList className="w-8 h-8 text-t1-muted/40 mx-auto mb-2" />
-                <p className="text-sm text-t1-muted">No session plans match your filters.</p>
+                <p className="text-sm text-t1-muted">
+                  {searchQuery.trim() ? `No session plans match "${searchQuery}".` : 'No session plans match your filters.'}
+                </p>
+                {searchQuery.trim() && (
+                  <button
+                    onClick={() => setSearchQuery('')}
+                    className="mt-2 text-xs text-t1-blue hover:underline"
+                  >
+                    Clear search
+                  </button>
+                )}
               </div>
             ) : (
               <div className="space-y-4">

@@ -6,7 +6,7 @@
 import { Link } from 'wouter';
 import { 
   Route, BookOpen, Target, ClipboardList, TrendingUp, 
-  Shield, Dumbbell, ChevronRight, Zap, Star, CheckCircle
+  Shield, Dumbbell, ChevronRight, Zap, Star, CheckCircle, History, ArrowLeftRight
 } from 'lucide-react';
 import { pathwayStages, drills } from '@/lib/data';
 import { useFavorites } from '@/hooks/useFavorites';
@@ -20,6 +20,8 @@ const quickLinks = [
   { href: '/assessments', label: 'Assessments', icon: Target, description: 'Player standards' },
   { href: '/advancement', label: 'Advancement', icon: TrendingUp, description: 'Progression decisions' },
   { href: '/session-plans', label: 'Plans', icon: ClipboardList, description: '52 session plans by level' },
+  { href: '/session-history', label: 'History', icon: History, description: 'Session log and tracking' },
+  { href: '/compare-plans', label: 'Compare', icon: ArrowLeftRight, description: 'Side-by-side plan comparison' },
   { href: '/coach-standards', label: 'Standards', icon: Shield, description: 'Coaching expectations' },
 ];
 

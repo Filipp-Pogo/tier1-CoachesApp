@@ -15,6 +15,8 @@ import SessionBuilder from "./pages/SessionBuilder";
 import Assessments from "./pages/Assessments";
 import Advancement from "./pages/Advancement";
 import SessionPlans from "./pages/SessionPlans";
+import SessionHistory from "./pages/SessionHistory";
+import PlanComparison from "./pages/PlanComparison";
 
 function Router() {
   return (
@@ -30,6 +32,8 @@ function Router() {
         <Route path="/assessments" component={Assessments} />
         <Route path="/advancement" component={Advancement} />
         <Route path="/session-plans" component={SessionPlans} />
+        <Route path="/session-history" component={SessionHistory} />
+        <Route path="/compare-plans" component={PlanComparison} />
         <Route path="/404" component={NotFound} />
         <Route component={NotFound} />
       </Switch>
