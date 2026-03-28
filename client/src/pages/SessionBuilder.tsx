@@ -1,12 +1,13 @@
 /*
   SESSION BUILDER: Tier 1 Performance — Cold Dark Brand
-  Build a practice, assign drills, export PDF
+  Build a practice, assign drills (favorites shown first), export PDF
 */
 import { useState, useMemo } from 'react';
 import { Link } from 'wouter';
-import { Plus, X, Clock, ChevronRight, Dumbbell, GripVertical, Printer, FileDown } from 'lucide-react';
+import { Plus, X, Clock, ChevronRight, Dumbbell, GripVertical, Printer, FileDown, Star } from 'lucide-react';
 import { pathwayStages, sessionBlocks, drills, sessionTemplates, type PathwayStageId, type SessionBlockId } from '@/lib/data';
 import { exportSessionPDF } from '@/lib/session-pdf';
+import { useFavorites } from '@/hooks/useFavorites';
 
 interface SessionBlockEntry {
   blockId: SessionBlockId;
@@ -20,6 +21,7 @@ export default function SessionBuilder() {
   const [sessionTime, setSessionTime] = useState('60');
   const [blocks, setBlocks] = useState<SessionBlockEntry[]>([]);
   const [showTemplates, setShowTemplates] = useState(true);
+  const { favorites, isFavorite } = useFavorites();
 
   const levelDrills = useMemo(() => {
     return drills.filter(d => d.level.includes(selectedLevel));
@@ -63,6 +65,14 @@ export default function SessionBuilder() {
       totalTime: sessionTime,
       blocks
     });
+  };
+
+  /** Sort drills for a block: favorites first, then alphabetical */
+  const getSortedBlockDrills = (blockId: SessionBlockId) => {
+    const blockDrills = levelDrills.filter(d => d.sessionBlock === blockId);
+    const favs = blockDrills.filter(d => favorites.includes(d.id));
+    const rest = blockDrills.filter(d => !favorites.includes(d.id));
+    return { favs, rest };
   };
 
   return (
@@ -154,7 +164,7 @@ export default function SessionBuilder() {
         <div className="space-y-3">
           {blocks.map((block, index) => {
             const blockInfo = sessionBlocks.find(b => b.id === block.blockId);
-            const blockDrills = levelDrills.filter(d => d.sessionBlock === block.blockId);
+            const { favs, rest } = getSortedBlockDrills(block.blockId);
             const selectedDrill = block.drillId ? drills.find(d => d.id === block.drillId) : null;
 
             return (
@@ -186,16 +196,34 @@ export default function SessionBuilder() {
                         />
                       </div>
                       <div className="flex-1">
-                        <label className="text-[10px] font-semibold uppercase tracking-wider text-t1-muted mb-1 block">Drill (optional)</label>
+                        <label className="text-[10px] font-semibold uppercase tracking-wider text-t1-muted mb-1 block">
+                          Drill (optional)
+                          {favs.length > 0 && (
+                            <span className="ml-1.5 text-yellow-400 normal-case tracking-normal">
+                              ★ {favs.length} saved
+                            </span>
+                          )}
+                        </label>
                         <select
                           value={block.drillId || ''}
                           onChange={(e) => updateBlock(index, { drillId: e.target.value || undefined })}
                           className="w-full px-2 py-1 bg-t1-bg border border-t1-border rounded text-xs text-t1-text focus:outline-none focus:ring-1 focus:ring-t1-blue/30"
                         >
                           <option value="">Select a drill...</option>
-                          {blockDrills.map(d => (
-                            <option key={d.id} value={d.id}>{d.name}</option>
-                          ))}
+                          {favs.length > 0 && (
+                            <optgroup label="★ My Drills">
+                              {favs.map(d => (
+                                <option key={d.id} value={d.id}>★ {d.name}</option>
+                              ))}
+                            </optgroup>
+                          )}
+                          {rest.length > 0 && (
+                            <optgroup label={favs.length > 0 ? 'All Drills' : undefined}>
+                              {rest.map(d => (
+                                <option key={d.id} value={d.id}>{d.name}</option>
+                              ))}
+                            </optgroup>
+                          )}
                         </select>
                       </div>
                       <div className="flex-1">
@@ -264,12 +292,16 @@ export default function SessionBuilder() {
               {blocks.map((block, i) => {
                 const info = sessionBlocks.find(b => b.id === block.blockId);
                 const drill = block.drillId ? drills.find(d => d.id === block.drillId) : null;
+                const isFav = drill ? isFavorite(drill.id) : false;
                 return (
                   <div key={i} className="flex items-center gap-3 text-xs">
                     <span className="w-5 text-t1-muted font-mono">{i + 1}.</span>
                     <span className="font-medium text-t1-text w-32">{info?.shortName}</span>
                     <span className="text-t1-muted w-16">{block.duration}</span>
-                    <span className="text-t1-muted">{drill?.name || block.notes || info?.description}</span>
+                    <span className="text-t1-muted flex items-center gap-1">
+                      {isFav && <Star className="w-3 h-3 text-yellow-400 fill-yellow-400" />}
+                      {drill?.name || block.notes || info?.description}
+                    </span>
                   </div>
                 );
               })}

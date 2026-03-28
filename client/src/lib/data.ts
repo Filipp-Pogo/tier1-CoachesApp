@@ -297,6 +297,8 @@ export interface Drill {
   regression: string;
   competitiveVariation: string;
   matchPlayRelevance: string;
+  /** Optional video demo URL — YouTube, Vimeo, or direct link */
+  videoUrl?: string;
 }
 
 export const drills: Drill[] = [

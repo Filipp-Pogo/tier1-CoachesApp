@@ -1,13 +1,15 @@
 /*
   DASHBOARD: Tier 1 Performance — Cold Dark Brand
   Blue accent, dark surfaces, Oswald 700 ALL CAPS headlines, Inter 400 body
+  Now includes My Drills (favorites) section
 */
 import { Link } from 'wouter';
 import { 
   Route, BookOpen, Target, ClipboardCheck, TrendingUp, 
-  Shield, Dumbbell, ChevronRight, Zap
+  Shield, Dumbbell, ChevronRight, Zap, Star
 } from 'lucide-react';
 import { pathwayStages, drills } from '@/lib/data';
+import { useFavorites } from '@/hooks/useFavorites';
 
 const HERO_IMG = 'https://d2xsxph8kpxj0f.cloudfront.net/310519663356767696/ELbCQXq8c7BR3Zt5VxeR2S/hero-dashboard-4kNxYGLrvc7smJFKBjje6R.webp';
 
@@ -30,6 +32,8 @@ const stageColors: Record<string, string> = {
 };
 
 export default function Dashboard() {
+  const { favorites, isFavorite, toggleFavorite } = useFavorites();
+  const favoriteDrills = drills.filter(d => favorites.includes(d.id));
   const recentDrills = drills.slice(0, 4);
 
   return (
@@ -85,6 +89,61 @@ export default function Dashboard() {
           </div>
         </section>
 
+        {/* My Drills (Favorites) — only shown if coach has saved drills */}
+        {favoriteDrills.length > 0 && (
+          <section>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="font-display text-xl font-bold uppercase tracking-wide text-t1-text flex items-center gap-2">
+                <Star className="w-5 h-5 text-yellow-400 fill-yellow-400" />
+                My Drills
+              </h2>
+              <Link href="/drills?tab=favorites" className="text-sm text-t1-blue font-medium hover:underline no-underline flex items-center gap-1">
+                View All ({favoriteDrills.length}) <ChevronRight className="w-3.5 h-3.5" />
+              </Link>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {favoriteDrills.slice(0, 4).map((drill) => (
+                <div
+                  key={drill.id}
+                  className="group bg-t1-surface border border-t1-border rounded-lg hover:border-t1-blue/40 hover:shadow-lg hover:shadow-t1-blue/5 transition-all relative"
+                >
+                  <button
+                    onClick={(e) => { e.preventDefault(); toggleFavorite(drill.id); }}
+                    className="absolute top-3 right-3 z-10 w-7 h-7 rounded-full flex items-center justify-center bg-yellow-500/15 text-yellow-400"
+                    title="Remove from My Drills"
+                  >
+                    <Star className="w-3.5 h-3.5 fill-yellow-400" />
+                  </button>
+                  <Link
+                    href={`/drills/${drill.id}`}
+                    className="block p-4 no-underline"
+                  >
+                    <div className="flex items-start justify-between pr-8">
+                      <div>
+                        <h3 className="font-display text-sm font-bold uppercase tracking-wide text-t1-text group-hover:text-t1-blue transition-colors">
+                          {drill.name}
+                        </h3>
+                        <p className="text-xs text-t1-muted mt-1">{drill.objective.slice(0, 80)}...</p>
+                      </div>
+                      <ChevronRight className="w-4 h-4 text-t1-muted group-hover:text-t1-blue transition-colors flex-shrink-0 mt-0.5" />
+                    </div>
+                    <div className="flex items-center gap-2 mt-3 flex-wrap">
+                      {drill.level.map((l) => (
+                        <span key={l} className="text-[10px] bg-t1-blue/10 text-t1-blue px-2 py-0.5 rounded font-medium uppercase tracking-wider">
+                          {pathwayStages.find(s => s.id === l)?.shortName}
+                        </span>
+                      ))}
+                      <span className="text-[10px] bg-secondary text-t1-muted px-2 py-0.5 rounded font-medium uppercase tracking-wider">
+                        {drill.sessionBlock.replace('-', ' ')}
+                      </span>
+                    </div>
+                  </Link>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
         {/* Pathway Overview */}
         <section>
           <div className="flex items-center justify-between mb-4">
@@ -117,7 +176,7 @@ export default function Dashboard() {
           </div>
         </section>
 
-        {/* Recent Drills */}
+        {/* Featured Drills */}
         <section>
           <div className="flex items-center justify-between mb-4">
             <h2 className="font-display text-xl font-bold uppercase tracking-wide text-t1-text">
@@ -128,36 +187,54 @@ export default function Dashboard() {
             </Link>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            {recentDrills.map((drill) => (
-              <Link
-                key={drill.id}
-                href={`/drills/${drill.id}`}
-                className="group bg-t1-surface border border-t1-border rounded-lg p-4 hover:border-t1-blue/40 hover:shadow-lg hover:shadow-t1-blue/5 transition-all no-underline"
-              >
-                <div className="flex items-start justify-between">
-                  <div>
-                    <h3 className="font-display text-sm font-bold uppercase tracking-wide text-t1-text group-hover:text-t1-blue transition-colors">
-                      {drill.name}
-                    </h3>
-                    <p className="text-xs text-t1-muted mt-1">{drill.objective.slice(0, 80)}...</p>
-                  </div>
-                  <ChevronRight className="w-4 h-4 text-t1-muted group-hover:text-t1-blue transition-colors flex-shrink-0 mt-0.5" />
+            {recentDrills.map((drill) => {
+              const favorited = isFavorite(drill.id);
+              return (
+                <div
+                  key={drill.id}
+                  className="group bg-t1-surface border border-t1-border rounded-lg hover:border-t1-blue/40 hover:shadow-lg hover:shadow-t1-blue/5 transition-all relative"
+                >
+                  <button
+                    onClick={(e) => { e.preventDefault(); toggleFavorite(drill.id); }}
+                    className={`absolute top-3 right-3 z-10 w-7 h-7 rounded-full flex items-center justify-center transition-all ${
+                      favorited
+                        ? 'bg-yellow-500/15 text-yellow-400'
+                        : 'bg-t1-bg/60 text-t1-muted/40 opacity-0 group-hover:opacity-100 hover:text-yellow-400'
+                    }`}
+                    title={favorited ? 'Remove from My Drills' : 'Add to My Drills'}
+                  >
+                    <Star className={`w-3.5 h-3.5 ${favorited ? 'fill-yellow-400' : ''}`} />
+                  </button>
+                  <Link
+                    href={`/drills/${drill.id}`}
+                    className="block p-4 no-underline"
+                  >
+                    <div className="flex items-start justify-between pr-8">
+                      <div>
+                        <h3 className="font-display text-sm font-bold uppercase tracking-wide text-t1-text group-hover:text-t1-blue transition-colors">
+                          {drill.name}
+                        </h3>
+                        <p className="text-xs text-t1-muted mt-1">{drill.objective.slice(0, 80)}...</p>
+                      </div>
+                      <ChevronRight className="w-4 h-4 text-t1-muted group-hover:text-t1-blue transition-colors flex-shrink-0 mt-0.5" />
+                    </div>
+                    <div className="flex items-center gap-2 mt-3 flex-wrap">
+                      {drill.level.map((l) => (
+                        <span key={l} className="text-[10px] bg-t1-blue/10 text-t1-blue px-2 py-0.5 rounded font-medium uppercase tracking-wider">
+                          {pathwayStages.find(s => s.id === l)?.shortName}
+                        </span>
+                      ))}
+                      <span className="text-[10px] bg-secondary text-t1-muted px-2 py-0.5 rounded font-medium uppercase tracking-wider">
+                        {drill.sessionBlock.replace('-', ' ')}
+                      </span>
+                      <span className="text-[10px] bg-secondary text-t1-muted px-2 py-0.5 rounded font-medium uppercase tracking-wider">
+                        {drill.recommendedTime}
+                      </span>
+                    </div>
+                  </Link>
                 </div>
-                <div className="flex items-center gap-2 mt-3 flex-wrap">
-                  {drill.level.map((l) => (
-                    <span key={l} className="text-[10px] bg-t1-blue/10 text-t1-blue px-2 py-0.5 rounded font-medium uppercase tracking-wider">
-                      {pathwayStages.find(s => s.id === l)?.shortName}
-                    </span>
-                  ))}
-                  <span className="text-[10px] bg-secondary text-t1-muted px-2 py-0.5 rounded font-medium uppercase tracking-wider">
-                    {drill.sessionBlock.replace('-', ' ')}
-                  </span>
-                  <span className="text-[10px] bg-secondary text-t1-muted px-2 py-0.5 rounded font-medium uppercase tracking-wider">
-                    {drill.recommendedTime}
-                  </span>
-                </div>
-              </Link>
-            ))}
+              );
+            })}
           </div>
         </section>
 
