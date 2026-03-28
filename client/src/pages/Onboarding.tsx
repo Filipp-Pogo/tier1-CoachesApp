@@ -7,8 +7,13 @@ import { Link } from 'wouter';
 import {
   Shield, Route, LayoutList, Target, Award, TrendingUp,
   ChevronRight, ChevronDown, CheckCircle2, Circle, BookOpen,
-  GraduationCap, ArrowRight, Lock, RotateCcw, Lightbulb, Quote
+  GraduationCap, ArrowRight, Lock, RotateCcw, Lightbulb, Quote, AlertTriangle
 } from 'lucide-react';
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader,
+  AlertDialogTitle, AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 import { onboardingModules } from '@/lib/onboarding';
 import type { OnboardingModule, OnboardingLesson } from '@/lib/onboarding';
 import { useOnboardingProgress } from '@/hooks/useOnboardingProgress';
@@ -26,7 +31,6 @@ export default function Onboarding() {
 
   const [activeModuleId, setActiveModuleId] = useState<string | null>(null);
   const [activeLessonId, setActiveLessonId] = useState<string | null>(null);
-  const [showResetConfirm, setShowResetConfirm] = useState(false);
 
   // Calculate overall progress
   const totalLessons = useMemo(() =>
@@ -482,31 +486,43 @@ export default function Onboarding() {
 
         {/* Reset */}
         <div className="mt-8 flex justify-end">
-          {!showResetConfirm ? (
-            <button
-              onClick={() => setShowResetConfirm(true)}
-              className="flex items-center gap-2 text-xs text-[#a0a5ad] hover:text-red-400 transition-colors"
-            >
-              <RotateCcw className="w-3.5 h-3.5" />
-              Reset Progress
-            </button>
-          ) : (
-            <div className="flex items-center gap-3">
-              <span className="text-xs text-red-400">Reset all progress and quiz results?</span>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
               <button
-                onClick={() => { resetProgress(); setShowResetConfirm(false); }}
-                className="text-xs font-medium text-red-400 hover:text-red-300 underline"
+                className="flex items-center gap-2 text-xs text-[#a0a5ad] hover:text-red-400 transition-colors"
               >
-                Yes, Reset
+                <RotateCcw className="w-3.5 h-3.5" />
+                Reset Progress
               </button>
-              <button
-                onClick={() => setShowResetConfirm(false)}
-                className="text-xs text-[#a0a5ad] hover:text-[#e8e8e8]"
-              >
-                Cancel
-              </button>
-            </div>
-          )}
+            </AlertDialogTrigger>
+            <AlertDialogContent className="bg-[#22262b] border-white/[0.08]">
+              <AlertDialogHeader>
+                <div className="flex items-center gap-2 mb-1">
+                  <div className="w-10 h-10 rounded-full bg-red-500/15 flex items-center justify-center">
+                    <AlertTriangle className="w-5 h-5 text-red-400" />
+                  </div>
+                  <AlertDialogTitle className="font-oswald text-lg uppercase tracking-wide text-[#e8e8e8]">
+                    Reset All Progress
+                  </AlertDialogTitle>
+                </div>
+                <AlertDialogDescription className="text-sm text-[#a0a5ad]">
+                  This will permanently erase all lesson progress, module completions, and quiz results.
+                  You will need to complete all {totalLessons} lessons again and retake the quiz. This action cannot be undone.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel className="bg-[#1a1d21] border-white/[0.08] text-[#e8e8e8] hover:bg-[#22262b]">
+                  Keep Progress
+                </AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={() => resetProgress()}
+                  className="bg-red-600 text-white hover:bg-red-700 border-0"
+                >
+                  Reset Everything
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </div>
       </div>
     </div>

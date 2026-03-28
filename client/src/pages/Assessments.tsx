@@ -1,24 +1,50 @@
 /*
   ASSESSMENTS: Tier 1 Performance — Cold Dark Brand
   MOBILE-FIRST: Compact hero, large filter touch targets, stacked cards on mobile.
+  Collapsible sections by level when viewing "All".
 */
 import { useState } from 'react';
-import { Target, CheckCircle2, AlertTriangle } from 'lucide-react';
+import { Target, CheckCircle2, AlertTriangle, ChevronDown, ChevronRight } from 'lucide-react';
 import { assessments, pathwayStages } from '@/lib/data';
 
 const ASSESSMENT_IMG = 'https://d2xsxph8kpxj0f.cloudfront.net/310519663356767696/ELbCQXq8c7BR3Zt5VxeR2S/assessment-bg-eUTW7YwB73FinQ8wZew5gb.webp';
 
 const ALL_STAGE_IDS = ['foundations', 'prep', 'jasa', 'hs', 'asa', 'fta'];
+const draftStages = ['hs', 'asa', 'fta'];
 
 export default function Assessments() {
   const [activeStage, setActiveStage] = useState<string>('all');
+  // Track which sections are expanded — default first one open when viewing all
+  const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(['foundations']));
 
   const filteredAssessments = activeStage === 'all'
     ? assessments
     : assessments.filter(a => a.stageId === activeStage || a.stageName.toLowerCase().includes(activeStage));
 
-  const draftStages = ['hs', 'asa', 'fta'];
   const showDraftBanner = activeStage === 'all' || draftStages.includes(activeStage);
+  const isAllView = activeStage === 'all';
+
+  function toggleSection(stageId: string) {
+    setExpandedSections(prev => {
+      const next = new Set(prev);
+      if (next.has(stageId)) {
+        next.delete(stageId);
+      } else {
+        next.add(stageId);
+      }
+      return next;
+    });
+  }
+
+  function expandAll() {
+    setExpandedSections(new Set(ALL_STAGE_IDS));
+  }
+
+  function collapseAll() {
+    setExpandedSections(new Set());
+  }
+
+  const allExpanded = ALL_STAGE_IDS.every(id => expandedSections.has(id));
 
   return (
     <div>
@@ -67,6 +93,22 @@ export default function Assessments() {
           })}
         </div>
 
+        {/* Expand/Collapse All — only when viewing All */}
+        {isAllView && (
+          <div className="flex justify-end">
+            <button
+              onClick={allExpanded ? collapseAll : expandAll}
+              className="text-[11px] text-t1-muted hover:text-t1-blue transition-colors font-medium flex items-center gap-1"
+            >
+              {allExpanded ? (
+                <>Collapse All</>
+              ) : (
+                <>Expand All</>
+              )}
+            </button>
+          </div>
+        )}
+
         {/* Draft notice */}
         {showDraftBanner && (
           <div className="bg-t1-surface border border-yellow-500/20 rounded-lg p-3">
@@ -80,41 +122,84 @@ export default function Assessments() {
         )}
 
         {/* Assessment Cards */}
-        {filteredAssessments.map((assessment, idx) => (
-          <section key={idx} className="bg-t1-surface border border-t1-border rounded-lg overflow-hidden">
-            <div className="bg-t1-blue/5 border-b border-t1-border px-4 sm:px-6 py-3 sm:py-4">
-              <h2 className="font-display text-sm sm:text-lg font-semibold uppercase tracking-wide text-t1-text">
-                {assessment.stageName} Standards
-              </h2>
-              <p className="text-[10px] sm:text-xs text-t1-muted mt-0.5">
-                {pathwayStages.find(s => s.id === assessment.stageId)?.name}
-                {draftStages.includes(assessment.stageId) && (
-                  <span className="ml-1.5 text-yellow-400">— Draft</span>
-                )}
-              </p>
-            </div>
-            <div className="p-3 sm:p-6">
-              <div className="space-y-2 sm:space-y-0 sm:grid sm:grid-cols-2 lg:grid-cols-3 sm:gap-3 lg:gap-4">
-                {assessment.categories.map((cat) => (
-                  <div key={cat.name} className="bg-secondary/50 rounded-lg p-3 sm:p-4">
-                    <h3 className="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-t1-text mb-2 flex items-center gap-1.5 border-b border-t1-border pb-1.5">
-                      <Target className="w-3 h-3 text-t1-blue" />
-                      {cat.name}
-                    </h3>
-                    <ul className="space-y-1.5">
-                      {cat.standards.map((standard, i) => (
-                        <li key={i} className="flex items-start gap-2">
-                          <CheckCircle2 className="w-3 h-3 text-t1-blue flex-shrink-0 mt-0.5" />
-                          <span className="text-[10px] sm:text-xs text-t1-text/80">{standard}</span>
-                        </li>
-                      ))}
-                    </ul>
+        {filteredAssessments.map((assessment, idx) => {
+          const isExpanded = !isAllView || expandedSections.has(assessment.stageId);
+          const isDraft = draftStages.includes(assessment.stageId);
+          const categoryCount = assessment.categories.length;
+          const standardCount = assessment.categories.reduce((sum, c) => sum + c.standards.length, 0);
+
+          return (
+            <section key={idx} className="bg-t1-surface border border-t1-border rounded-lg overflow-hidden">
+              {/* Section Header — clickable when in All view */}
+              <div
+                className={`bg-t1-blue/5 border-b border-t1-border px-4 sm:px-6 py-3 sm:py-4 ${
+                  isAllView ? 'cursor-pointer hover:bg-t1-blue/10 transition-colors select-none' : ''
+                }`}
+                onClick={isAllView ? () => toggleSection(assessment.stageId) : undefined}
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <h2 className="font-display text-sm sm:text-lg font-semibold uppercase tracking-wide text-t1-text">
+                        {assessment.stageName} Standards
+                      </h2>
+                      {isDraft && (
+                        <span className="text-[10px] bg-yellow-500/15 text-yellow-400 px-1.5 py-0.5 rounded font-medium uppercase tracking-wider">
+                          Draft
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-[10px] sm:text-xs text-t1-muted mt-0.5">
+                      {pathwayStages.find(s => s.id === assessment.stageId)?.name}
+                      {!isExpanded && (
+                        <span className="ml-2 text-t1-muted/60">
+                          {categoryCount} categories &middot; {standardCount} standards
+                        </span>
+                      )}
+                    </p>
                   </div>
-                ))}
+                  {isAllView && (
+                    <div className="flex-shrink-0 ml-3">
+                      {isExpanded ? (
+                        <ChevronDown className="w-5 h-5 text-t1-muted" />
+                      ) : (
+                        <ChevronRight className="w-5 h-5 text-t1-muted" />
+                      )}
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
-          </section>
-        ))}
+
+              {/* Collapsible Content */}
+              <div
+                className={`transition-all duration-300 ease-in-out overflow-hidden ${
+                  isExpanded ? 'max-h-[5000px] opacity-100' : 'max-h-0 opacity-0'
+                }`}
+              >
+                <div className="p-3 sm:p-6">
+                  <div className="space-y-2 sm:space-y-0 sm:grid sm:grid-cols-2 lg:grid-cols-3 sm:gap-3 lg:gap-4">
+                    {assessment.categories.map((cat) => (
+                      <div key={cat.name} className="bg-secondary/50 rounded-lg p-3 sm:p-4">
+                        <h3 className="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-t1-text mb-2 flex items-center gap-1.5 border-b border-t1-border pb-1.5">
+                          <Target className="w-3 h-3 text-t1-blue" />
+                          {cat.name}
+                        </h3>
+                        <ul className="space-y-1.5">
+                          {cat.standards.map((standard, i) => (
+                            <li key={i} className="flex items-start gap-2">
+                              <CheckCircle2 className="w-3 h-3 text-t1-blue flex-shrink-0 mt-0.5" />
+                              <span className="text-[10px] sm:text-xs text-t1-text/80">{standard}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </section>
+          );
+        })}
 
         {filteredAssessments.length === 0 && (
           <div className="bg-t1-surface border border-t1-border rounded-lg p-6 text-center">
