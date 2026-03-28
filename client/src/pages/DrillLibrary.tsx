@@ -18,6 +18,7 @@ export default function DrillLibrary() {
   const [categoryFilter, setCategoryFilter] = useState<string>('');
   const [typeFilter, setTypeFilter] = useState('');
   const [feedingFilter, setFeedingFilter] = useState('');
+  const [formatFilter, setFormatFilter] = useState('');
   const [showFilters, setShowFilters] = useState(false);
   const [activeTab, setActiveTab] = useState<'all' | 'favorites'>('all');
   const [previewDrillId, setPreviewDrillId] = useState<string | null>(null);
@@ -30,7 +31,7 @@ export default function DrillLibrary() {
     return recentIds.map((id: string) => drills.find(d => d.id === id)).filter(Boolean).slice(0, 5) as typeof drills;
   }, [recentIds]);
 
-  const activeFilterCount = [levelFilter, blockFilter, categoryFilter, typeFilter, feedingFilter].filter(Boolean).length;
+  const activeFilterCount = [levelFilter, blockFilter, categoryFilter, typeFilter, feedingFilter, formatFilter].filter(Boolean).length;
 
   const filteredDrills = useMemo(() => {
     let result = [...drills];
@@ -48,12 +49,17 @@ export default function DrillLibrary() {
     if (categoryFilter) result = result.filter(d => d.skillCategory === categoryFilter);
     if (typeFilter) result = result.filter(d => d.type === typeFilter);
     if (feedingFilter) result = result.filter(d => d.feedingStyle === feedingFilter);
+    if (formatFilter) {
+      if (formatFilter === 'doubles') result = result.filter(d => d.skillCategory === 'doubles');
+      else if (formatFilter === 'private') result = result.filter(d => d.format === 'private' || d.format === 'group-or-private');
+      else result = result.filter(d => d.skillCategory !== 'doubles');
+    }
     return result;
-  }, [searchQuery, levelFilter, blockFilter, categoryFilter, typeFilter, feedingFilter, activeTab, favorites]);
+  }, [searchQuery, levelFilter, blockFilter, categoryFilter, typeFilter, feedingFilter, formatFilter, activeTab, favorites]);
 
   const clearFilters = () => {
     setLevelFilter(''); setBlockFilter(''); setCategoryFilter('');
-    setTypeFilter(''); setFeedingFilter(''); setSearchQuery('');
+    setTypeFilter(''); setFeedingFilter(''); setFormatFilter(''); setSearchQuery('');
   };
 
   const openPreview = (drillId: string) => {
@@ -185,8 +191,8 @@ export default function DrillLibrary() {
                 ))}
               </div>
             </div>
-            {/* Skill + Type + Feeding in a responsive grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            {/* Skill + Type + Feeding + Format in a responsive grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
               <div>
                 <label className="text-[10px] font-semibold uppercase tracking-wider text-t1-muted mb-1.5 block">Skill</label>
                 <div className="flex flex-wrap gap-1.5">
@@ -241,6 +247,24 @@ export default function DrillLibrary() {
                   ))}
                 </div>
               </div>
+              <div>
+                <label className="text-[10px] font-semibold uppercase tracking-wider text-t1-muted mb-1.5 block">Format</label>
+                <div className="flex flex-wrap gap-1.5">
+                  {[{ id: 'singles', label: 'Singles' }, { id: 'doubles', label: 'Doubles' }, { id: 'private', label: 'Private' }].map(f => (
+                    <button
+                      key={f.id}
+                      onClick={() => setFormatFilter(formatFilter === f.id ? '' : f.id)}
+                      className={`px-2.5 py-1.5 rounded-full text-xs font-medium border transition-colors min-h-[32px] ${
+                        formatFilter === f.id
+                          ? 'bg-t1-blue text-white border-t1-blue'
+                          : 'bg-t1-bg border-t1-border text-t1-muted active:bg-t1-blue/10'
+                      }`}
+                    >
+                      {f.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
 
             {activeFilterCount > 0 && (
@@ -282,6 +306,12 @@ export default function DrillLibrary() {
               <span className="inline-flex items-center gap-1 px-2 py-1 bg-t1-blue/10 text-t1-blue text-[10px] font-medium rounded-full min-h-[28px]">
                 {feedingFilter === 'live-ball' ? 'Live Ball' : feedingFilter === 'both' ? 'Both' : 'Feeding'}
                 <button onClick={() => setFeedingFilter('')} className="ml-0.5"><X className="w-3 h-3" /></button>
+              </span>
+            )}
+            {formatFilter && (
+              <span className="inline-flex items-center gap-1 px-2 py-1 bg-purple-500/10 text-purple-400 text-[10px] font-medium rounded-full capitalize min-h-[28px]">
+                {formatFilter}
+                <button onClick={() => setFormatFilter('')} className="ml-0.5"><X className="w-3 h-3" /></button>
               </span>
             )}
             <button onClick={clearFilters} className="text-[10px] text-t1-muted hover:text-t1-blue font-medium min-h-[28px]">
@@ -374,6 +404,16 @@ export default function DrillLibrary() {
                     <span className="text-[10px] text-t1-muted">
                       {drill.recommendedTime}
                     </span>
+                    {drill.subBand && (
+                      <span className="text-[10px] bg-amber-500/10 text-amber-400 px-1.5 py-0.5 rounded font-medium uppercase tracking-wider">
+                        {drill.subBand}
+                      </span>
+                    )}
+                    {drill.skillCategory === 'doubles' && (
+                      <span className="text-[10px] bg-purple-500/10 text-purple-400 px-1.5 py-0.5 rounded font-medium uppercase tracking-wider">
+                        Doubles
+                      </span>
+                    )}
                     {drill.videoUrl && (
                       <span className="flex items-center gap-0.5 text-[10px] text-t1-blue">
                         <Video className="w-3 h-3" /> Video

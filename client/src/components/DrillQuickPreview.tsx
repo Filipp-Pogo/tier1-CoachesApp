@@ -64,6 +64,16 @@ export function DrillQuickPreview({ drillId, open, onOpenChange }: DrillQuickPre
             <span className="flex items-center gap-1 text-[10px] text-t1-muted">
               <Clock className="w-3 h-3" /> {drill.recommendedTime}
             </span>
+            {drill.subBand && (
+              <span className="text-[10px] bg-amber-500/10 text-amber-400 px-1.5 py-0.5 rounded font-medium uppercase tracking-wider">
+                {drill.subBand}
+              </span>
+            )}
+            {drill.skillCategory === 'doubles' && (
+              <span className="text-[10px] bg-purple-500/10 text-purple-400 px-1.5 py-0.5 rounded font-medium uppercase tracking-wider">
+                Doubles
+              </span>
+            )}
           </div>
           <div className="flex items-center gap-1.5 flex-shrink-0">
             <button

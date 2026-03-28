@@ -154,6 +154,21 @@ export default function DrillDetail() {
             <span className="flex items-center gap-1 text-[10px] sm:text-xs text-t1-muted">
               <Clock className="w-3 h-3" /> {drill.recommendedTime}
             </span>
+            {drill.subBand && (
+              <span className="text-[10px] sm:text-xs bg-amber-500/10 text-amber-400 px-2 py-1 rounded font-medium uppercase tracking-wider">
+                {drill.subBand}
+              </span>
+            )}
+            {drill.format && (
+              <span className="text-[10px] sm:text-xs bg-secondary text-t1-muted px-2 py-1 rounded font-medium uppercase tracking-wider">
+                {drill.format === 'private' ? 'Private Lesson' : drill.format === 'group-or-private' ? 'Group / Private' : 'Group'}
+              </span>
+            )}
+            {drill.skillCategory === 'doubles' && (
+              <span className="text-[10px] sm:text-xs bg-purple-500/10 text-purple-400 px-2 py-1 rounded font-medium uppercase tracking-wider">
+                Doubles
+              </span>
+            )}
           </div>
         </div>
 
