@@ -17,6 +17,8 @@ import Advancement from "./pages/Advancement";
 import SessionPlans from "./pages/SessionPlans";
 import SessionHistory from "./pages/SessionHistory";
 import PlanComparison from "./pages/PlanComparison";
+import Onboarding from "./pages/Onboarding";
+import OnboardingQuiz from "./pages/OnboardingQuiz";
 
 function Router() {
   return (
@@ -34,6 +36,8 @@ function Router() {
         <Route path="/session-plans" component={SessionPlans} />
         <Route path="/session-history" component={SessionHistory} />
         <Route path="/compare-plans" component={PlanComparison} />
+        <Route path="/onboarding" component={Onboarding} />
+        <Route path="/onboarding/quiz" component={OnboardingQuiz} />
         <Route path="/404" component={NotFound} />
         <Route component={NotFound} />
       </Switch>

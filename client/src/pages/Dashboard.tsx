@@ -6,7 +6,7 @@
 import { Link } from 'wouter';
 import { 
   Route, BookOpen, Target, ClipboardList, TrendingUp, 
-  Shield, Dumbbell, ChevronRight, Zap, Star, CheckCircle, History, ArrowLeftRight
+  Shield, Dumbbell, ChevronRight, Zap, Star, CheckCircle, History, ArrowLeftRight, GraduationCap
 } from 'lucide-react';
 import { pathwayStages, drills } from '@/lib/data';
 import { useFavorites } from '@/hooks/useFavorites';
@@ -23,6 +23,7 @@ const quickLinks = [
   { href: '/session-history', label: 'History', icon: History, description: 'Session log and tracking' },
   { href: '/compare-plans', label: 'Compare', icon: ArrowLeftRight, description: 'Side-by-side plan comparison' },
   { href: '/coach-standards', label: 'Standards', icon: Shield, description: 'Coaching expectations' },
+  { href: '/onboarding', label: 'Onboarding', icon: GraduationCap, description: 'Learn & pass the quiz' },
 ];
 
 const stageColors: Record<string, string> = {

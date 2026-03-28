@@ -8,7 +8,7 @@ import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'wouter';
 import {
   Menu, X, ChevronRight, LayoutDashboard, Route, BookOpen,
-  Wrench, Target, TrendingUp, Shield, ClipboardList, History, ArrowLeftRight
+  Wrench, Target, TrendingUp, Shield, ClipboardList, History, ArrowLeftRight, GraduationCap
 } from 'lucide-react';
 
 const TIER1_LOGO_WHITE = 'https://d2xsxph8kpxj0f.cloudfront.net/310519663356767696/ZPsMJTEeF9cNbnWWtGpFHU/tier1_logo_white_e523441d.webp';
@@ -24,6 +24,7 @@ const navItems = [
   { href: '/session-history', label: 'Session History', icon: History },
   { href: '/compare-plans', label: 'Compare Plans', icon: ArrowLeftRight },
   { href: '/coach-standards', label: 'Coach Standards', icon: Shield },
+  { href: '/onboarding', label: 'Onboarding', icon: GraduationCap },
 ];
 
 const bottomNavItems = [
