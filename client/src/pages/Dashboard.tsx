@@ -1,6 +1,6 @@
 /*
-  DASHBOARD: Fast home base for coaches
-  Fieldhouse design — bold headers, quick links, pathway overview
+  DASHBOARD: Tier 1 Performance — Cold Dark Brand
+  Blue accent, dark surfaces, Oswald 700 ALL CAPS headlines, Inter 400 body
 */
 import { Link } from 'wouter';
 import { 
@@ -22,11 +22,11 @@ const quickLinks = [
 
 const stageColors: Record<string, string> = {
   foundations: 'bg-red-500',
-  prep: 'bg-green-600',
+  prep: 'bg-green-500',
   jasa: 'bg-yellow-500',
-  hs: 'bg-blue-600',
-  asa: 'bg-purple-600',
-  fta: 'bg-t1-charcoal',
+  hs: 'bg-blue-500',
+  asa: 'bg-purple-500',
+  fta: 'bg-t1-text',
 };
 
 export default function Dashboard() {
@@ -38,20 +38,20 @@ export default function Dashboard() {
       <section className="relative h-64 sm:h-80 overflow-hidden">
         <img
           src={HERO_IMG}
-          alt="Tier 1 Academy training facility"
+          alt="Tier 1 Performance training facility"
           className="absolute inset-0 w-full h-full object-cover"
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-t1-charcoal/90 via-t1-charcoal/70 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-r from-t1-bg/95 via-t1-bg/80 to-t1-bg/40" />
         <div className="relative container h-full flex flex-col justify-center">
           <h1 className="font-display text-3xl sm:text-4xl md:text-5xl font-bold text-white uppercase tracking-wide">
             Coach Dashboard
           </h1>
-          <p className="mt-2 text-white/80 text-sm sm:text-base max-w-lg">
+          <p className="mt-2 text-t1-muted text-sm sm:text-base max-w-lg">
             Your home base for Tier 1 coaching. Find drills, build sessions, assess players, and maintain standards.
           </p>
-          <div className="mt-4 flex items-center gap-2 text-t1-sand text-xs font-medium uppercase tracking-widest">
+          <div className="mt-4 flex items-center gap-2 text-t1-blue text-xs font-medium uppercase tracking-widest">
             <Zap className="w-3.5 h-3.5" />
-            Every rep matters
+            The Standard Is The Standard.
           </div>
         </div>
       </section>
@@ -59,7 +59,7 @@ export default function Dashboard() {
       <div className="container mt-8 space-y-10">
         {/* Quick Links Grid */}
         <section>
-          <h2 className="font-display text-xl font-semibold uppercase tracking-wide text-t1-charcoal mb-4">
+          <h2 className="font-display text-xl font-bold uppercase tracking-wide text-t1-text mb-4">
             Quick Access
           </h2>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
@@ -67,17 +67,17 @@ export default function Dashboard() {
               <Link
                 key={link.href}
                 href={link.href}
-                className="group flex flex-col gap-2 p-4 bg-white border border-border rounded-lg hover:border-t1-green hover:shadow-md transition-all no-underline"
+                className="group flex flex-col gap-2 p-4 bg-t1-surface border border-t1-border rounded-lg hover:border-t1-blue/40 hover:shadow-lg hover:shadow-t1-blue/5 transition-all no-underline"
               >
                 <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-md bg-t1-green/10 flex items-center justify-center group-hover:bg-t1-green/20 transition-colors">
-                    <link.icon className="w-4.5 h-4.5 text-t1-green" />
+                  <div className="w-9 h-9 rounded-md bg-t1-blue/10 flex items-center justify-center group-hover:bg-t1-blue/20 transition-colors">
+                    <link.icon className="w-4.5 h-4.5 text-t1-blue" />
                   </div>
                   <div>
-                    <span className="font-display text-sm font-semibold uppercase tracking-wide text-t1-charcoal">
+                    <span className="font-display text-sm font-bold uppercase tracking-wide text-t1-text">
                       {link.label}
                     </span>
-                    <p className="text-xs text-muted-foreground hidden sm:block">{link.description}</p>
+                    <p className="text-xs text-t1-muted hidden sm:block">{link.description}</p>
                   </div>
                 </div>
               </Link>
@@ -88,10 +88,10 @@ export default function Dashboard() {
         {/* Pathway Overview */}
         <section>
           <div className="flex items-center justify-between mb-4">
-            <h2 className="font-display text-xl font-semibold uppercase tracking-wide text-t1-charcoal">
+            <h2 className="font-display text-xl font-bold uppercase tracking-wide text-t1-text">
               Development Pathway
             </h2>
-            <Link href="/pathway" className="text-sm text-t1-green font-medium hover:underline no-underline flex items-center gap-1">
+            <Link href="/pathway" className="text-sm text-t1-blue font-medium hover:underline no-underline flex items-center gap-1">
               View Full Pathway <ChevronRight className="w-3.5 h-3.5" />
             </Link>
           </div>
@@ -100,15 +100,15 @@ export default function Dashboard() {
               <Link
                 key={stage.id}
                 href={`/stage/${stage.id}`}
-                className="group relative bg-white border border-border rounded-lg p-4 hover:border-t1-green hover:shadow-md transition-all no-underline"
+                className="group relative bg-t1-surface border border-t1-border rounded-lg p-4 hover:border-t1-blue/40 hover:shadow-lg hover:shadow-t1-blue/5 transition-all no-underline"
               >
                 <div className={`w-3 h-3 rounded-full ${stageColors[stage.id]} mb-3`} />
-                <h3 className="font-display text-sm font-semibold uppercase tracking-wide text-t1-charcoal">
+                <h3 className="font-display text-sm font-bold uppercase tracking-wide text-t1-text">
                   {stage.shortName}
                 </h3>
-                <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{stage.subtitle}</p>
+                <p className="text-xs text-t1-muted mt-1 line-clamp-2">{stage.subtitle}</p>
                 {stage.contentStatus === 'placeholder' && (
-                  <span className="mt-2 inline-block text-[10px] bg-t1-sand-light text-t1-charcoal/60 px-1.5 py-0.5 rounded font-medium uppercase tracking-wider">
+                  <span className="mt-2 inline-block text-[10px] bg-t1-navy text-t1-blue px-1.5 py-0.5 rounded font-medium uppercase tracking-wider">
                     Draft
                   </span>
                 )}
@@ -120,10 +120,10 @@ export default function Dashboard() {
         {/* Recent Drills */}
         <section>
           <div className="flex items-center justify-between mb-4">
-            <h2 className="font-display text-xl font-semibold uppercase tracking-wide text-t1-charcoal">
+            <h2 className="font-display text-xl font-bold uppercase tracking-wide text-t1-text">
               Featured Drills
             </h2>
-            <Link href="/drills" className="text-sm text-t1-green font-medium hover:underline no-underline flex items-center gap-1">
+            <Link href="/drills" className="text-sm text-t1-blue font-medium hover:underline no-underline flex items-center gap-1">
               View All Drills <ChevronRight className="w-3.5 h-3.5" />
             </Link>
           </div>
@@ -132,27 +132,27 @@ export default function Dashboard() {
               <Link
                 key={drill.id}
                 href={`/drills/${drill.id}`}
-                className="group bg-white border border-border rounded-lg p-4 hover:border-t1-green hover:shadow-md transition-all no-underline"
+                className="group bg-t1-surface border border-t1-border rounded-lg p-4 hover:border-t1-blue/40 hover:shadow-lg hover:shadow-t1-blue/5 transition-all no-underline"
               >
                 <div className="flex items-start justify-between">
                   <div>
-                    <h3 className="font-display text-sm font-semibold uppercase tracking-wide text-t1-charcoal group-hover:text-t1-green transition-colors">
+                    <h3 className="font-display text-sm font-bold uppercase tracking-wide text-t1-text group-hover:text-t1-blue transition-colors">
                       {drill.name}
                     </h3>
-                    <p className="text-xs text-muted-foreground mt-1">{drill.objective.slice(0, 80)}...</p>
+                    <p className="text-xs text-t1-muted mt-1">{drill.objective.slice(0, 80)}...</p>
                   </div>
-                  <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-t1-green transition-colors flex-shrink-0 mt-0.5" />
+                  <ChevronRight className="w-4 h-4 text-t1-muted group-hover:text-t1-blue transition-colors flex-shrink-0 mt-0.5" />
                 </div>
                 <div className="flex items-center gap-2 mt-3 flex-wrap">
                   {drill.level.map((l) => (
-                    <span key={l} className="text-[10px] bg-t1-green/10 text-t1-green px-2 py-0.5 rounded font-medium uppercase tracking-wider">
+                    <span key={l} className="text-[10px] bg-t1-blue/10 text-t1-blue px-2 py-0.5 rounded font-medium uppercase tracking-wider">
                       {pathwayStages.find(s => s.id === l)?.shortName}
                     </span>
                   ))}
-                  <span className="text-[10px] bg-secondary text-muted-foreground px-2 py-0.5 rounded font-medium uppercase tracking-wider">
+                  <span className="text-[10px] bg-secondary text-t1-muted px-2 py-0.5 rounded font-medium uppercase tracking-wider">
                     {drill.sessionBlock.replace('-', ' ')}
                   </span>
-                  <span className="text-[10px] bg-secondary text-muted-foreground px-2 py-0.5 rounded font-medium uppercase tracking-wider">
+                  <span className="text-[10px] bg-secondary text-t1-muted px-2 py-0.5 rounded font-medium uppercase tracking-wider">
                     {drill.recommendedTime}
                   </span>
                 </div>
@@ -162,24 +162,24 @@ export default function Dashboard() {
         </section>
 
         {/* Tier 1 Culture Banner */}
-        <section className="bg-t1-charcoal rounded-lg p-6 sm:p-8">
-          <h2 className="font-display text-xl font-semibold uppercase tracking-wide text-white mb-4">
+        <section className="bg-t1-navy rounded-lg p-6 sm:p-8 border border-t1-border">
+          <h2 className="font-display text-xl font-bold uppercase tracking-wide text-white mb-4">
             Tier 1 Culture
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {[
-              'Player first over short term results',
-              'Care over profits',
-              'Long term development over quick wins',
+              'Player first — development over short-term results',
+              'Care over profits — every athlete matters',
+              'Long-term development over quick wins',
               'Truth, accountability, and clear communication',
               'High standards in effort and professionalism',
-              'Building players and people'
+              'Building players and people — every rep matters'
             ].map((value, i) => (
               <div key={i} className="flex items-start gap-3">
-                <div className="w-6 h-6 rounded-full bg-t1-green/20 flex items-center justify-center flex-shrink-0 mt-0.5">
-                  <ClipboardCheck className="w-3.5 h-3.5 text-t1-green" />
+                <div className="w-6 h-6 rounded-full bg-t1-blue/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <ClipboardCheck className="w-3.5 h-3.5 text-t1-blue" />
                 </div>
-                <span className="text-sm text-white/80">{value}</span>
+                <span className="text-sm text-t1-text/80">{value}</span>
               </div>
             ))}
           </div>

@@ -1,8 +1,8 @@
 /*
-  SESSION PDF EXPORT
+  SESSION PDF EXPORT — Tier 1 Performance Cold Dark Brand
   Generates a clean, print-ready HTML document and triggers browser print/save-as-PDF.
   Uses window.open + print() for zero-dependency PDF generation.
-  Designed for on-court reference: high contrast, large text, minimal decoration.
+  Brand: Dark bg #1a1d21, surface #22262b, blue accent #3b82f6, Inter + Oswald
 */
 
 import { pathwayStages, sessionBlocks, drills, type PathwayStageId, type SessionBlockId } from './data';
@@ -72,14 +72,14 @@ export function exportSessionPDF(data: SessionExportData) {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Tier 1 Session Plan — ${stage?.shortName || data.level} — ${dateStr}</title>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Oswald:wght@500;600;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Oswald:wght@500;600;700&display=swap');
 
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
     body {
-      font-family: 'DM Sans', sans-serif;
-      color: #1a1a1a;
-      background: #fff;
+      font-family: 'Inter', system-ui, sans-serif;
+      color: #e8e8e8;
+      background: #1a1d21;
       padding: 0;
       -webkit-print-color-adjust: exact;
       print-color-adjust: exact;
@@ -96,32 +96,31 @@ export function exportSessionPDF(data: SessionExportData) {
       display: flex;
       align-items: flex-start;
       justify-content: space-between;
-      border-bottom: 3px solid #1a3c2a;
+      border-bottom: 3px solid #3b82f6;
       padding-bottom: 16px;
       margin-bottom: 24px;
     }
-    .header-left { }
     .brand {
-      font-family: 'Oswald', sans-serif;
+      font-family: 'Oswald', system-ui, sans-serif;
       font-size: 22px;
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 1px;
-      color: #1a3c2a;
+      color: #ffffff;
     }
     .brand-sub {
       font-size: 10px;
       text-transform: uppercase;
       letter-spacing: 2px;
-      color: #888;
+      color: #a0a5ad;
       margin-top: 2px;
     }
     .header-right {
       text-align: right;
       font-size: 12px;
-      color: #555;
+      color: #a0a5ad;
     }
-    .header-right .date { font-weight: 600; color: #1a1a1a; }
+    .header-right .date { font-weight: 600; color: #e8e8e8; }
 
     /* Session Meta */
     .meta {
@@ -129,7 +128,7 @@ export function exportSessionPDF(data: SessionExportData) {
       gap: 24px;
       margin-bottom: 24px;
       padding: 12px 16px;
-      background: #f5f0e8;
+      background: #172554;
       border-radius: 6px;
     }
     .meta-item {
@@ -139,12 +138,12 @@ export function exportSessionPDF(data: SessionExportData) {
       font-size: 10px;
       text-transform: uppercase;
       letter-spacing: 1.5px;
-      color: #888;
+      color: #a0a5ad;
       margin-bottom: 2px;
     }
     .meta-value {
       font-weight: 600;
-      color: #1a1a1a;
+      color: #e8e8e8;
     }
 
     /* Block Table */
@@ -154,13 +153,13 @@ export function exportSessionPDF(data: SessionExportData) {
       margin-bottom: 24px;
     }
     .session-table th {
-      font-family: 'Oswald', sans-serif;
+      font-family: 'Oswald', system-ui, sans-serif;
       font-size: 10px;
       font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 1.5px;
       color: #fff;
-      background: #1a3c2a;
+      background: #3b82f6;
       padding: 8px 12px;
       text-align: left;
     }
@@ -174,14 +173,15 @@ export function exportSessionPDF(data: SessionExportData) {
     }
     .block-row td {
       padding: 10px 12px;
-      border-bottom: 1px solid #e5e5e5;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
       font-size: 13px;
       vertical-align: top;
+      color: #e8e8e8;
     }
     .block-num {
       text-align: center;
       font-weight: 700;
-      color: #1a3c2a;
+      color: #3b82f6;
       font-size: 14px;
     }
     .block-name {
@@ -189,15 +189,15 @@ export function exportSessionPDF(data: SessionExportData) {
       white-space: nowrap;
     }
     .block-duration {
-      color: #555;
+      color: #a0a5ad;
       white-space: nowrap;
     }
     .block-content {
-      color: #333;
+      color: #e8e8e8;
     }
     .block-notes {
       font-size: 11px;
-      color: #888;
+      color: #a0a5ad;
       margin-top: 4px;
       font-style: italic;
     }
@@ -205,46 +205,48 @@ export function exportSessionPDF(data: SessionExportData) {
     /* Drill Details */
     .detail-row td {
       padding: 0 12px 12px 52px;
-      border-bottom: 1px solid #e5e5e5;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
     }
     .drill-details {
-      background: #fafaf7;
-      border: 1px solid #e8e4da;
+      background: #22262b;
+      border: 1px solid rgba(255,255,255,0.08);
       border-radius: 6px;
       padding: 12px 16px;
       font-size: 12px;
       line-height: 1.5;
+      color: #e8e8e8;
     }
     .drill-name {
-      font-family: 'Oswald', sans-serif;
+      font-family: 'Oswald', system-ui, sans-serif;
       font-size: 13px;
       font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 0.5px;
-      color: #1a3c2a;
+      color: #3b82f6;
       margin-bottom: 8px;
       padding-bottom: 6px;
-      border-bottom: 1px solid #e8e4da;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
     }
     .drill-details div { margin-bottom: 6px; }
-    .drill-details strong { color: #1a1a1a; }
+    .drill-details strong { color: #ffffff; }
     .drill-details ul {
       margin: 4px 0 0 16px;
       padding: 0;
     }
     .drill-details li {
       margin-bottom: 2px;
+      color: #e8e8e8;
     }
 
     /* Footer */
     .footer {
-      border-top: 2px solid #e5e5e5;
+      border-top: 2px solid rgba(255,255,255,0.08);
       padding-top: 12px;
       margin-top: 24px;
       display: flex;
       justify-content: space-between;
       font-size: 10px;
-      color: #aaa;
+      color: #a0a5ad;
       text-transform: uppercase;
       letter-spacing: 1px;
     }
@@ -258,22 +260,23 @@ export function exportSessionPDF(data: SessionExportData) {
       .block-row { break-inside: avoid; }
     }
 
-    /* Print button */
+    /* Print button bar */
     .print-bar {
       position: fixed;
       top: 0;
       left: 0;
       right: 0;
-      background: #1a3c2a;
+      background: #172554;
       padding: 12px 24px;
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 16px;
       z-index: 100;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
     }
     .print-bar button {
-      font-family: 'DM Sans', sans-serif;
+      font-family: 'Inter', system-ui, sans-serif;
       font-size: 14px;
       font-weight: 600;
       padding: 8px 24px;
@@ -284,13 +287,13 @@ export function exportSessionPDF(data: SessionExportData) {
     }
     .print-bar button:hover { opacity: 0.85; }
     .btn-print {
-      background: #fff;
-      color: #1a3c2a;
+      background: #3b82f6;
+      color: #fff;
     }
     .btn-close {
       background: transparent;
-      color: #fff;
-      border: 1px solid rgba(255,255,255,0.3) !important;
+      color: #a0a5ad;
+      border: 1px solid rgba(255,255,255,0.15) !important;
     }
     .print-spacer { height: 56px; }
   </style>
@@ -305,8 +308,8 @@ export function exportSessionPDF(data: SessionExportData) {
   <div class="page">
     <div class="header">
       <div class="header-left">
-        <div class="brand">Tier 1 Academy</div>
-        <div class="brand-sub">Woodinville Sports Club &middot; Caliber Sports Facility</div>
+        <div class="brand">Tier 1 Performance</div>
+        <div class="brand-sub">Internal Session Plan &middot; Caliber Sports Facility</div>
       </div>
       <div class="header-right">
         <div class="date">${dateStr}</div>
@@ -344,8 +347,8 @@ export function exportSessionPDF(data: SessionExportData) {
     </table>
 
     <div class="footer">
-      <span>Tier 1 Academy &middot; Internal Use Only</span>
-      <span>Every Rep Matters</span>
+      <span>Tier 1 Performance &middot; Internal Use Only</span>
+      <span>The Standard Is The Standard.</span>
     </div>
   </div>
 </body>

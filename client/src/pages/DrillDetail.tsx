@@ -1,6 +1,6 @@
 /*
-  DRILL DETAIL: Full drill card with all fields
-  Coaching cues, standards, progressions, regressions, competitive variation
+  DRILL DETAIL: Tier 1 Performance — Cold Dark Brand
+  Full drill card with all coaching fields
 */
 import { useParams, Link } from 'wouter';
 import { ArrowLeft, Clock, Target, AlertTriangle, TrendingUp, TrendingDown, Swords, Crosshair } from 'lucide-react';
@@ -13,8 +13,8 @@ export default function DrillDetail() {
   if (!drill) {
     return (
       <div className="container py-16 text-center">
-        <h1 className="font-display text-2xl font-bold uppercase text-t1-charcoal">Drill Not Found</h1>
-        <Link href="/drills" className="text-t1-green mt-4 inline-block">Back to Drill Library</Link>
+        <h1 className="font-display text-2xl font-bold uppercase text-t1-text">Drill Not Found</h1>
+        <Link href="/drills" className="text-t1-blue mt-4 inline-block">Back to Drill Library</Link>
       </div>
     );
   }
@@ -24,34 +24,34 @@ export default function DrillDetail() {
 
   return (
     <div className="container py-6">
-      <Link href="/drills" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-t1-green no-underline mb-6">
+      <Link href="/drills" className="inline-flex items-center gap-1.5 text-sm text-t1-muted hover:text-t1-blue no-underline mb-6">
         <ArrowLeft className="w-4 h-4" /> Back to Drill Library
       </Link>
 
       {/* Header */}
-      <div className="bg-white border border-border rounded-lg p-6 mb-4">
-        <h1 className="font-display text-2xl sm:text-3xl font-bold uppercase tracking-wide text-t1-charcoal">
+      <div className="bg-t1-surface border border-t1-border rounded-lg p-6 mb-4">
+        <h1 className="font-display text-2xl sm:text-3xl font-bold uppercase tracking-wide text-t1-text">
           {drill.name}
         </h1>
         <div className="flex flex-wrap items-center gap-2 mt-3">
           {drill.level.map(l => (
-            <span key={l} className="text-xs bg-t1-green/10 text-t1-green px-2.5 py-1 rounded font-medium uppercase tracking-wider">
+            <span key={l} className="text-xs bg-t1-blue/10 text-t1-blue px-2.5 py-1 rounded font-medium uppercase tracking-wider">
               {pathwayStages.find(s => s.id === l)?.shortName}
             </span>
           ))}
-          <span className="text-xs bg-secondary text-muted-foreground px-2.5 py-1 rounded font-medium uppercase tracking-wider">
+          <span className="text-xs bg-secondary text-t1-muted px-2.5 py-1 rounded font-medium uppercase tracking-wider">
             {block?.name}
           </span>
-          <span className="text-xs bg-secondary text-muted-foreground px-2.5 py-1 rounded font-medium uppercase tracking-wider">
+          <span className="text-xs bg-secondary text-t1-muted px-2.5 py-1 rounded font-medium uppercase tracking-wider">
             {category?.name}
           </span>
-          <span className="text-xs bg-secondary text-muted-foreground px-2.5 py-1 rounded font-medium uppercase tracking-wider capitalize">
+          <span className="text-xs bg-secondary text-t1-muted px-2.5 py-1 rounded font-medium uppercase tracking-wider capitalize">
             {drill.type}
           </span>
-          <span className="text-xs bg-secondary text-muted-foreground px-2.5 py-1 rounded font-medium uppercase tracking-wider capitalize">
+          <span className="text-xs bg-secondary text-t1-muted px-2.5 py-1 rounded font-medium uppercase tracking-wider capitalize">
             {drill.feedingStyle.replace('-', ' ')}
           </span>
-          <span className="flex items-center gap-1 text-xs text-muted-foreground">
+          <span className="flex items-center gap-1 text-xs text-t1-muted">
             <Clock className="w-3 h-3" /> {drill.recommendedTime}
           </span>
         </div>
@@ -61,61 +61,61 @@ export default function DrillDetail() {
         {/* Main Content */}
         <div className="lg:col-span-2 space-y-4">
           {/* Objective */}
-          <div className="bg-white border border-border rounded-lg p-5">
-            <h2 className="font-display text-sm font-semibold uppercase tracking-wider text-t1-charcoal mb-2 flex items-center gap-2">
-              <Target className="w-4 h-4 text-t1-green" /> Objective
+          <div className="bg-t1-surface border border-t1-border rounded-lg p-5">
+            <h2 className="font-display text-sm font-semibold uppercase tracking-wider text-t1-text mb-2 flex items-center gap-2">
+              <Target className="w-4 h-4 text-t1-blue" /> Objective
             </h2>
-            <p className="text-sm text-foreground/80 leading-relaxed">{drill.objective}</p>
+            <p className="text-sm text-t1-text/80 leading-relaxed">{drill.objective}</p>
           </div>
 
           {/* Setup */}
-          <div className="bg-white border border-border rounded-lg p-5">
-            <h2 className="font-display text-sm font-semibold uppercase tracking-wider text-t1-charcoal mb-2">
+          <div className="bg-t1-surface border border-t1-border rounded-lg p-5">
+            <h2 className="font-display text-sm font-semibold uppercase tracking-wider text-t1-text mb-2">
               Setup
             </h2>
-            <p className="text-sm text-foreground/80 leading-relaxed">{drill.setup}</p>
+            <p className="text-sm text-t1-text/80 leading-relaxed">{drill.setup}</p>
           </div>
 
           {/* Coaching Cues */}
-          <div className="bg-t1-green/5 border border-t1-green/20 rounded-lg p-5">
-            <h2 className="font-display text-sm font-semibold uppercase tracking-wider text-t1-green mb-3">
+          <div className="bg-t1-blue/5 border border-t1-blue/20 rounded-lg p-5">
+            <h2 className="font-display text-sm font-semibold uppercase tracking-wider text-t1-blue mb-3">
               Coaching Cues
             </h2>
             <ul className="space-y-2">
               {drill.coachingCues.map((cue, i) => (
                 <li key={i} className="flex items-start gap-3">
-                  <span className="w-5 h-5 rounded-full bg-t1-green text-white text-[10px] font-bold flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <span className="w-5 h-5 rounded-full bg-t1-blue text-white text-[10px] font-bold flex items-center justify-center flex-shrink-0 mt-0.5">
                     {i + 1}
                   </span>
-                  <span className="text-sm text-foreground/80">{cue}</span>
+                  <span className="text-sm text-t1-text/80">{cue}</span>
                 </li>
               ))}
             </ul>
           </div>
 
           {/* Standards */}
-          <div className="bg-white border border-border rounded-lg p-5">
-            <h2 className="font-display text-sm font-semibold uppercase tracking-wider text-t1-charcoal mb-3 flex items-center gap-2">
-              <Crosshair className="w-4 h-4 text-t1-green" /> Standards / Success Measures
+          <div className="bg-t1-surface border border-t1-border rounded-lg p-5">
+            <h2 className="font-display text-sm font-semibold uppercase tracking-wider text-t1-text mb-3 flex items-center gap-2">
+              <Crosshair className="w-4 h-4 text-t1-blue" /> Standards / Success Measures
             </h2>
             <ul className="space-y-2">
               {drill.standards.map((s, i) => (
-                <li key={i} className="flex items-start gap-2 text-sm text-foreground/80">
-                  <span className="text-t1-green mt-1">&#10003;</span> {s}
+                <li key={i} className="flex items-start gap-2 text-sm text-t1-text/80">
+                  <span className="text-t1-blue mt-1">&#10003;</span> {s}
                 </li>
               ))}
             </ul>
           </div>
 
           {/* Common Breakdowns */}
-          <div className="bg-red-50/50 border border-red-100 rounded-lg p-5">
-            <h2 className="font-display text-sm font-semibold uppercase tracking-wider text-red-700 mb-3 flex items-center gap-2">
+          <div className="bg-t1-red/5 border border-t1-red/15 rounded-lg p-5">
+            <h2 className="font-display text-sm font-semibold uppercase tracking-wider text-t1-red mb-3 flex items-center gap-2">
               <AlertTriangle className="w-4 h-4" /> Common Breakdowns
             </h2>
             <ul className="space-y-2">
               {drill.commonBreakdowns.map((b, i) => (
-                <li key={i} className="flex items-start gap-2 text-sm text-foreground/80">
-                  <span className="text-red-400 mt-1">&times;</span> {b}
+                <li key={i} className="flex items-start gap-2 text-sm text-t1-text/80">
+                  <span className="text-t1-red mt-1">&times;</span> {b}
                 </li>
               ))}
             </ul>
@@ -125,35 +125,35 @@ export default function DrillDetail() {
         {/* Sidebar */}
         <div className="space-y-4">
           {/* Progression */}
-          <div className="bg-white border border-border rounded-lg p-5">
-            <h2 className="font-display text-sm font-semibold uppercase tracking-wider text-t1-charcoal mb-2 flex items-center gap-2">
-              <TrendingUp className="w-4 h-4 text-t1-green" /> Progression
+          <div className="bg-t1-surface border border-t1-border rounded-lg p-5">
+            <h2 className="font-display text-sm font-semibold uppercase tracking-wider text-t1-text mb-2 flex items-center gap-2">
+              <TrendingUp className="w-4 h-4 text-t1-blue" /> Progression
             </h2>
-            <p className="text-sm text-foreground/80 leading-relaxed">{drill.progression}</p>
+            <p className="text-sm text-t1-text/80 leading-relaxed">{drill.progression}</p>
           </div>
 
           {/* Regression */}
-          <div className="bg-white border border-border rounded-lg p-5">
-            <h2 className="font-display text-sm font-semibold uppercase tracking-wider text-t1-charcoal mb-2 flex items-center gap-2">
-              <TrendingDown className="w-4 h-4 text-t1-orange" /> Regression
+          <div className="bg-t1-surface border border-t1-border rounded-lg p-5">
+            <h2 className="font-display text-sm font-semibold uppercase tracking-wider text-t1-text mb-2 flex items-center gap-2">
+              <TrendingDown className="w-4 h-4 text-t1-blue-light" /> Regression
             </h2>
-            <p className="text-sm text-foreground/80 leading-relaxed">{drill.regression}</p>
+            <p className="text-sm text-t1-text/80 leading-relaxed">{drill.regression}</p>
           </div>
 
           {/* Competitive Variation */}
-          <div className="bg-white border border-border rounded-lg p-5">
-            <h2 className="font-display text-sm font-semibold uppercase tracking-wider text-t1-charcoal mb-2 flex items-center gap-2">
-              <Swords className="w-4 h-4 text-t1-green" /> Competitive Variation
+          <div className="bg-t1-surface border border-t1-border rounded-lg p-5">
+            <h2 className="font-display text-sm font-semibold uppercase tracking-wider text-t1-text mb-2 flex items-center gap-2">
+              <Swords className="w-4 h-4 text-t1-blue" /> Competitive Variation
             </h2>
-            <p className="text-sm text-foreground/80 leading-relaxed">{drill.competitiveVariation}</p>
+            <p className="text-sm text-t1-text/80 leading-relaxed">{drill.competitiveVariation}</p>
           </div>
 
           {/* Match Play Relevance */}
-          <div className="bg-t1-charcoal rounded-lg p-5">
+          <div className="bg-t1-navy rounded-lg p-5 border border-t1-border">
             <h2 className="font-display text-sm font-semibold uppercase tracking-wider text-white mb-2">
               Why It Matters in Match Play
             </h2>
-            <p className="text-sm text-white/80 leading-relaxed">{drill.matchPlayRelevance}</p>
+            <p className="text-sm text-t1-text/80 leading-relaxed">{drill.matchPlayRelevance}</p>
           </div>
         </div>
       </div>
