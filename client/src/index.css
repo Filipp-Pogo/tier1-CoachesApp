@@ -108,6 +108,18 @@
     @apply bg-background text-foreground font-sans;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+
+  /* Remove iOS tap highlight flash */
+  a, button, [role="button"], input, select, textarea {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Smooth momentum scrolling on iOS */
+  .overflow-x-auto, .overflow-y-auto {
+    -webkit-overflow-scrolling: touch;
   }
   h1, h2, h3, h4, h5, h6 {
     font-family: 'Oswald', system-ui, sans-serif;
@@ -157,5 +169,38 @@
   /* Safe area for mobile bottom nav on notched devices */
   .safe-area-bottom {
     padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  /* Hide scrollbar for horizontal scroll areas on mobile */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* Mobile-specific: larger touch targets, active states */
+@media (max-width: 639px) {
+  /* Ensure minimum touch target size */
+  button, a[href], [role="button"] {
+    min-height: 32px;
+  }
+
+  /* Active press feedback on mobile */
+  .active\:scale-\[0\.98\]:active {
+    transform: scale(0.98);
+  }
+
+  /* Prevent accidental zoom on double-tap for interactive elements */
+  button, a, [role="button"] {
+    touch-action: manipulation;
+  }
+
+  /* Prevent text selection on interactive elements during tap */
+  nav, .grid a, button {
+    -webkit-user-select: none;
+    user-select: none;
   }
 }
