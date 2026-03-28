@@ -1,11 +1,13 @@
 /*
   SESSION BUILDER: Build a practice based on Tier 1 structure
   Select level, blocks, and drills — fast and practical
+  Includes PDF export for on-court reference
 */
 import { useState, useMemo } from 'react';
 import { Link } from 'wouter';
-import { Plus, X, Clock, ChevronRight, Dumbbell, GripVertical } from 'lucide-react';
+import { Plus, X, Clock, ChevronRight, Dumbbell, GripVertical, Printer, FileDown } from 'lucide-react';
 import { pathwayStages, sessionBlocks, drills, sessionTemplates, type PathwayStageId, type SessionBlockId } from '@/lib/data';
+import { exportSessionPDF } from '@/lib/session-pdf';
 
 interface SessionBlockEntry {
   blockId: SessionBlockId;
@@ -54,6 +56,14 @@ export default function SessionBuilder() {
       })));
       setShowTemplates(false);
     }
+  };
+
+  const handleExport = () => {
+    exportSessionPDF({
+      level: selectedLevel,
+      totalTime: sessionTime,
+      blocks
+    });
   };
 
   return (
@@ -231,12 +241,21 @@ export default function SessionBuilder() {
           </div>
         </div>
 
-        {/* Session Summary */}
+        {/* Session Summary + Export */}
         {blocks.length > 0 && (
           <div className="bg-t1-sand-light/50 border border-t1-sand rounded-lg p-5">
-            <h2 className="font-display text-sm font-semibold uppercase tracking-wider text-t1-charcoal mb-3 flex items-center gap-2">
-              <Dumbbell className="w-4 h-4 text-t1-green" /> Session Summary
-            </h2>
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="font-display text-sm font-semibold uppercase tracking-wider text-t1-charcoal flex items-center gap-2">
+                <Dumbbell className="w-4 h-4 text-t1-green" /> Session Summary
+              </h2>
+              <button
+                onClick={handleExport}
+                className="inline-flex items-center gap-2 px-4 py-2 bg-t1-green text-white text-xs font-semibold uppercase tracking-wider rounded-lg hover:bg-t1-green-dark transition-colors shadow-sm"
+              >
+                <Printer className="w-3.5 h-3.5" />
+                Export / Print
+              </button>
+            </div>
             <div className="flex items-center gap-4 text-sm text-muted-foreground mb-3">
               <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5" /> {sessionTime} min total</span>
               <span>{blocks.length} blocks</span>
@@ -255,6 +274,17 @@ export default function SessionBuilder() {
                   </div>
                 );
               })}
+            </div>
+
+            {/* Secondary export option */}
+            <div className="mt-4 pt-3 border-t border-t1-sand flex items-center gap-3">
+              <button
+                onClick={handleExport}
+                className="inline-flex items-center gap-1.5 text-xs text-t1-green font-medium hover:underline"
+              >
+                <FileDown className="w-3.5 h-3.5" />
+                Save as PDF for on-court reference
+              </button>
             </div>
           </div>
         )}
