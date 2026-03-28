@@ -153,4 +153,9 @@
       max-width: 1280px;
     }
   }
+
+  /* Safe area for mobile bottom nav on notched devices */
+  .safe-area-bottom {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
 }

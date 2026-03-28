@@ -1,12 +1,14 @@
 /*
   ASSESSMENTS: Tier 1 Performance — Cold Dark Brand
-  Stage-by-stage competency standards
+  Stage-by-stage competency standards — all 6 stages
 */
 import { useState } from 'react';
 import { Target, CheckCircle2, AlertTriangle } from 'lucide-react';
 import { assessments, pathwayStages } from '@/lib/data';
 
 const ASSESSMENT_IMG = 'https://d2xsxph8kpxj0f.cloudfront.net/310519663356767696/ELbCQXq8c7BR3Zt5VxeR2S/assessment-bg-eUTW7YwB73FinQ8wZew5gb.webp';
+
+const ALL_STAGE_IDS = ['foundations', 'prep', 'jasa', 'hs', 'asa', 'fta'];
 
 export default function Assessments() {
   const [activeStage, setActiveStage] = useState<string>('all');
@@ -15,8 +17,9 @@ export default function Assessments() {
     ? assessments
     : assessments.filter(a => a.stageId === activeStage || a.stageName.toLowerCase().includes(activeStage));
 
-  const stagesWithAssessments = ['all', 'foundations', 'prep', 'jasa'];
-  const stagesWithoutAssessments = ['hs', 'asa', 'fta'];
+  // Stages that still have the "developing" banner
+  const draftStages = ['hs', 'asa', 'fta'];
+  const showDraftBanner = activeStage === 'all' || draftStages.includes(activeStage);
 
   return (
     <div>
@@ -35,7 +38,7 @@ export default function Assessments() {
       </section>
 
       <div className="container mt-6 space-y-6">
-        {/* Stage Filter */}
+        {/* Stage Filter — all 6 stages */}
         <div className="flex flex-wrap gap-2">
           <button
             onClick={() => setActiveStage('all')}
@@ -47,7 +50,7 @@ export default function Assessments() {
           >
             All Stages
           </button>
-          {stagesWithAssessments.filter(s => s !== 'all').map(stageId => {
+          {ALL_STAGE_IDS.map(stageId => {
             const stage = pathwayStages.find(s => s.id === stageId);
             return (
               <button
@@ -65,11 +68,23 @@ export default function Assessments() {
           })}
         </div>
 
-        {/* Assessment Categories */}
+        {/* Assessment Categories Legend */}
         <div className="text-xs text-t1-muted mb-2 flex items-center gap-2">
           <Target className="w-3.5 h-3.5 text-t1-blue" />
           Categories: Physical Literacy &middot; Footwork &middot; Baseline &middot; Transition & Net Play &middot; Serve & Return &middot; Character &middot; Competition
         </div>
+
+        {/* Draft notice for HS/ASA/FTA */}
+        {showDraftBanner && (
+          <div className="bg-t1-surface border border-yellow-500/20 rounded-lg p-4">
+            <div className="flex items-start gap-3">
+              <AlertTriangle className="w-4 h-4 text-yellow-400 flex-shrink-0 mt-0.5" />
+              <p className="text-xs text-t1-muted">
+                HS, ASA, and FTA assessment standards are draft outlines. These will be refined as detailed source material becomes available.
+              </p>
+            </div>
+          </div>
+        )}
 
         {/* Assessment Cards */}
         {filteredAssessments.map((assessment, idx) => (
@@ -80,6 +95,9 @@ export default function Assessments() {
               </h2>
               <p className="text-xs text-t1-muted mt-1">
                 {pathwayStages.find(s => s.id === assessment.stageId)?.name}
+                {draftStages.includes(assessment.stageId) && (
+                  <span className="ml-2 text-yellow-400">— Draft</span>
+                )}
               </p>
             </div>
             <div className="p-6">
@@ -105,20 +123,11 @@ export default function Assessments() {
           </section>
         ))}
 
-        {/* Placeholder for stages without assessments */}
-        {(activeStage === 'all' || stagesWithoutAssessments.includes(activeStage)) && (
-          <div className="bg-t1-surface border border-t1-border rounded-lg p-6">
-            <div className="flex items-start gap-3">
-              <AlertTriangle className="w-5 h-5 text-yellow-400 flex-shrink-0 mt-0.5" />
-              <div>
-                <h3 className="font-display text-sm font-semibold uppercase tracking-wide text-t1-text mb-1">
-                  Additional Assessments Coming
-                </h3>
-                <p className="text-sm text-t1-muted">
-                  Detailed assessment standards for HS, ASA, and FTA stages are being developed. These sections will be populated as source material becomes available. The assessment framework (Physical Literacy, Footwork, Baseline, Transition, Serve & Return, Character, Competition) will remain consistent across all stages.
-                </p>
-              </div>
-            </div>
+        {/* Empty state if no assessments match */}
+        {filteredAssessments.length === 0 && (
+          <div className="bg-t1-surface border border-t1-border rounded-lg p-8 text-center">
+            <Target className="w-8 h-8 text-t1-muted mx-auto mb-3" />
+            <p className="text-sm text-t1-muted">No assessments found for this stage.</p>
           </div>
         )}
       </div>
