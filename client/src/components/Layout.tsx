@@ -8,7 +8,7 @@ import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'wouter';
 import {
   Menu, X, ChevronRight, LayoutDashboard, Route, BookOpen,
-  Wrench, Target, TrendingUp, Shield, ClipboardCheck
+  Wrench, Target, TrendingUp, Shield, ClipboardList
 } from 'lucide-react';
 
 const TIER1_LOGO_WHITE = 'https://d2xsxph8kpxj0f.cloudfront.net/310519663356767696/ZPsMJTEeF9cNbnWWtGpFHU/tier1_logo_white_e523441d.webp';
@@ -20,6 +20,7 @@ const navItems = [
   { href: '/session-builder', label: 'Session Builder', icon: Wrench },
   { href: '/assessments', label: 'Assessments', icon: Target },
   { href: '/advancement', label: 'Advancement', icon: TrendingUp },
+  { href: '/session-plans', label: 'Session Plans', icon: ClipboardList },
   { href: '/coach-standards', label: 'Coach Standards', icon: Shield },
 ];
 
@@ -27,7 +28,7 @@ const bottomNavItems = [
   { href: '/', label: 'Home', icon: LayoutDashboard },
   { href: '/drills', label: 'Drills', icon: BookOpen },
   { href: '/session-builder', label: 'Builder', icon: Wrench },
-  { href: '/pathway', label: 'Pathway', icon: Route },
+  { href: '/session-plans', label: 'Plans', icon: ClipboardList },
 ];
 
 export default function Layout({ children }: { children: React.ReactNode }) {

@@ -5,8 +5,8 @@
 */
 import { Link } from 'wouter';
 import { 
-  Route, BookOpen, Target, ClipboardCheck, TrendingUp, 
-  Shield, Dumbbell, ChevronRight, Zap, Star
+  Route, BookOpen, Target, ClipboardList, TrendingUp, 
+  Shield, Dumbbell, ChevronRight, Zap, Star, CheckCircle
 } from 'lucide-react';
 import { pathwayStages, drills } from '@/lib/data';
 import { useFavorites } from '@/hooks/useFavorites';
@@ -19,6 +19,7 @@ const quickLinks = [
   { href: '/session-builder', label: 'Builder', icon: Dumbbell, description: 'Build a practice' },
   { href: '/assessments', label: 'Assessments', icon: Target, description: 'Player standards' },
   { href: '/advancement', label: 'Advancement', icon: TrendingUp, description: 'Progression decisions' },
+  { href: '/session-plans', label: 'Plans', icon: ClipboardList, description: '44 session plans by level' },
   { href: '/coach-standards', label: 'Standards', icon: Shield, description: 'Coaching expectations' },
 ];
 
@@ -247,7 +248,7 @@ export default function Dashboard() {
             ].map((value, i) => (
               <div key={i} className="flex items-start gap-2.5">
                 <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-t1-blue/20 flex items-center justify-center flex-shrink-0 mt-0.5">
-                  <ClipboardCheck className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-t1-blue" />
+                  <CheckCircle className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-t1-blue" />
                 </div>
                 <span className="text-xs sm:text-sm text-t1-text/80">{value}</span>
               </div>

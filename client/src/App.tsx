@@ -14,6 +14,7 @@ import CoachStandards from "./pages/CoachStandards";
 import SessionBuilder from "./pages/SessionBuilder";
 import Assessments from "./pages/Assessments";
 import Advancement from "./pages/Advancement";
+import SessionPlans from "./pages/SessionPlans";
 
 function Router() {
   return (
@@ -28,6 +29,7 @@ function Router() {
         <Route path="/session-builder" component={SessionBuilder} />
         <Route path="/assessments" component={Assessments} />
         <Route path="/advancement" component={Advancement} />
+        <Route path="/session-plans" component={SessionPlans} />
         <Route path="/404" component={NotFound} />
         <Route component={NotFound} />
       </Switch>
