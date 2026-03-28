@@ -1,28 +1,62 @@
 /*
   LAYOUT: Tier 1 Performance — Cold Dark Brand
   MOBILE-FIRST: Bottom nav is primary on mobile, top bar is minimal.
-  Desktop: Full top nav with all links.
+  Desktop: Full top nav with grouped menus for Sessions and Player Development.
   Touch targets: min 44px on mobile.
+  NAV GROUPING: 11 items collapsed to 7 top-level items.
 */
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link, useLocation } from 'wouter';
 import {
-  Menu, X, ChevronRight, LayoutDashboard, Route, BookOpen,
+  Menu, X, ChevronRight, ChevronDown, LayoutDashboard, Route, BookOpen,
   Wrench, Target, TrendingUp, Shield, ClipboardList, History, ArrowLeftRight, GraduationCap
 } from 'lucide-react';
 
 const TIER1_LOGO_WHITE = 'https://d2xsxph8kpxj0f.cloudfront.net/310519663356767696/ZPsMJTEeF9cNbnWWtGpFHU/tier1_logo_white_e523441d.webp';
 
-const navItems = [
+/* --- Grouped navigation structure --- */
+interface NavItem {
+  href: string;
+  label: string;
+  icon: React.ComponentType<{ className?: string; strokeWidth?: number }>;
+  children?: NavItem[];
+}
+
+const navItems: NavItem[] = [
+  { href: '/', label: 'Dashboard', icon: LayoutDashboard },
+  { href: '/pathway', label: 'Pathway', icon: Route },
+  { href: '/drills', label: 'Drills', icon: BookOpen },
+  {
+    href: '/session-builder', label: 'Sessions', icon: Wrench,
+    children: [
+      { href: '/session-builder', label: 'Session Builder', icon: Wrench },
+      { href: '/session-plans', label: 'Session Plans', icon: ClipboardList },
+      { href: '/session-history', label: 'Session History', icon: History },
+      { href: '/compare-plans', label: 'Compare Plans', icon: ArrowLeftRight },
+    ],
+  },
+  {
+    href: '/assessments', label: 'Player Dev', icon: Target,
+    children: [
+      { href: '/assessments', label: 'Assessments', icon: Target },
+      { href: '/advancement', label: 'Advancement', icon: TrendingUp },
+    ],
+  },
+  { href: '/coach-standards', label: 'Coach Standards', icon: Shield },
+  { href: '/onboarding', label: 'Onboarding', icon: GraduationCap },
+];
+
+/* Flat list for mobile menu */
+const allNavItems: NavItem[] = [
   { href: '/', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/pathway', label: 'Pathway', icon: Route },
   { href: '/drills', label: 'Drills', icon: BookOpen },
   { href: '/session-builder', label: 'Session Builder', icon: Wrench },
-  { href: '/assessments', label: 'Assessments', icon: Target },
-  { href: '/advancement', label: 'Advancement', icon: TrendingUp },
   { href: '/session-plans', label: 'Session Plans', icon: ClipboardList },
   { href: '/session-history', label: 'Session History', icon: History },
   { href: '/compare-plans', label: 'Compare Plans', icon: ArrowLeftRight },
+  { href: '/assessments', label: 'Assessments', icon: Target },
+  { href: '/advancement', label: 'Advancement', icon: TrendingUp },
   { href: '/coach-standards', label: 'Coach Standards', icon: Shield },
   { href: '/onboarding', label: 'Onboarding', icon: GraduationCap },
 ];
@@ -33,6 +67,68 @@ const bottomNavItems = [
   { href: '/session-builder', label: 'Builder', icon: Wrench },
   { href: '/session-plans', label: 'Plans', icon: ClipboardList },
 ];
+
+/* --- Desktop Dropdown Component --- */
+function NavDropdown({ item, isActive }: { item: NavItem; isActive: (href: string) => boolean }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const anyChildActive = item.children?.some(c => isActive(c.href)) ?? false;
+  const active = anyChildActive || isActive(item.href);
+
+  const handleEnter = () => {
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    setOpen(true);
+  };
+  const handleLeave = () => {
+    timeoutRef.current = setTimeout(() => setOpen(false), 150);
+  };
+
+  useEffect(() => {
+    return () => { if (timeoutRef.current) clearTimeout(timeoutRef.current); };
+  }, []);
+
+  return (
+    <div ref={ref} className="relative" onMouseEnter={handleEnter} onMouseLeave={handleLeave}>
+      <button
+        onClick={() => setOpen(!open)}
+        className={`flex items-center gap-1 px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
+          active
+            ? 'bg-t1-blue text-white'
+            : 'text-t1-muted hover:text-t1-text hover:bg-t1-surface'
+        }`}
+      >
+        {item.label}
+        <ChevronDown className={`w-3.5 h-3.5 transition-transform ${open ? 'rotate-180' : ''}`} />
+      </button>
+
+      {open && (
+        <div className="absolute top-full left-0 mt-1 w-52 bg-t1-surface border border-t1-border rounded-lg shadow-xl shadow-black/30 py-1 z-50">
+          {item.children!.map(child => {
+            const Icon = child.icon;
+            const childActive = isActive(child.href);
+            return (
+              <Link
+                key={child.href}
+                href={child.href}
+                onClick={() => setOpen(false)}
+                className={`flex items-center gap-2.5 px-3 py-2.5 text-sm no-underline transition-colors ${
+                  childActive
+                    ? 'bg-t1-blue/10 text-t1-blue'
+                    : 'text-t1-text hover:bg-t1-bg'
+                }`}
+              >
+                <Icon className={`w-4 h-4 flex-shrink-0 ${childActive ? 'text-t1-blue' : 'text-t1-muted'}`} />
+                {child.label}
+              </Link>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -76,21 +172,25 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             </div>
           </Link>
 
-          {/* Desktop Nav */}
+          {/* Desktop Nav — grouped */}
           <nav className="hidden lg:flex items-center gap-1">
-            {navItems.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors no-underline ${
-                  isActive(item.href)
-                    ? 'bg-t1-blue text-white'
-                    : 'text-t1-muted hover:text-t1-text hover:bg-t1-surface'
-                }`}
-              >
-                {item.label}
-              </Link>
-            ))}
+            {navItems.map((item) =>
+              item.children ? (
+                <NavDropdown key={item.label} item={item} isActive={isActive} />
+              ) : (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors no-underline ${
+                    isActive(item.href)
+                      ? 'bg-t1-blue text-white'
+                      : 'text-t1-muted hover:text-t1-text hover:bg-t1-surface'
+                  }`}
+                >
+                  {item.label}
+                </Link>
+              )
+            )}
           </nav>
 
           {/* Mobile: hamburger hidden — bottom nav + More handles it */}
@@ -98,7 +198,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         </div>
       </header>
 
-      {/* Mobile Full-Screen Menu Overlay */}
+      {/* Mobile Full-Screen Menu Overlay — grouped sections */}
       {mobileOpen && (
         <div className="lg:hidden fixed inset-0 z-[60] bg-t1-bg/98 backdrop-blur-md flex flex-col">
           {/* Menu Header */}
@@ -113,9 +213,85 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             </button>
           </div>
 
-          {/* Menu Items — large touch targets */}
+          {/* Menu Items — grouped with section headers */}
           <nav className="flex-1 overflow-y-auto px-4 py-3">
-            {navItems.map((item) => {
+            {/* Main pages */}
+            {[allNavItems[0], allNavItems[1], allNavItems[2]].map((item) => {
+              const Icon = item.icon;
+              const active = isActive(item.href);
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  onClick={() => setMobileOpen(false)}
+                  className={`flex items-center gap-4 px-4 py-4 rounded-xl text-base font-medium no-underline transition-colors mb-1 ${
+                    active
+                      ? 'bg-t1-blue/10 text-t1-blue border border-t1-blue/20'
+                      : 'text-t1-text hover:bg-t1-surface border border-transparent'
+                  }`}
+                >
+                  <Icon className={`w-5 h-5 flex-shrink-0 ${active ? 'text-t1-blue' : 'text-t1-muted'}`} />
+                  {item.label}
+                  <ChevronRight className="w-4 h-4 text-t1-muted/40 ml-auto" />
+                </Link>
+              );
+            })}
+
+            {/* Sessions group */}
+            <div className="mt-3 mb-1">
+              <p className="text-[10px] font-semibold uppercase tracking-widest text-t1-muted/60 px-4 mb-1">Sessions</p>
+            </div>
+            {[allNavItems[3], allNavItems[4], allNavItems[5], allNavItems[6]].map((item) => {
+              const Icon = item.icon;
+              const active = isActive(item.href);
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  onClick={() => setMobileOpen(false)}
+                  className={`flex items-center gap-4 px-4 py-4 rounded-xl text-base font-medium no-underline transition-colors mb-1 ${
+                    active
+                      ? 'bg-t1-blue/10 text-t1-blue border border-t1-blue/20'
+                      : 'text-t1-text hover:bg-t1-surface border border-transparent'
+                  }`}
+                >
+                  <Icon className={`w-5 h-5 flex-shrink-0 ${active ? 'text-t1-blue' : 'text-t1-muted'}`} />
+                  {item.label}
+                  <ChevronRight className="w-4 h-4 text-t1-muted/40 ml-auto" />
+                </Link>
+              );
+            })}
+
+            {/* Player Development group */}
+            <div className="mt-3 mb-1">
+              <p className="text-[10px] font-semibold uppercase tracking-widest text-t1-muted/60 px-4 mb-1">Player Development</p>
+            </div>
+            {[allNavItems[7], allNavItems[8]].map((item) => {
+              const Icon = item.icon;
+              const active = isActive(item.href);
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  onClick={() => setMobileOpen(false)}
+                  className={`flex items-center gap-4 px-4 py-4 rounded-xl text-base font-medium no-underline transition-colors mb-1 ${
+                    active
+                      ? 'bg-t1-blue/10 text-t1-blue border border-t1-blue/20'
+                      : 'text-t1-text hover:bg-t1-surface border border-transparent'
+                  }`}
+                >
+                  <Icon className={`w-5 h-5 flex-shrink-0 ${active ? 'text-t1-blue' : 'text-t1-muted'}`} />
+                  {item.label}
+                  <ChevronRight className="w-4 h-4 text-t1-muted/40 ml-auto" />
+                </Link>
+              );
+            })}
+
+            {/* Coach section */}
+            <div className="mt-3 mb-1">
+              <p className="text-[10px] font-semibold uppercase tracking-widest text-t1-muted/60 px-4 mb-1">Coach</p>
+            </div>
+            {[allNavItems[9], allNavItems[10]].map((item) => {
               const Icon = item.icon;
               const active = isActive(item.href);
               return (
