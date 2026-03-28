@@ -1,19 +1,20 @@
 /*
   DRILL DETAIL: Tier 1 Performance — Cold Dark Brand
-  Full drill card with all coaching fields, video embed, and favorite toggle
+  Full drill card with coaching fields, video embed, favorite toggle,
+  Quick Copy coaching cues button, and recently viewed tracking
 */
 import { useParams, Link } from 'wouter';
-import { ArrowLeft, Clock, Target, AlertTriangle, TrendingUp, TrendingDown, Swords, Crosshair, Star, Video, ExternalLink } from 'lucide-react';
+import { useEffect, useState, useCallback } from 'react';
+import { ArrowLeft, Clock, Target, AlertTriangle, TrendingUp, TrendingDown, Swords, Crosshair, Star, Video, ExternalLink, Clipboard, Check } from 'lucide-react';
 import { drills, pathwayStages, sessionBlocks, skillCategories } from '@/lib/data';
 import { useFavorites } from '@/hooks/useFavorites';
+import { useRecentDrills } from '@/hooks/useRecentDrills';
 
 /** Parse a YouTube or Vimeo URL into an embeddable src, or return null */
 function getEmbedUrl(url: string): string | null {
   try {
-    // YouTube
     const ytMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/);
     if (ytMatch) return `https://www.youtube.com/embed/${ytMatch[1]}`;
-    // Vimeo
     const vmMatch = url.match(/vimeo\.com\/(\d+)/);
     if (vmMatch) return `https://player.vimeo.com/video/${vmMatch[1]}`;
   } catch { /* ignore */ }
@@ -24,6 +25,31 @@ export default function DrillDetail() {
   const { id } = useParams<{ id: string }>();
   const drill = drills.find(d => d.id === id);
   const { isFavorite, toggleFavorite } = useFavorites();
+  const { addRecent } = useRecentDrills();
+  const [copied, setCopied] = useState(false);
+
+  // Track this drill as recently viewed
+  useEffect(() => {
+    if (drill) addRecent(drill.id);
+  }, [drill?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const handleCopy = useCallback(() => {
+    if (!drill) return;
+    const text = [
+      `${drill.name} — Coaching Cues`,
+      '',
+      ...drill.coachingCues.map((c, i) => `${i + 1}. ${c}`),
+      '',
+      `Setup: ${drill.setup}`,
+      '',
+      `Standards:`,
+      ...drill.standards.map(s => `✓ ${s}`),
+    ].join('\n');
+    navigator.clipboard.writeText(text).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  }, [drill]);
 
   if (!drill) {
     return (
@@ -46,23 +72,39 @@ export default function DrillDetail() {
       </Link>
 
       {/* Header */}
-      <div className="bg-t1-surface border border-t1-border rounded-lg p-6 mb-4">
+      <div className="bg-t1-surface border border-t1-border rounded-lg p-5 sm:p-6 mb-4">
         <div className="flex items-start justify-between gap-3">
-          <h1 className="font-display text-2xl sm:text-3xl font-bold uppercase tracking-wide text-t1-text">
+          <h1 className="font-display text-xl sm:text-3xl font-bold uppercase tracking-wide text-t1-text">
             {drill.name}
           </h1>
-          <button
-            onClick={() => toggleFavorite(drill.id)}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-semibold uppercase tracking-wider transition-all flex-shrink-0 ${
-              favorited
-                ? 'bg-yellow-500/15 border-yellow-500/40 text-yellow-400'
-                : 'bg-t1-surface border-t1-border text-t1-muted hover:border-yellow-500/40 hover:text-yellow-400'
-            }`}
-            title={favorited ? 'Remove from My Drills' : 'Add to My Drills'}
-          >
-            <Star className={`w-3.5 h-3.5 ${favorited ? 'fill-yellow-400' : ''}`} />
-            {favorited ? 'Saved' : 'Save'}
-          </button>
+          <div className="flex items-center gap-2 flex-shrink-0">
+            {/* Quick Copy */}
+            <button
+              onClick={handleCopy}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-semibold uppercase tracking-wider transition-all ${
+                copied
+                  ? 'bg-green-500/15 border-green-500/30 text-green-400'
+                  : 'bg-t1-surface border-t1-border text-t1-muted hover:border-t1-blue/40 hover:text-t1-blue'
+              }`}
+              title="Copy coaching cues, setup, and standards to clipboard"
+            >
+              {copied ? <Check className="w-3.5 h-3.5" /> : <Clipboard className="w-3.5 h-3.5" />}
+              <span className="hidden sm:inline">{copied ? 'Copied' : 'Copy'}</span>
+            </button>
+            {/* Favorite */}
+            <button
+              onClick={() => toggleFavorite(drill.id)}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-semibold uppercase tracking-wider transition-all ${
+                favorited
+                  ? 'bg-yellow-500/15 border-yellow-500/40 text-yellow-400'
+                  : 'bg-t1-surface border-t1-border text-t1-muted hover:border-yellow-500/40 hover:text-yellow-400'
+              }`}
+              title={favorited ? 'Remove from My Drills' : 'Add to My Drills'}
+            >
+              <Star className={`w-3.5 h-3.5 ${favorited ? 'fill-yellow-400' : ''}`} />
+              <span className="hidden sm:inline">{favorited ? 'Saved' : 'Save'}</span>
+            </button>
+          </div>
         </div>
         <div className="flex flex-wrap items-center gap-2 mt-3">
           {drill.level.map(l => (
@@ -88,7 +130,7 @@ export default function DrillDetail() {
         </div>
       </div>
 
-      {/* Video Section — only shown if drill has a videoUrl */}
+      {/* Video Section */}
       {drill.videoUrl && (
         <div className="bg-t1-surface border border-t1-border rounded-lg overflow-hidden mb-4">
           {embedUrl ? (
@@ -122,14 +164,14 @@ export default function DrillDetail() {
         </div>
       )}
 
-      {/* Video placeholder when no video is set */}
+      {/* Video placeholder */}
       {!drill.videoUrl && (
         <div className="bg-t1-surface border border-dashed border-t1-border rounded-lg p-5 mb-4">
           <div className="flex items-center gap-3 text-t1-muted">
             <Video className="w-5 h-5 flex-shrink-0" />
             <div>
               <p className="text-sm font-medium text-t1-text/60">No demo video attached</p>
-              <p className="text-xs text-t1-muted/70 mt-0.5">Video URLs can be added to drill entries in the data model (YouTube, Vimeo, or direct links).</p>
+              <p className="text-xs text-t1-muted/70 mt-0.5">Video URLs can be added to drill entries in the data model.</p>
             </div>
           </div>
         </div>
@@ -138,6 +180,36 @@ export default function DrillDetail() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* Main Content */}
         <div className="lg:col-span-2 space-y-4">
+          {/* Coaching Cues — FIRST on the page for on-court coaches */}
+          <div className="bg-t1-blue/5 border border-t1-blue/20 rounded-lg p-5">
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="font-display text-sm font-semibold uppercase tracking-wider text-t1-blue">
+                Coaching Cues
+              </h2>
+              <button
+                onClick={handleCopy}
+                className={`flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-semibold uppercase tracking-wider transition-all ${
+                  copied
+                    ? 'bg-green-500/15 text-green-400 border border-green-500/30'
+                    : 'bg-t1-surface border border-t1-border text-t1-muted hover:text-t1-blue hover:border-t1-blue/40'
+                }`}
+              >
+                {copied ? <Check className="w-3 h-3" /> : <Clipboard className="w-3 h-3" />}
+                {copied ? 'Copied' : 'Copy All'}
+              </button>
+            </div>
+            <ul className="space-y-2">
+              {drill.coachingCues.map((cue, i) => (
+                <li key={i} className="flex items-start gap-3">
+                  <span className="w-5 h-5 rounded-full bg-t1-blue text-white text-[10px] font-bold flex items-center justify-center flex-shrink-0 mt-0.5">
+                    {i + 1}
+                  </span>
+                  <span className="text-sm text-t1-text/80">{cue}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+
           {/* Objective */}
           <div className="bg-t1-surface border border-t1-border rounded-lg p-5">
             <h2 className="font-display text-sm font-semibold uppercase tracking-wider text-t1-text mb-2 flex items-center gap-2">
@@ -152,23 +224,6 @@ export default function DrillDetail() {
               Setup
             </h2>
             <p className="text-sm text-t1-text/80 leading-relaxed">{drill.setup}</p>
-          </div>
-
-          {/* Coaching Cues */}
-          <div className="bg-t1-blue/5 border border-t1-blue/20 rounded-lg p-5">
-            <h2 className="font-display text-sm font-semibold uppercase tracking-wider text-t1-blue mb-3">
-              Coaching Cues
-            </h2>
-            <ul className="space-y-2">
-              {drill.coachingCues.map((cue, i) => (
-                <li key={i} className="flex items-start gap-3">
-                  <span className="w-5 h-5 rounded-full bg-t1-blue text-white text-[10px] font-bold flex items-center justify-center flex-shrink-0 mt-0.5">
-                    {i + 1}
-                  </span>
-                  <span className="text-sm text-t1-text/80">{cue}</span>
-                </li>
-              ))}
-            </ul>
           </div>
 
           {/* Standards */}

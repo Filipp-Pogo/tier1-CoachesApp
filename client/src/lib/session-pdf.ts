@@ -19,6 +19,7 @@ interface SessionExportData {
   totalTime: string;
   blocks: ExportBlock[];
   date?: string;
+  sessionNotes?: string;
 }
 
 export function exportSessionPDF(data: SessionExportData) {
@@ -331,6 +332,12 @@ export function exportSessionPDF(data: SessionExportData) {
         <div class="meta-value">${data.blocks.length}</div>
       </div>
     </div>
+
+    ${data.sessionNotes ? `
+    <div style="background:#22262b;border:1px solid rgba(255,255,255,0.08);border-radius:6px;padding:12px 16px;margin-bottom:20px;">
+      <div style="font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:#a0a5ad;margin-bottom:6px;font-weight:600;">Session Notes</div>
+      <div style="font-size:13px;color:#e8e8e8;line-height:1.5;white-space:pre-wrap;">${data.sessionNotes}</div>
+    </div>` : ''}
 
     <table class="session-table">
       <thead>
