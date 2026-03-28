@@ -1,16 +1,19 @@
 /*
-  LAYOUT: Tier 1 Performance — Cold Dark Brand
+  LAYOUT: Tier 1 Performance — Dual Theme Support
   MOBILE-FIRST: Bottom nav is primary on mobile, top bar is minimal.
   Desktop: Full top nav with grouped menus for Sessions and Player Development.
   Touch targets: min 44px on mobile.
   NAV GROUPING: 11 items collapsed to 7 top-level items.
+  THEME TOGGLE: Sun/Moon icon in header + mobile menu footer.
 */
 import { useState, useEffect, useRef } from 'react';
 import { Link, useLocation } from 'wouter';
 import {
   Menu, X, ChevronRight, ChevronDown, LayoutDashboard, Route, BookOpen,
-  Wrench, Target, TrendingUp, Shield, ClipboardList, History, ArrowLeftRight, GraduationCap
+  Wrench, Target, TrendingUp, Shield, ClipboardList, History, ArrowLeftRight, GraduationCap,
+  Sun, Moon
 } from 'lucide-react';
+import { useTheme } from '@/contexts/ThemeContext';
 
 const TIER1_LOGO_WHITE = 'https://d2xsxph8kpxj0f.cloudfront.net/310519663356767696/ZPsMJTEeF9cNbnWWtGpFHU/tier1_logo_white_e523441d.webp';
 
@@ -104,7 +107,7 @@ function NavDropdown({ item, isActive }: { item: NavItem; isActive: (href: strin
       </button>
 
       {open && (
-        <div className="absolute top-full left-0 mt-1 w-52 bg-t1-surface border border-t1-border rounded-lg shadow-xl shadow-black/30 py-1 z-50">
+        <div className="absolute top-full left-0 mt-1 w-52 bg-t1-surface border border-t1-border rounded-lg shadow-xl shadow-black/20 py-1 z-50">
           {item.children!.map(child => {
             const Icon = child.icon;
             const childActive = isActive(child.href);
@@ -130,9 +133,32 @@ function NavDropdown({ item, isActive }: { item: NavItem; isActive: (href: strin
   );
 }
 
+/* --- Theme Toggle Button --- */
+function ThemeToggle({ size = 'sm' }: { size?: 'sm' | 'md' }) {
+  const { theme, toggleTheme, isDark } = useTheme();
+  const dim = size === 'md' ? 'w-10 h-10' : 'w-8 h-8';
+  const iconDim = size === 'md' ? 'w-5 h-5' : 'w-4 h-4';
+
+  return (
+    <button
+      onClick={toggleTheme}
+      className={`${dim} flex items-center justify-center rounded-lg transition-colors text-t1-muted hover:text-t1-text hover:bg-t1-surface`}
+      aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+      title={isDark ? 'Light mode (outdoor)' : 'Dark mode (indoor)'}
+    >
+      {isDark ? (
+        <Sun className={iconDim} />
+      ) : (
+        <Moon className={iconDim} />
+      )}
+    </button>
+  );
+}
+
 export default function Layout({ children }: { children: React.ReactNode }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [location] = useLocation();
+  const { isDark } = useTheme();
 
   // Close mobile menu on route change
   useEffect(() => {
@@ -155,13 +181,17 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background transition-colors duration-200">
       {/* Top Navigation Bar — minimal on mobile, full on desktop */}
-      <header className="sticky top-0 z-50 border-b border-t1-border bg-t1-bg/95 backdrop-blur-sm">
+      <header className="sticky top-0 z-50 border-b border-t1-border bg-t1-bg/95 backdrop-blur-sm transition-colors duration-200">
         <div className="container flex items-center justify-between h-12 lg:h-14">
           {/* Logo / Brand */}
           <Link href="/" className="flex items-center gap-2.5 no-underline">
-            <img src={TIER1_LOGO_WHITE} alt="Tier 1 Performance" className="h-6 lg:h-7 w-auto" />
+            <img
+              src={TIER1_LOGO_WHITE}
+              alt="Tier 1 Performance"
+              className={`h-6 lg:h-7 w-auto transition-all duration-200 ${isDark ? '' : 'brightness-0'}`}
+            />
             <div className="flex flex-col">
               <span className="font-display text-xs lg:text-sm font-bold tracking-wide text-t1-text leading-none uppercase">
                 Tier 1 Academy
@@ -191,26 +221,35 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 </Link>
               )
             )}
+            {/* Theme Toggle — desktop */}
+            <div className="ml-2 border-l border-t1-border pl-2">
+              <ThemeToggle size="sm" />
+            </div>
           </nav>
 
-          {/* Mobile: hamburger hidden — bottom nav + More handles it */}
-          <div className="lg:hidden" />
+          {/* Mobile: theme toggle visible */}
+          <div className="lg:hidden flex items-center gap-1">
+            <ThemeToggle size="sm" />
+          </div>
         </div>
       </header>
 
       {/* Mobile Full-Screen Menu Overlay — grouped sections */}
       {mobileOpen && (
-        <div className="lg:hidden fixed inset-0 z-[60] bg-t1-bg/98 backdrop-blur-md flex flex-col">
+        <div className="lg:hidden fixed inset-0 z-[60] bg-t1-bg/98 backdrop-blur-md flex flex-col transition-colors duration-200">
           {/* Menu Header */}
           <div className="flex items-center justify-between px-4 h-12 border-b border-t1-border flex-shrink-0">
             <span className="font-display text-sm font-bold uppercase tracking-wide text-t1-text">Menu</span>
-            <button
-              onClick={() => setMobileOpen(false)}
-              className="w-10 h-10 flex items-center justify-center rounded-lg text-t1-muted hover:text-t1-text hover:bg-t1-surface"
-              aria-label="Close menu"
-            >
-              <X className="w-5 h-5" />
-            </button>
+            <div className="flex items-center gap-1">
+              <ThemeToggle size="md" />
+              <button
+                onClick={() => setMobileOpen(false)}
+                className="w-10 h-10 flex items-center justify-center rounded-lg text-t1-muted hover:text-t1-text hover:bg-t1-surface"
+                aria-label="Close menu"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
           </div>
 
           {/* Menu Items — grouped with section headers */}
@@ -328,10 +367,14 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       </main>
 
       {/* Footer — hidden on mobile (bottom nav takes its place) */}
-      <footer className="hidden lg:block border-t border-t1-border bg-t1-bg">
+      <footer className="hidden lg:block border-t border-t1-border bg-t1-bg transition-colors duration-200">
         <div className="container py-5 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <img src={TIER1_LOGO_WHITE} alt="Tier 1" className="h-4 w-auto opacity-50" />
+            <img
+              src={TIER1_LOGO_WHITE}
+              alt="Tier 1"
+              className={`h-4 w-auto opacity-50 transition-all duration-200 ${isDark ? '' : 'brightness-0'}`}
+            />
             <span className="text-xs text-t1-muted/60">Tier 1 Performance &middot; Internal Coaching Platform</span>
           </div>
           <div className="text-[10px] text-t1-muted/40 font-display uppercase tracking-widest">
@@ -341,7 +384,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       </footer>
 
       {/* Mobile Bottom Navigation Bar — 44px+ touch targets */}
-      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 border-t border-t1-border bg-t1-bg/98 backdrop-blur-md safe-area-bottom">
+      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 border-t border-t1-border bg-t1-bg/98 backdrop-blur-md safe-area-bottom transition-colors duration-200">
         <div className="grid grid-cols-5 h-16">
           {bottomNavItems.map((item) => {
             const active = isActive(item.href);

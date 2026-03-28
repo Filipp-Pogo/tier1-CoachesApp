@@ -14,7 +14,7 @@ const stageColors: Record<string, { bg: string; border: string; dot: string; tex
   jasa: { bg: 'bg-yellow-500/10', border: 'border-yellow-500/30', dot: 'bg-yellow-500', text: 'text-yellow-400' },
   hs: { bg: 'bg-blue-500/10', border: 'border-blue-500/30', dot: 'bg-blue-500', text: 'text-blue-400' },
   asa: { bg: 'bg-purple-500/10', border: 'border-purple-500/30', dot: 'bg-purple-500', text: 'text-purple-400' },
-  fta: { bg: 'bg-white/5', border: 'border-white/20', dot: 'bg-t1-text', text: 'text-t1-text' },
+  fta: { bg: 'bg-t1-text/5', border: 'border-t1-text/20', dot: 'bg-t1-text', text: 'text-t1-text' },
 };
 
 export default function Pathway() {

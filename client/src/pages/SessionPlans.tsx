@@ -444,7 +444,7 @@ export default function SessionPlans() {
         <div className="container py-4 sm:py-6">
           <div className="flex items-start justify-between">
             <div>
-              <h1 className="font-display text-xl sm:text-4xl font-bold text-white uppercase tracking-wide">
+              <h1 className="font-display text-xl sm:text-4xl font-bold text-t1-text dark:text-white uppercase tracking-wide">
                 Session Plans
               </h1>
               <p className="mt-1 text-t1-muted text-xs sm:text-sm">

@@ -1,6 +1,6 @@
 /*
   Tier 1 Academy — Onboarding Quiz
-  Style: Tier 1 cold dark, Oswald headings, 90% pass threshold
+  Style: Theme-responsive using t1-* tokens, Oswald headings, 90% pass threshold
 */
 import { useState, useMemo, useCallback } from 'react';
 import { Link, useLocation } from 'wouter';
@@ -117,7 +117,7 @@ export default function OnboardingQuiz() {
     });
 
     return (
-      <div className="min-h-screen bg-[#1a1d21]">
+      <div className="min-h-screen bg-t1-bg transition-colors duration-200">
         <div className="max-w-3xl mx-auto px-4 py-8">
           {/* Result Header */}
           <div className={`rounded-xl p-8 mb-8 text-center border ${passed ? 'bg-emerald-500/10 border-emerald-500/30' : 'bg-red-500/10 border-red-500/30'}`}>
@@ -128,10 +128,10 @@ export default function OnboardingQuiz() {
                 <AlertTriangle className="w-10 h-10 text-red-400" />
               )}
             </div>
-            <h1 className="font-oswald font-bold text-4xl text-[#e8e8e8] uppercase tracking-tight mb-2">
+            <h1 className="font-oswald font-bold text-4xl text-t1-text uppercase tracking-tight mb-2">
               {passed ? 'Quiz Passed!' : 'Not Yet'}
             </h1>
-            <p className="text-[#a0a5ad] mb-6">
+            <p className="text-t1-muted mb-6">
               {passed
                 ? 'Congratulations! You have demonstrated strong knowledge of Tier 1 coaching standards.'
                 : `You need ${PASS_THRESHOLD}% to pass. Review the modules below and try again.`
@@ -144,21 +144,21 @@ export default function OnboardingQuiz() {
                 <div className={`text-5xl font-bold ${passed ? 'text-emerald-400' : 'text-red-400'}`}>
                   {result.percentage}%
                 </div>
-                <div className="text-sm text-[#a0a5ad] mt-1">Score</div>
+                <div className="text-sm text-t1-muted mt-1">Score</div>
               </div>
-              <div className="w-px h-12 bg-white/10" />
+              <div className="w-px h-12 bg-t1-border" />
               <div>
-                <div className="text-3xl font-bold text-[#e8e8e8]">
+                <div className="text-3xl font-bold text-t1-text">
                   {result.score}/{result.total}
                 </div>
-                <div className="text-sm text-[#a0a5ad] mt-1">Correct</div>
+                <div className="text-sm text-t1-muted mt-1">Correct</div>
               </div>
-              <div className="w-px h-12 bg-white/10" />
+              <div className="w-px h-12 bg-t1-border" />
               <div>
-                <div className="text-3xl font-bold text-[#e8e8e8]">
+                <div className="text-3xl font-bold text-t1-text">
                   {PASS_THRESHOLD}%
                 </div>
-                <div className="text-sm text-[#a0a5ad] mt-1">Required</div>
+                <div className="text-sm text-t1-muted mt-1">Required</div>
               </div>
             </div>
           </div>
@@ -166,19 +166,19 @@ export default function OnboardingQuiz() {
           {/* Incorrect Questions Review */}
           {incorrectQuestions.length > 0 && (
             <div className="mb-8">
-              <h2 className="font-oswald font-bold text-xl text-[#e8e8e8] uppercase tracking-wide mb-4">
+              <h2 className="font-oswald font-bold text-xl text-t1-text uppercase tracking-wide mb-4">
                 Review Incorrect Answers
               </h2>
               {Object.entries(incorrectByModule).map(([moduleId, questions]) => (
                 <div key={moduleId} className="mb-6">
                   <div className="flex items-center gap-2 mb-3">
-                    <BookOpen className="w-4 h-4 text-[#3b82f6]" />
-                    <span className="text-sm font-medium text-[#3b82f6]">{getModuleName(moduleId)}</span>
+                    <BookOpen className="w-4 h-4 text-t1-blue" />
+                    <span className="text-sm font-medium text-t1-blue">{getModuleName(moduleId)}</span>
                   </div>
                   <div className="space-y-3">
                     {questions.map(iq => (
-                      <div key={iq.questionId} className="bg-[#22262b] border border-white/[0.08] rounded-xl p-5">
-                        <p className="text-[#e8e8e8] font-medium mb-3">{iq.question.question}</p>
+                      <div key={iq.questionId} className="bg-t1-surface border border-t1-border rounded-xl p-5">
+                        <p className="text-t1-text font-medium mb-3">{iq.question.question}</p>
                         <div className="space-y-2 mb-3">
                           {iq.question.options.map((opt, i) => {
                             const isCorrect = i === iq.question.correctIndex;
@@ -191,7 +191,7 @@ export default function OnboardingQuiz() {
                                     ? 'bg-emerald-500/10 border border-emerald-500/30 text-emerald-300'
                                     : isSelected
                                       ? 'bg-red-500/10 border border-red-500/30 text-red-300'
-                                      : 'bg-[#1a1d21] text-[#a0a5ad]'
+                                      : 'bg-t1-bg text-t1-muted'
                                 }`}
                               >
                                 {isCorrect ? (
@@ -199,14 +199,14 @@ export default function OnboardingQuiz() {
                                 ) : isSelected ? (
                                   <XCircle className="w-4 h-4 text-red-400 flex-shrink-0" />
                                 ) : (
-                                  <div className="w-4 h-4 rounded-full border border-white/20 flex-shrink-0" />
+                                  <div className="w-4 h-4 rounded-full border border-t1-border flex-shrink-0" />
                                 )}
                                 {opt}
                               </div>
                             );
                           })}
                         </div>
-                        <div className="bg-[#172554] rounded-lg p-3 text-sm text-[#93c5fd]">
+                        <div className="bg-t1-navy rounded-lg p-3 text-sm text-t1-blue-light">
                           {iq.question.explanation}
                         </div>
                       </div>
@@ -223,8 +223,8 @@ export default function OnboardingQuiz() {
               onClick={retakeQuiz}
               className={`flex-1 flex items-center justify-center gap-2 font-semibold py-3 px-6 rounded-lg transition-colors ${
                 passed
-                  ? 'bg-[#22262b] hover:bg-[#2a2e34] text-[#e8e8e8] border border-white/[0.08]'
-                  : 'bg-[#3b82f6] hover:bg-[#2563eb] text-white'
+                  ? 'bg-t1-surface hover:bg-secondary text-t1-text border border-t1-border'
+                  : 'bg-t1-blue hover:bg-t1-blue-light text-white'
               }`}
             >
               <RotateCcw className="w-5 h-5" />
@@ -232,7 +232,7 @@ export default function OnboardingQuiz() {
             </button>
             <Link
               href="/onboarding"
-              className="flex-1 flex items-center justify-center gap-2 bg-[#22262b] hover:bg-[#2a2e34] text-[#e8e8e8] border border-white/[0.08] font-semibold py-3 px-6 rounded-lg transition-colors"
+              className="flex-1 flex items-center justify-center gap-2 bg-t1-surface hover:bg-secondary text-t1-text border border-t1-border font-semibold py-3 px-6 rounded-lg transition-colors"
             >
               <BookOpen className="w-5 h-5" />
               Review Modules
@@ -241,20 +241,20 @@ export default function OnboardingQuiz() {
 
           {/* Quiz History */}
           {quizResults.length > 1 && (
-            <div className="mt-8 bg-[#22262b] border border-white/[0.08] rounded-xl p-5">
-              <h3 className="font-oswald font-bold text-lg text-[#e8e8e8] uppercase tracking-wide mb-3">
+            <div className="mt-8 bg-t1-surface border border-t1-border rounded-xl p-5">
+              <h3 className="font-oswald font-bold text-lg text-t1-text uppercase tracking-wide mb-3">
                 Quiz History
               </h3>
               <div className="space-y-2">
                 {quizResults.slice(0, 5).map((r, i) => (
-                  <div key={r.id} className="flex items-center justify-between py-2 border-b border-white/[0.05] last:border-0">
+                  <div key={r.id} className="flex items-center justify-between py-2 border-b border-t1-border/50 last:border-0">
                     <div className="flex items-center gap-3">
                       {r.passed ? (
                         <CheckCircle2 className="w-4 h-4 text-emerald-400" />
                       ) : (
                         <XCircle className="w-4 h-4 text-red-400" />
                       )}
-                      <span className="text-sm text-[#a0a5ad]">
+                      <span className="text-sm text-t1-muted">
                         {new Date(r.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                       </span>
                     </div>
@@ -262,7 +262,7 @@ export default function OnboardingQuiz() {
                       <span className={`text-sm font-bold ${r.passed ? 'text-emerald-400' : 'text-red-400'}`}>
                         {r.percentage}%
                       </span>
-                      <span className="text-xs text-[#a0a5ad]">{r.score}/{r.total}</span>
+                      <span className="text-xs text-t1-muted">{r.score}/{r.total}</span>
                     </div>
                   </div>
                 ))}
@@ -283,19 +283,19 @@ export default function OnboardingQuiz() {
     const moduleName = getModuleName(currentQuestion.moduleId);
 
     return (
-      <div className="min-h-screen bg-[#1a1d21]">
+      <div className="min-h-screen bg-t1-bg transition-colors duration-200">
         <div className="max-w-3xl mx-auto px-4 py-8">
           {/* Progress Bar */}
           <div className="mb-8">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-sm text-[#a0a5ad]">
+              <span className="text-sm text-t1-muted">
                 Question {currentIdx + 1} of {totalQuestions}
               </span>
-              <span className="text-sm font-medium text-[#e8e8e8]">{progressPercent}%</span>
+              <span className="text-sm font-medium text-t1-text">{progressPercent}%</span>
             </div>
-            <div className="h-2 bg-[#22262b] rounded-full overflow-hidden">
+            <div className="h-2 bg-t1-surface rounded-full overflow-hidden">
               <div
-                className="h-full bg-[#3b82f6] rounded-full transition-all duration-300"
+                className="h-full bg-t1-blue rounded-full transition-all duration-300"
                 style={{ width: `${progressPercent}%` }}
               />
             </div>
@@ -303,14 +303,14 @@ export default function OnboardingQuiz() {
 
           {/* Module Tag */}
           <div className="flex items-center gap-2 mb-4">
-            <Target className="w-4 h-4 text-[#3b82f6]" />
-            <span className="text-xs font-medium tracking-wider text-[#3b82f6] uppercase">
+            <Target className="w-4 h-4 text-t1-blue" />
+            <span className="text-xs font-medium tracking-wider text-t1-blue uppercase">
               {moduleName}
             </span>
           </div>
 
           {/* Question */}
-          <h2 className="text-xl md:text-2xl font-bold text-[#e8e8e8] mb-8 leading-relaxed">
+          <h2 className="text-xl md:text-2xl font-bold text-t1-text mb-8 leading-relaxed">
             {currentQuestion.question}
           </h2>
 
@@ -320,7 +320,7 @@ export default function OnboardingQuiz() {
               const isSelected = selectedAnswer === i;
               const isCorrectOption = i === currentQuestion.correctIndex;
 
-              let optionStyle = 'bg-[#22262b] border-white/[0.08] hover:bg-[#2a2e34] hover:border-[#3b82f6]/30 text-[#e8e8e8] cursor-pointer';
+              let optionStyle = 'bg-t1-surface border-t1-border hover:bg-secondary hover:border-t1-blue/30 text-t1-text cursor-pointer';
 
               if (showExplanation) {
                 if (isCorrectOption) {
@@ -328,10 +328,10 @@ export default function OnboardingQuiz() {
                 } else if (isSelected && !isCorrectOption) {
                   optionStyle = 'bg-red-500/10 border-red-500/40 text-red-300';
                 } else {
-                  optionStyle = 'bg-[#22262b] border-white/[0.05] text-[#a0a5ad] opacity-60';
+                  optionStyle = 'bg-t1-surface border-t1-border/50 text-t1-muted opacity-60';
                 }
               } else if (isSelected) {
-                optionStyle = 'bg-[#3b82f6]/10 border-[#3b82f6]/40 text-[#e8e8e8]';
+                optionStyle = 'bg-t1-blue/10 border-t1-blue/40 text-t1-text';
               }
 
               return (
@@ -346,7 +346,7 @@ export default function OnboardingQuiz() {
                       ? 'bg-emerald-500/20 text-emerald-400'
                       : showExplanation && isSelected && !isCorrectOption
                         ? 'bg-red-500/20 text-red-400'
-                        : 'bg-[#1a1d21] text-[#a0a5ad]'
+                        : 'bg-t1-bg text-t1-muted'
                   }`}>
                     {showExplanation && isCorrectOption ? (
                       <CheckCircle2 className="w-5 h-5" />
@@ -379,7 +379,7 @@ export default function OnboardingQuiz() {
                   <p className={`font-semibold mb-1 ${isCorrect ? 'text-emerald-400' : 'text-amber-400'}`}>
                     {isCorrect ? 'Correct!' : 'Not quite.'}
                   </p>
-                  <p className="text-sm text-[#e8e8e8]/80 leading-relaxed">
+                  <p className="text-sm text-t1-text/80 leading-relaxed">
                     {currentQuestion.explanation}
                   </p>
                 </div>
@@ -394,8 +394,8 @@ export default function OnboardingQuiz() {
               disabled={currentIdx === 0}
               className={`flex items-center gap-2 py-2.5 px-5 rounded-lg text-sm font-medium transition-colors ${
                 currentIdx === 0
-                  ? 'text-[#a0a5ad]/40 cursor-not-allowed'
-                  : 'text-[#a0a5ad] hover:text-[#e8e8e8] hover:bg-[#22262b]'
+                  ? 'text-t1-muted/40 cursor-not-allowed'
+                  : 'text-t1-muted hover:text-t1-text hover:bg-t1-surface'
               }`}
             >
               <ChevronLeft className="w-4 h-4" />
@@ -405,7 +405,7 @@ export default function OnboardingQuiz() {
             {showExplanation && (
               <button
                 onClick={nextQuestion}
-                className="flex items-center gap-2 bg-[#3b82f6] hover:bg-[#2563eb] text-white font-semibold py-2.5 px-6 rounded-lg transition-colors"
+                className="flex items-center gap-2 bg-t1-blue hover:bg-t1-blue-light text-white font-semibold py-2.5 px-6 rounded-lg transition-colors"
               >
                 {currentIdx < totalQuestions - 1 ? (
                   <>Next <ChevronRight className="w-4 h-4" /></>
@@ -422,48 +422,48 @@ export default function OnboardingQuiz() {
 
   // ─── Intro View ─────────────────────────────────────────────
   return (
-    <div className="min-h-screen bg-[#1a1d21]">
+    <div className="min-h-screen bg-t1-bg transition-colors duration-200">
       <div className="max-w-3xl mx-auto px-4 py-8">
         {/* Back Link */}
-        <Link href="/onboarding" className="flex items-center gap-2 text-sm text-[#a0a5ad] hover:text-[#3b82f6] transition-colors mb-8">
+        <Link href="/onboarding" className="flex items-center gap-2 text-sm text-t1-muted hover:text-t1-blue transition-colors mb-8">
           <ArrowLeft className="w-4 h-4" />
           Back to Onboarding
         </Link>
 
         {/* Header */}
         <div className="text-center mb-10">
-          <div className="w-20 h-20 rounded-2xl bg-[#3b82f6]/20 flex items-center justify-center mx-auto mb-6">
-            <GraduationCap className="w-10 h-10 text-[#3b82f6]" />
+          <div className="w-20 h-20 rounded-2xl bg-t1-blue/20 flex items-center justify-center mx-auto mb-6">
+            <GraduationCap className="w-10 h-10 text-t1-blue" />
           </div>
-          <h1 className="font-oswald font-bold text-4xl md:text-5xl text-[#e8e8e8] uppercase tracking-tight mb-3">
+          <h1 className="font-oswald font-bold text-4xl md:text-5xl text-t1-text uppercase tracking-tight mb-3">
             Onboarding Quiz
           </h1>
-          <p className="text-[#a0a5ad] max-w-lg mx-auto">
+          <p className="text-t1-muted max-w-lg mx-auto">
             Test your knowledge of Tier 1 culture, the development pathway, session structure, drills, coaching standards, and advancement.
           </p>
         </div>
 
         {/* Quiz Info */}
-        <div className="bg-[#22262b] border border-white/[0.08] rounded-xl p-6 mb-8">
+        <div className="bg-t1-surface border border-t1-border rounded-xl p-6 mb-8">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 text-center">
             <div>
-              <div className="text-3xl font-bold text-[#e8e8e8]">{quizQuestions.length}</div>
-              <div className="text-sm text-[#a0a5ad] mt-1">Questions</div>
+              <div className="text-3xl font-bold text-t1-text">{quizQuestions.length}</div>
+              <div className="text-sm text-t1-muted mt-1">Questions</div>
             </div>
             <div>
-              <div className="text-3xl font-bold text-[#3b82f6]">{PASS_THRESHOLD}%</div>
-              <div className="text-sm text-[#a0a5ad] mt-1">Pass Threshold</div>
+              <div className="text-3xl font-bold text-t1-blue">{PASS_THRESHOLD}%</div>
+              <div className="text-sm text-t1-muted mt-1">Pass Threshold</div>
             </div>
             <div>
-              <div className="text-3xl font-bold text-[#e8e8e8]">6</div>
-              <div className="text-sm text-[#a0a5ad] mt-1">Modules Covered</div>
+              <div className="text-3xl font-bold text-t1-text">6</div>
+              <div className="text-sm text-t1-muted mt-1">Modules Covered</div>
             </div>
           </div>
         </div>
 
         {/* Module Breakdown */}
-        <div className="bg-[#22262b] border border-white/[0.08] rounded-xl p-6 mb-8">
-          <h3 className="font-oswald font-bold text-lg text-[#e8e8e8] uppercase tracking-wide mb-4">
+        <div className="bg-t1-surface border border-t1-border rounded-xl p-6 mb-8">
+          <h3 className="font-oswald font-bold text-lg text-t1-text uppercase tracking-wide mb-4">
             Questions By Module
           </h3>
           <div className="space-y-3">
@@ -471,8 +471,8 @@ export default function OnboardingQuiz() {
               const count = quizQuestions.filter(q => q.moduleId === mod.id).length;
               return (
                 <div key={mod.id} className="flex items-center justify-between">
-                  <span className="text-sm text-[#a0a5ad]">{mod.title}</span>
-                  <span className="text-sm font-medium text-[#e8e8e8]">{count} questions</span>
+                  <span className="text-sm text-t1-muted">{mod.title}</span>
+                  <span className="text-sm font-medium text-t1-text">{count} questions</span>
                 </div>
               );
             })}
@@ -480,25 +480,25 @@ export default function OnboardingQuiz() {
         </div>
 
         {/* Rules */}
-        <div className="bg-[#172554] border border-[#3b82f6]/20 rounded-xl p-6 mb-8">
-          <h3 className="font-oswald font-bold text-lg text-[#e8e8e8] uppercase tracking-wide mb-3">
+        <div className="bg-t1-navy border border-t1-blue/20 rounded-xl p-6 mb-8">
+          <h3 className="font-oswald font-bold text-lg text-t1-text uppercase tracking-wide mb-3">
             Quiz Rules
           </h3>
-          <ul className="space-y-2 text-sm text-[#93c5fd]">
+          <ul className="space-y-2 text-sm text-t1-blue-light">
             <li className="flex items-start gap-2">
-              <CheckCircle2 className="w-4 h-4 text-[#3b82f6] flex-shrink-0 mt-0.5" />
+              <CheckCircle2 className="w-4 h-4 text-t1-blue flex-shrink-0 mt-0.5" />
               Questions are randomized each attempt
             </li>
             <li className="flex items-start gap-2">
-              <CheckCircle2 className="w-4 h-4 text-[#3b82f6] flex-shrink-0 mt-0.5" />
+              <CheckCircle2 className="w-4 h-4 text-t1-blue flex-shrink-0 mt-0.5" />
               You will see the correct answer and explanation after each question
             </li>
             <li className="flex items-start gap-2">
-              <CheckCircle2 className="w-4 h-4 text-[#3b82f6] flex-shrink-0 mt-0.5" />
+              <CheckCircle2 className="w-4 h-4 text-t1-blue flex-shrink-0 mt-0.5" />
               You need {PASS_THRESHOLD}% ({Math.ceil(quizQuestions.length * PASS_THRESHOLD / 100)}/{quizQuestions.length}) correct answers to pass
             </li>
             <li className="flex items-start gap-2">
-              <CheckCircle2 className="w-4 h-4 text-[#3b82f6] flex-shrink-0 mt-0.5" />
+              <CheckCircle2 className="w-4 h-4 text-t1-blue flex-shrink-0 mt-0.5" />
               You can retake the quiz as many times as needed
             </li>
           </ul>
@@ -506,10 +506,10 @@ export default function OnboardingQuiz() {
 
         {/* Previous Results */}
         {bestQuizResult && (
-          <div className="bg-[#22262b] border border-white/[0.08] rounded-xl p-5 mb-8">
+          <div className="bg-t1-surface border border-t1-border rounded-xl p-5 mb-8">
             <div className="flex items-center justify-between">
               <div>
-                <span className="text-sm text-[#a0a5ad]">Your Best Score</span>
+                <span className="text-sm text-t1-muted">Your Best Score</span>
                 <div className={`text-2xl font-bold ${bestQuizResult.passed ? 'text-emerald-400' : 'text-amber-400'}`}>
                   {bestQuizResult.percentage}%
                 </div>
@@ -527,7 +527,7 @@ export default function OnboardingQuiz() {
         {/* Start Button */}
         <button
           onClick={startQuiz}
-          className="w-full flex items-center justify-center gap-3 bg-[#3b82f6] hover:bg-[#2563eb] text-white font-bold py-4 px-8 rounded-xl transition-colors text-lg"
+          className="w-full flex items-center justify-center gap-3 bg-t1-blue hover:bg-t1-blue-light text-white font-bold py-4 px-8 rounded-xl transition-colors text-lg"
         >
           <GraduationCap className="w-6 h-6" />
           {hasPassed ? 'Retake Quiz' : bestQuizResult ? 'Try Again' : 'Start Quiz'}

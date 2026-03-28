@@ -4,10 +4,10 @@
 @custom-variant dark (&:is(.dark *));
 
 /*
-  BRAND: Tier 1 Performance — Cold Dark
-  Background: #1a1d21 | Surface: #22262b | Text: #e8e8e8
-  Muted: #a0a5ad | Blue Accent: #3b82f6 | Deep Navy: #172554
-  Red Alert: #ef4444 | Border: rgba(255,255,255,0.08)
+  BRAND: Tier 1 Performance — Dual Theme
+  Dark (default): #1a1d21 bg, #22262b surface, #e8e8e8 text
+  Light (outdoor): #f5f6f8 bg, #ffffff surface, #1a1d21 text
+  Shared: Blue #3b82f6, Red #ef4444
   Headlines: Oswald 700 ALL CAPS | Body: Inter 400
 */
 
@@ -50,22 +50,22 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
-  /* Tier 1 Brand Tokens */
-  --color-t1-bg: #1a1d21;
-  --color-t1-surface: #22262b;
-  --color-t1-text: #e8e8e8;
-  --color-t1-muted: #a0a5ad;
-  --color-t1-blue: #3b82f6;
-  --color-t1-blue-light: #60a5fa;
-  --color-t1-navy: #172554;
-  --color-t1-red: #ef4444;
-  --color-t1-border: rgba(255, 255, 255, 0.08);
-  --color-t1-border-strong: rgba(255, 255, 255, 0.15);
+  /* Tier 1 Dynamic Brand Tokens — resolve per theme */
+  --color-t1-bg: var(--t1-bg);
+  --color-t1-surface: var(--t1-surface);
+  --color-t1-text: var(--t1-text);
+  --color-t1-muted: var(--t1-muted);
+  --color-t1-blue: var(--t1-blue);
+  --color-t1-blue-light: var(--t1-blue-light);
+  --color-t1-navy: var(--t1-navy);
+  --color-t1-red: var(--t1-red);
+  --color-t1-border: var(--t1-border);
+  --color-t1-border-strong: var(--t1-border-strong);
 }
 
+/* ─── DARK THEME (Default) ─────────────────────────────────── */
 :root {
   --radius: 0.5rem;
-  /* Tier 1 Cold Dark — applied directly (no .dark class needed) */
   --background: #1a1d21;
   --foreground: #e8e8e8;
   --card: #22262b;
@@ -98,6 +98,64 @@
   --sidebar-accent-foreground: #e8e8e8;
   --sidebar-border: rgba(255, 255, 255, 0.08);
   --sidebar-ring: #3b82f6;
+  /* Tier 1 Dark Brand */
+  --t1-bg: #1a1d21;
+  --t1-surface: #22262b;
+  --t1-text: #e8e8e8;
+  --t1-muted: #a0a5ad;
+  --t1-blue: #3b82f6;
+  --t1-blue-light: #60a5fa;
+  --t1-navy: #172554;
+  --t1-red: #ef4444;
+  --t1-border: rgba(255, 255, 255, 0.08);
+  --t1-border-strong: rgba(255, 255, 255, 0.15);
+}
+
+/* ─── LIGHT THEME (Outdoor Court Mode) ─────────────────────── */
+.light {
+  --background: #f5f6f8;
+  --foreground: #1a1d21;
+  --card: #ffffff;
+  --card-foreground: #1a1d21;
+  --popover: #ffffff;
+  --popover-foreground: #1a1d21;
+  --primary: #2563eb;
+  --primary-foreground: #ffffff;
+  --secondary: #e8eaed;
+  --secondary-foreground: #4a5060;
+  --muted: #e8eaed;
+  --muted-foreground: #6b7280;
+  --accent: #dbeafe;
+  --accent-foreground: #1e40af;
+  --destructive: #dc2626;
+  --destructive-foreground: #ffffff;
+  --border: rgba(0, 0, 0, 0.10);
+  --input: rgba(0, 0, 0, 0.08);
+  --ring: #2563eb;
+  --chart-1: #2563eb;
+  --chart-2: #3b82f6;
+  --chart-3: #dbeafe;
+  --chart-4: #dc2626;
+  --chart-5: #6b7280;
+  --sidebar: #ffffff;
+  --sidebar-foreground: #1a1d21;
+  --sidebar-primary: #2563eb;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #dbeafe;
+  --sidebar-accent-foreground: #1e40af;
+  --sidebar-border: rgba(0, 0, 0, 0.10);
+  --sidebar-ring: #2563eb;
+  /* Tier 1 Light Brand */
+  --t1-bg: #f5f6f8;
+  --t1-surface: #ffffff;
+  --t1-text: #1a1d21;
+  --t1-muted: #6b7280;
+  --t1-blue: #2563eb;
+  --t1-blue-light: #3b82f6;
+  --t1-navy: #dbeafe;
+  --t1-red: #dc2626;
+  --t1-border: rgba(0, 0, 0, 0.10);
+  --t1-border-strong: rgba(0, 0, 0, 0.18);
 }
 
 @layer base {
@@ -110,6 +168,7 @@
     -moz-osx-font-smoothing: grayscale;
     -webkit-text-size-adjust: 100%;
     text-size-adjust: 100%;
+    transition: background-color 0.2s ease, color 0.2s ease;
   }
 
   /* Remove iOS tap highlight flash */

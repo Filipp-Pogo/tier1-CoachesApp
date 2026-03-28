@@ -302,7 +302,7 @@ export default function DrillDetail() {
             </div>
 
             <div className="bg-t1-navy rounded-lg p-4 sm:p-5 border border-t1-border">
-              <h2 className="font-display text-xs sm:text-sm font-semibold uppercase tracking-wider text-white mb-2">
+              <h2 className="font-display text-xs sm:text-sm font-semibold uppercase tracking-wider text-t1-text dark:text-white mb-2">
                 Why It Matters in Match Play
               </h2>
               <p className="text-sm text-t1-text/80 leading-relaxed">{drill.matchPlayRelevance}</p>

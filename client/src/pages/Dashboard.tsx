@@ -82,7 +82,7 @@ export default function Dashboard() {
                 {/* Badge Icon */}
                 <div className="relative flex-shrink-0">
                   <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl bg-emerald-500/15 flex items-center justify-center">
-                    <Shield className="w-7 h-7 sm:w-8 sm:h-8 text-emerald-400" />
+                    <Shield className="w-7 h-7 sm:w-8 sm:h-8 text-emerald-600 dark:text-emerald-400" />
                   </div>
                   <div className="absolute -top-1 -right-1 w-5 h-5 bg-emerald-500 rounded-full flex items-center justify-center">
                     <CheckCircle className="w-3.5 h-3.5 text-white" />
@@ -92,28 +92,28 @@ export default function Dashboard() {
                 {/* Badge Content */}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <h3 className="font-display text-sm sm:text-base font-bold uppercase tracking-wide text-emerald-400">
+                    <h3 className="font-display text-sm sm:text-base font-bold uppercase tracking-wide text-emerald-600 dark:text-emerald-400">
                       Certified Coach
                     </h3>
-                    <span className="text-[10px] sm:text-xs bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded-full font-semibold uppercase tracking-wider">
+                    <span className="text-[10px] sm:text-xs bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 px-2 py-0.5 rounded-full font-semibold uppercase tracking-wider">
                       Passed
                     </span>
                   </div>
                   <div className="flex items-center gap-3 sm:gap-5 mt-1.5">
                     <div>
                       <span className="text-[10px] text-t1-muted uppercase tracking-wider">Score</span>
-                      <p className="text-sm sm:text-lg font-bold text-emerald-400 leading-tight">
+                      <p className="text-sm sm:text-lg font-bold text-emerald-600 dark:text-emerald-400 leading-tight">
                         {bestQuizResult.percentage}%
                       </p>
                     </div>
-                    <div className="w-px h-7 bg-white/10" />
+                    <div className="w-px h-7 bg-t1-border" />
                     <div>
                       <span className="text-[10px] text-t1-muted uppercase tracking-wider">Result</span>
                       <p className="text-sm sm:text-lg font-bold text-t1-text leading-tight">
                         {bestQuizResult.score}/{bestQuizResult.total}
                       </p>
                     </div>
-                    <div className="w-px h-7 bg-white/10" />
+                    <div className="w-px h-7 bg-t1-border" />
                     <div>
                       <span className="text-[10px] text-t1-muted uppercase tracking-wider">Passed On</span>
                       <p className="text-xs sm:text-sm font-medium text-t1-text leading-tight mt-0.5">
@@ -123,7 +123,7 @@ export default function Dashboard() {
                   </div>
                 </div>
 
-                <ChevronRight className="w-5 h-5 text-t1-muted/40 group-hover:text-emerald-400 transition-colors flex-shrink-0 hidden sm:block" />
+                <ChevronRight className="w-5 h-5 text-t1-muted/40 group-hover:text-emerald-600 dark:text-emerald-400 transition-colors flex-shrink-0 hidden sm:block" />
               </div>
             </Link>
           ) : (
@@ -145,7 +145,7 @@ export default function Dashboard() {
                     <h3 className="font-display text-sm sm:text-base font-bold uppercase tracking-wide text-t1-text">
                       Coach Onboarding
                     </h3>
-                    <span className="text-[10px] sm:text-xs bg-amber-500/20 text-amber-300 px-2 py-0.5 rounded-full font-semibold uppercase tracking-wider">
+                    <span className="text-[10px] sm:text-xs bg-amber-500/20 text-amber-700 dark:text-amber-300 px-2 py-0.5 rounded-full font-semibold uppercase tracking-wider">
                       {completedLessons === 0 ? 'Not Started' : 'In Progress'}
                     </span>
                   </div>

@@ -242,7 +242,7 @@ export default function PlanComparison() {
       {/* Header */}
       <section className="bg-t1-navy border-b border-t1-border">
         <div className="container py-4 sm:py-6">
-          <h1 className="font-display text-xl sm:text-4xl font-bold text-white uppercase tracking-wide flex items-center gap-2">
+          <h1 className="font-display text-xl sm:text-4xl font-bold text-t1-text dark:text-white uppercase tracking-wide flex items-center gap-2">
             <ArrowLeftRight className="w-6 h-6 sm:w-8 sm:h-8" />
             Compare Plans
           </h1>

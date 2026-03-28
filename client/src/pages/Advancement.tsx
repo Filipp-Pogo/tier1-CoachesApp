@@ -23,7 +23,7 @@ export default function Advancement() {
       {/* Header — compact on mobile */}
       <section className="bg-t1-navy border-b border-t1-border">
         <div className="container py-4 sm:py-8">
-          <h1 className="font-display text-xl sm:text-4xl font-bold text-white uppercase tracking-wide">
+          <h1 className="font-display text-xl sm:text-4xl font-bold text-t1-text dark:text-white uppercase tracking-wide">
             Advancement
           </h1>
           <p className="mt-1 sm:mt-2 text-t1-muted text-xs sm:text-sm max-w-2xl">
