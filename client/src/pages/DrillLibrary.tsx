@@ -34,6 +34,7 @@ function getCardBorderColor(levels: string[]): string {
 export default function DrillLibrary() {
   const [searchQuery, setSearchQuery] = useState('');
   const [levelFilter, setLevelFilter] = useState<PathwayStageId | ''>('');
+  const [utrFilter, setUtrFilter] = useState('');
   const [blockFilter, setBlockFilter] = useState<SessionBlockId | ''>('');
   const [categoryFilter, setCategoryFilter] = useState<string>('');
   const [typeFilter, setTypeFilter] = useState('');
@@ -52,12 +53,31 @@ export default function DrillLibrary() {
     return recentIds.map((id: string) => drills.find(d => d.id === id)).filter(Boolean).slice(0, 5) as typeof drills;
   }, [recentIds]);
 
-  const advancedFilterCount = [blockFilter, categoryFilter, typeFilter, feedingFilter, formatFilter].filter(Boolean).length;
+  const advancedFilterCount = [utrFilter, blockFilter, categoryFilter, typeFilter, feedingFilter, formatFilter].filter(Boolean).length;
+
+  const availableUtrBands = useMemo(() => {
+    const bands = new Set<string>();
+    drills.forEach((drill) => {
+      drill.subBand?.forEach((band) => {
+        if (band.toUpperCase().includes('UTR')) bands.add(band);
+      });
+    });
+
+    return Array.from(bands).sort((a, b) => {
+      const extractMin = (value: string) => {
+        const match = value.match(/UTR\s*(\d+)/i);
+        return match ? Number(match[1]) : Number.MAX_SAFE_INTEGER;
+      };
+
+      return extractMin(a) - extractMin(b) || a.localeCompare(b);
+    });
+  }, []);
 
   const filteredDrills = useMemo(() => {
     let result = [...drills];
     if (activeTab === 'favorites') result = result.filter(d => favorites.includes(d.id));
     if (levelFilter) result = result.filter(d => d.level.includes(levelFilter));
+    if (utrFilter) result = result.filter(d => d.subBand?.includes(utrFilter));
     if (blockFilter) result = result.filter(d => d.sessionBlock === blockFilter);
     if (categoryFilter) result = result.filter(d => d.skillCategory === categoryFilter);
     if (typeFilter) result = result.filter(d => d.type === typeFilter);
@@ -75,7 +95,7 @@ export default function DrillLibrary() {
         .map(item => item.drill);
     }
     return result;
-  }, [searchQuery, levelFilter, blockFilter, categoryFilter, typeFilter, feedingFilter, formatFilter, activeTab, favorites]);
+  }, [searchQuery, levelFilter, utrFilter, blockFilter, categoryFilter, typeFilter, feedingFilter, formatFilter, activeTab, favorites]);
 
   // Reset visible count when filters change
   const visibleDrills = useMemo(() => {
@@ -86,7 +106,7 @@ export default function DrillLibrary() {
 
   const clearFilters = () => {
     setLevelFilter(''); setBlockFilter(''); setCategoryFilter('');
-    setTypeFilter(''); setFeedingFilter(''); setFormatFilter(''); setSearchQuery('');
+    setTypeFilter(''); setFeedingFilter(''); setFormatFilter(''); setUtrFilter(''); setSearchQuery('');
     setVisibleCount(DRILLS_PER_PAGE);
   };
 
@@ -225,6 +245,26 @@ export default function DrillLibrary() {
         {/* Advanced Filters Panel */}
         {showAdvancedFilters && (
           <div className="bg-t1-surface border border-t1-border rounded-lg p-3 sm:p-4 mb-3 space-y-3">
+            {/* Block */}
+            <div>
+              <label className="text-[10px] font-semibold uppercase tracking-wider text-t1-muted mb-1.5 block">UTR</label>
+              <div className="flex flex-wrap gap-1.5">
+                {availableUtrBands.map((band) => (
+                  <button
+                    key={band}
+                    onClick={() => { setUtrFilter(utrFilter === band ? '' : band); setVisibleCount(DRILLS_PER_PAGE); }}
+                    className={`px-2.5 py-1.5 rounded-full text-xs font-medium border transition-colors min-h-[32px] ${
+                      utrFilter === band
+                        ? 'bg-t1-blue text-white border-t1-blue'
+                        : 'bg-t1-bg border-t1-border text-t1-muted active:bg-t1-blue/10'
+                    }`}
+                  >
+                    {band.replace(/\s+to\s+/gi, '-')}
+                  </button>
+                ))}
+              </div>
+            </div>
+
             {/* Block */}
             <div>
               <label className="text-[10px] font-semibold uppercase tracking-wider text-t1-muted mb-1.5 block">Block</label>

@@ -200,15 +200,11 @@ export async function fetchUserCustomPlans(userId: string) {
 export async function fetchSharedCustomPlans(userId?: string) {
   if (!supabase) return [] as CustomSessionPlanRecord[];
 
-  let query = supabase
+  const query = supabase
     .from(CUSTOM_PLAN_TABLE)
     .select('*')
     .eq('visibility', 'shared')
     .order('updated_at', { ascending: false });
-
-  if (userId) {
-    query = query.neq('user_id', userId);
-  }
 
   const { data, error } = await query;
 
