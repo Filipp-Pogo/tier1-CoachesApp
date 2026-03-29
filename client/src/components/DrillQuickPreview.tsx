@@ -11,6 +11,7 @@ import { X, Target, Clipboard, Check, Clock, Star, ExternalLink } from 'lucide-r
 import { drills, pathwayStages, sessionBlocks, skillCategories } from '@/lib/data';
 import { useFavorites } from '@/hooks/useFavorites';
 import { useState, useCallback } from 'react';
+import { formatSubBand } from '@/lib/customPlans';
 
 interface DrillQuickPreviewProps {
   drillId: string | null;
@@ -66,7 +67,7 @@ export function DrillQuickPreview({ drillId, open, onOpenChange }: DrillQuickPre
             </span>
             {drill.subBand && (
               <span className="text-[10px] bg-amber-500/10 text-amber-400 px-1.5 py-0.5 rounded font-medium uppercase tracking-wider">
-                {drill.subBand}
+                {formatSubBand(drill.subBand)}
               </span>
             )}
             {drill.skillCategory === 'doubles' && (

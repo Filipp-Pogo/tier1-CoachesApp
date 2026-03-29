@@ -8,8 +8,13 @@ import { Link, useLocation } from 'wouter';
 import {
   Clock, ChevronDown, ChevronUp, Target, AlertTriangle, Zap, ArrowRight,
   ClipboardList, Copy, Check, Printer, Star, History, Search, ArrowLeftRight,
-  X, Edit3, Users, Lock,
+  X, Edit3, Users, Lock, Trash2,
 } from 'lucide-react';
+import { toast } from 'sonner';
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 import { pathwayStages, type PathwayStageId } from '@/lib/data';
 import { sessionPlans, sessionPlanLevelGroups } from '@/lib/sessionPlans';
 import { useSessionPlanFavorites } from '@/hooks/useSessionPlanFavorites';
@@ -22,6 +27,7 @@ import {
   stockPlanToCardPlan,
   stockPlanToDraft,
   customRecordToDraft,
+  deleteCustomPlan,
   type SessionPlanCardData,
 } from '@/lib/customPlans';
 
@@ -68,9 +74,10 @@ interface PlanCardProps {
   onToggleFavorite?: () => void;
   onPrimaryAction: () => void;
   primaryActionLabel?: string;
+  onDelete?: () => void;
 }
 
-function PlanCard({ plan, isExpanded, onToggle, isFavorite = false, onToggleFavorite, onPrimaryAction, primaryActionLabel }: PlanCardProps) {
+function PlanCard({ plan, isExpanded, onToggle, isFavorite = false, onToggleFavorite, onPrimaryAction, primaryActionLabel, onDelete }: PlanCardProps) {
   const [copiedBlock, setCopiedBlock] = useState<string | null>(null);
   const draft = Boolean(plan.isDraft);
   const custom = plan.planType === 'custom';
@@ -172,7 +179,12 @@ ${draftBanner}
                     : 'bg-t1-bg text-t1-muted border-t1-border'
                 }`}>
                   {plan.visibility === 'shared' ? <Users className="w-3 h-3" /> : <Lock className="w-3 h-3" />}
-                  {plan.visibility}
+                  {plan.visibility === 'shared' ? 'Team Shared' : 'Private'}
+                </span>
+              )}
+              {custom && (
+                <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full border bg-t1-bg text-t1-muted border-t1-border">
+                  My Plan
                 </span>
               )}
               {draft && (
@@ -287,6 +299,28 @@ ${draftBanner}
               <Edit3 className="w-3.5 h-3.5" />
               {primaryActionLabel || (plan.planType === 'stock' ? 'Customize Copy' : 'Edit in Builder')}
             </button>
+            {onDelete && (
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <button className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-t1-bg border border-t1-border text-red-400 rounded-lg hover:bg-red-500/10 transition-colors">
+                    <Trash2 className="w-3.5 h-3.5" />
+                    Delete
+                  </button>
+                </AlertDialogTrigger>
+                <AlertDialogContent className="bg-t1-surface border-t1-border">
+                  <AlertDialogHeader>
+                    <AlertDialogTitle className="font-display text-lg uppercase tracking-wide text-t1-text">Delete this custom plan?</AlertDialogTitle>
+                    <AlertDialogDescription className="text-sm text-t1-muted">
+                      This removes the plan from your library. Shared coaches will lose access to this version too.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel className="bg-t1-bg border-t1-border text-t1-text hover:bg-t1-surface">Cancel</AlertDialogCancel>
+                    <AlertDialogAction className="bg-red-500 text-white hover:bg-red-500/90" onClick={onDelete}>Delete Plan</AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            )}
           </div>
         </div>
       )}
@@ -329,6 +363,7 @@ export default function SessionPlans() {
         setSharedPlans(shared.map(recordToCardPlan));
       } catch (error) {
         console.error('Failed to load custom plans', error);
+        toast.error('Could not load your saved/shared plans.');
       } finally {
         if (mounted) setLoadingCustomPlans(false);
       }
@@ -414,6 +449,23 @@ export default function SessionPlans() {
     navigate('/session-builder');
   };
 
+  const handleDeleteCustomPlan = async (plan: SessionPlanCardData) => {
+    if (!user) {
+      toast.error('Sign in to manage your plans.');
+      return;
+    }
+
+    try {
+      await deleteCustomPlan(plan.id, user.id);
+      setCustomPlans((prev) => prev.filter((item) => item.id !== plan.id));
+      setSharedPlans((prev) => prev.filter((item) => item.id !== plan.id));
+      toast.success('Custom plan deleted.');
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to delete custom plan.';
+      toast.error(message);
+    }
+  };
+
   const availableLevels = useMemo(() => {
     const levels = new Set(sessionPlans.map((plan) => plan.level));
     return pathwayStages.filter((stage) => levels.has(stage.id));
@@ -474,9 +526,9 @@ export default function SessionPlans() {
   };
 
   const emptyMessage = activeTab === 'custom'
-    ? authEnabled ? 'No saved custom plans yet.' : 'Connect Supabase to save custom plans.'
+    ? authEnabled ? 'No plans in My Plans yet.' : 'Connect Supabase to save plans.'
     : activeTab === 'shared'
-      ? authEnabled ? 'No shared plans available yet.' : 'Connect Supabase to view shared plans.'
+      ? authEnabled ? 'No team-shared plans available yet.' : 'Connect Supabase to view team-shared plans.'
       : 'No plans found.';
 
   return (
@@ -489,7 +541,7 @@ export default function SessionPlans() {
                 Session Plans
               </h1>
               <p className="mt-1 text-t1-muted text-xs sm:text-sm">
-                Stock plans stay in code. Your custom plans sync through Supabase. Shared plans are the lightweight team lane.
+                Stock plans stay in code. My Plans sync through Supabase. Team Shared plans are the lightweight collaboration lane.
               </p>
             </div>
             <Link
@@ -536,8 +588,8 @@ export default function SessionPlans() {
             { key: 'all' as const, label: 'All Plans', icon: ClipboardList, count: stockPlanCards.length },
             { key: 'favorites' as const, label: 'Favorites', icon: Star, count: favoritePlans.length },
             { key: 'recent' as const, label: 'Recent', icon: History, count: recentPlans.length },
-            { key: 'custom' as const, label: 'Custom', icon: Edit3, count: customPlans.length },
-            { key: 'shared' as const, label: 'Shared', icon: Users, count: sharedPlans.length },
+            { key: 'custom' as const, label: 'My Plans', icon: Edit3, count: customPlans.length },
+            { key: 'shared' as const, label: 'Team Shared', icon: Users, count: sharedPlans.length },
           ].map((tab) => (
             <button
               key={tab.key}
@@ -740,6 +792,7 @@ export default function SessionPlans() {
                           openPlanInBuilder(plan);
                         }
                       }}
+                      onDelete={activeTab === 'custom' && plan.planType === 'custom' ? () => void handleDeleteCustomPlan(plan) : undefined}
                       primaryActionLabel={activeTab === 'shared' ? 'Customize Copy' : plan.planType === 'stock' ? 'Customize Copy' : 'Edit in Builder'}
                     />
                   ))}

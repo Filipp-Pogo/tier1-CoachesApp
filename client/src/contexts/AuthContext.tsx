@@ -3,6 +3,7 @@ import type { PropsWithChildren } from 'react';
 import type { Session, User } from '@supabase/supabase-js';
 import { clearLocalCoachAppState, syncLocalStateForUser } from '@/lib/cloudSync';
 import { isSupabaseConfigured, supabase } from '@/lib/supabase';
+import { toast } from 'sonner';
 
 interface AuthContextValue {
   user: User | null;
@@ -55,6 +56,16 @@ export function AuthProvider({ children }: PropsWithChildren) {
       mounted = false;
       subscription.unsubscribe();
     };
+  }, []);
+
+  useEffect(() => {
+    const handler = (event: Event) => {
+      const customEvent = event as CustomEvent<{ message?: string }>;
+      toast.error(customEvent.detail?.message || 'Cloud sync hit an error.');
+    };
+
+    window.addEventListener('tier1-cloud-sync-error', handler as EventListener);
+    return () => window.removeEventListener('tier1-cloud-sync-error', handler as EventListener);
   }, []);
 
   const value = useMemo<AuthContextValue>(() => ({

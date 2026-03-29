@@ -83,6 +83,12 @@ export function buildLevelTag(level: PathwayStageId, subBand?: string | null) {
   return subBand ? `${stage.shortName} ${subBand}` : stage.shortName;
 }
 
+export function formatSubBand(subBand?: string | string[] | null) {
+  if (!subBand) return '';
+  if (Array.isArray(subBand)) return subBand.join(' • ');
+  return subBand;
+}
+
 export function stockPlanToDraft(plan: SessionPlan): BuilderCustomPlanDraft {
   return {
     sourcePlanId: plan.id,
@@ -253,4 +259,18 @@ export async function saveCustomPlan(user: User, draft: BuilderCustomPlanDraft) 
   }
 
   return data as CustomSessionPlanRecord;
+}
+
+export async function deleteCustomPlan(planId: string, userId: string) {
+  if (!supabase) {
+    throw new Error('Supabase is not configured.');
+  }
+
+  const { error } = await supabase
+    .from(CUSTOM_PLAN_TABLE)
+    .delete()
+    .eq('id', planId)
+    .eq('user_id', userId);
+
+  if (error) throw error;
 }

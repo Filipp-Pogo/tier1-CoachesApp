@@ -15,6 +15,10 @@ import {
 } from 'lucide-react';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useAuth } from '@/contexts/AuthContext';
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 
 const TIER1_LOGO_WHITE = 'https://d2xsxph8kpxj0f.cloudfront.net/310519663356767696/ZPsMJTEeF9cNbnWWtGpFHU/tier1_logo_white_e523441d.webp';
 
@@ -235,13 +239,26 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                   <p className="text-xs font-medium text-t1-text leading-tight">{user.email}</p>
                   <p className="text-[10px] uppercase tracking-widest text-t1-muted">Cloud sync on</p>
                 </div>
-                <button
-                  onClick={() => void signOut()}
-                  className="inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium text-t1-muted hover:text-t1-text hover:bg-t1-surface transition-colors"
-                >
-                  <LogOut className="w-4 h-4" />
-                  Sign Out
-                </button>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <button className="inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium text-t1-muted hover:text-t1-text hover:bg-t1-surface transition-colors">
+                      <LogOut className="w-4 h-4" />
+                      Sign Out
+                    </button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent className="bg-t1-surface border-t1-border">
+                    <AlertDialogHeader>
+                      <AlertDialogTitle className="font-display text-lg uppercase tracking-wide text-t1-text">Sign out of Tier 1 Coaches App?</AlertDialogTitle>
+                      <AlertDialogDescription className="text-sm text-t1-muted">
+                        Your synced data is safe in the cloud. Any unsaved local changes could be lost if you sign out right now.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel className="bg-t1-bg border-t1-border text-t1-text hover:bg-t1-surface">Cancel</AlertDialogCancel>
+                      <AlertDialogAction className="bg-t1-blue text-white hover:bg-t1-blue/90" onClick={() => void signOut()}>Sign Out</AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
               </div>
             )}
           </nav>
@@ -374,13 +391,26 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           {/* Menu Footer */}
           <div className="flex-shrink-0 px-4 py-4 border-t border-t1-border">
             {authEnabled && user && (
-              <button
-                onClick={() => void signOut()}
-                className="mb-3 w-full flex items-center justify-center gap-2 rounded-xl border border-t1-border bg-t1-surface px-4 py-3 text-sm font-medium text-t1-text"
-              >
-                <LogOut className="w-4 h-4" />
-                Sign Out
-              </button>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <button className="mb-3 w-full flex items-center justify-center gap-2 rounded-xl border border-t1-border bg-t1-surface px-4 py-3 text-sm font-medium text-t1-text">
+                    <LogOut className="w-4 h-4" />
+                    Sign Out
+                  </button>
+                </AlertDialogTrigger>
+                <AlertDialogContent className="bg-t1-surface border-t1-border">
+                  <AlertDialogHeader>
+                    <AlertDialogTitle className="font-display text-lg uppercase tracking-wide text-t1-text">Sign out of Tier 1 Coaches App?</AlertDialogTitle>
+                    <AlertDialogDescription className="text-sm text-t1-muted">
+                      Your synced data is safe in the cloud. Any unsaved local changes could be lost if you sign out right now.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel className="bg-t1-bg border-t1-border text-t1-text hover:bg-t1-surface">Cancel</AlertDialogCancel>
+                    <AlertDialogAction className="bg-t1-blue text-white hover:bg-t1-blue/90" onClick={() => void signOut()}>Sign Out</AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             )}
             <p className="text-[10px] text-t1-muted/50 font-display uppercase tracking-widest text-center">
               The Standard Is The Standard.

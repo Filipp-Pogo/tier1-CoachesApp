@@ -90,6 +90,11 @@ async function fetchRemoteState(userId: string): Promise<CoachAppStateSnapshot |
 
   if (error) {
     console.error('Failed to fetch coach app state', error);
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('tier1-cloud-sync-error', {
+        detail: { message: 'Failed to load your synced coach app data.' },
+      }));
+    }
     return null;
   }
 
@@ -110,6 +115,11 @@ async function upsertRemoteState(userId: string, payload: CoachAppStateSnapshot)
 
   if (error) {
     console.error('Failed to save coach app state', error);
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('tier1-cloud-sync-error', {
+        detail: { message: 'Failed to sync your latest changes to the cloud.' },
+      }));
+    }
   }
 }
 

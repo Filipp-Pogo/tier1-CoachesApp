@@ -9,6 +9,7 @@ import { useState, useMemo } from 'react';
 import { Link } from 'wouter';
 import { Search, Filter, X, Clock, Star, Eye, Video, SlidersHorizontal, ChevronDown } from 'lucide-react';
 import { drills, pathwayStages, sessionBlocks, type Drill, type PathwayStageId, type SessionBlockId } from '@/lib/data';
+import { formatSubBand } from '@/lib/customPlans';
 import { useFavorites } from '@/hooks/useFavorites';
 import { useRecentDrills } from '@/hooks/useRecentDrills';
 import { DrillQuickPreview } from '@/components/DrillQuickPreview';
@@ -614,7 +615,7 @@ export default function DrillLibrary() {
                     </span>
                     {drill.subBand && (
                       <span className="text-[10px] bg-amber-500/10 text-amber-400 px-1.5 py-0.5 rounded font-medium uppercase tracking-wider">
-                        {drill.subBand}
+                        {formatSubBand(drill.subBand)}
                       </span>
                     )}
                     {drill.skillCategory === 'doubles' && (
