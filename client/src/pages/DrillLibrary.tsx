@@ -8,13 +8,79 @@
 import { useState, useMemo } from 'react';
 import { Link } from 'wouter';
 import { Search, Filter, X, Clock, Star, Eye, Video, SlidersHorizontal, ChevronDown } from 'lucide-react';
-import { drills, pathwayStages, sessionBlocks, skillCategories, type PathwayStageId, type SessionBlockId } from '@/lib/data';
+import { drills, pathwayStages, sessionBlocks, type Drill, type PathwayStageId, type SessionBlockId } from '@/lib/data';
 import { useFavorites } from '@/hooks/useFavorites';
 import { useRecentDrills } from '@/hooks/useRecentDrills';
 import { DrillQuickPreview } from '@/components/DrillQuickPreview';
 import { scoreDrillSearch } from '@/lib/drillSearch';
 
 const DRILLS_PER_PAGE = 24;
+
+type DrillSkillFilterId = 'baseline' | 'transition' | 'serve-return' | 'movement' | 'doubles' | 'tactical' | 'mental';
+
+const drillSkillFilters: { id: DrillSkillFilterId; name: string }[] = [
+  { id: 'baseline', name: 'Baseline' },
+  { id: 'transition', name: 'Transition & Net' },
+  { id: 'serve-return', name: 'Serve & Return' },
+  { id: 'movement', name: 'Movement & Footwork' },
+  { id: 'doubles', name: 'Doubles' },
+  { id: 'tactical', name: 'Tactical & Point Play' },
+  { id: 'mental', name: 'Mental & Match Prep' },
+];
+
+function getDrillSkillFilters(drill: Drill): DrillSkillFilterId[] {
+  const filters = new Set<DrillSkillFilterId>();
+  const name = drill.name.toLowerCase();
+  const objective = drill.objective.toLowerCase();
+
+  switch (drill.skillCategory) {
+    case 'baseline':
+    case 'baseline-pattern':
+      filters.add('baseline');
+      break;
+    case 'transition':
+      filters.add('transition');
+      break;
+    case 'serve-return':
+    case 'serve-plus-one':
+    case 'return':
+    case 'return-plus-one':
+      filters.add('serve-return');
+      break;
+    case 'movement':
+    case 'physical':
+      filters.add('movement');
+      break;
+    case 'doubles':
+      filters.add('doubles');
+      break;
+    case 'mental':
+    case 'pressure-match-prep':
+      filters.add('mental');
+      filters.add('tactical');
+      break;
+    case 'tactical':
+    case 'point-play':
+    case 'attacking':
+    case 'defense':
+      filters.add('tactical');
+      break;
+    case 'private-lesson':
+      if (drill.sessionBlock === 'serve-return' || /serve|return|toss/.test(name)) {
+        filters.add('serve-return');
+      } else if (drill.sessionBlock === 'movement') {
+        filters.add('movement');
+      } else if (/volley|approach|net|transition/.test(name + ' ' + objective)) {
+        filters.add('transition');
+      } else {
+        filters.add('baseline');
+      }
+      break;
+  }
+
+  if (filters.size === 0) filters.add('tactical');
+  return Array.from(filters);
+}
 
 /* Level-specific left border colors for drill cards */
 const levelBorderMap: Record<string, string> = {
@@ -36,7 +102,7 @@ export default function DrillLibrary() {
   const [levelFilter, setLevelFilter] = useState<PathwayStageId | ''>('');
   const [utrFilter, setUtrFilter] = useState('');
   const [blockFilter, setBlockFilter] = useState<SessionBlockId | ''>('');
-  const [categoryFilter, setCategoryFilter] = useState<string>('');
+  const [categoryFilter, setCategoryFilter] = useState<DrillSkillFilterId | ''>('');
   const [typeFilter, setTypeFilter] = useState('');
   const [feedingFilter, setFeedingFilter] = useState('');
   const [formatFilter, setFormatFilter] = useState('');
@@ -79,7 +145,7 @@ export default function DrillLibrary() {
     if (levelFilter) result = result.filter(d => d.level.includes(levelFilter));
     if (utrFilter) result = result.filter(d => d.subBand?.includes(utrFilter));
     if (blockFilter) result = result.filter(d => d.sessionBlock === blockFilter);
-    if (categoryFilter) result = result.filter(d => d.skillCategory === categoryFilter);
+    if (categoryFilter) result = result.filter(d => getDrillSkillFilters(d).includes(categoryFilter));
     if (typeFilter) result = result.filter(d => d.type === typeFilter);
     if (feedingFilter) result = result.filter(d => d.feedingStyle === feedingFilter);
     if (formatFilter) {
@@ -289,7 +355,7 @@ export default function DrillLibrary() {
               <div>
                 <label className="text-[10px] font-semibold uppercase tracking-wider text-t1-muted mb-1.5 block">Skill</label>
                 <div className="flex flex-wrap gap-1.5">
-                  {skillCategories.map(cat => (
+                  {drillSkillFilters.map(cat => (
                     <button
                       key={cat.id}
                       onClick={() => { setCategoryFilter(categoryFilter === cat.id ? '' : cat.id); setVisibleCount(DRILLS_PER_PAGE); }}
@@ -382,7 +448,7 @@ export default function DrillLibrary() {
             )}
             {categoryFilter && (
               <span className="inline-flex items-center gap-1 px-2 py-1 bg-t1-blue/10 text-t1-blue text-[10px] font-medium rounded-full min-h-[28px]">
-                {skillCategories.find(c => c.id === categoryFilter)?.name}
+                {drillSkillFilters.find(c => c.id === categoryFilter)?.name}
                 <button onClick={() => setCategoryFilter('')} className="ml-0.5"><X className="w-3 h-3" /></button>
               </span>
             )}
