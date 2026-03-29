@@ -34,8 +34,9 @@ export default function OnboardingQuiz() {
   const [showExplanation, setShowExplanation] = useState(false);
   const [result, setResult] = useState<QuizResult | null>(null);
 
-  // Shuffle questions once per quiz attempt
-  const questions = useMemo(() => shuffleArray(quizQuestions), [state === 'intro' ? Date.now() : 0]);
+  // Shuffle questions once per quiz attempt — shuffleSeed increments each time startQuiz is called
+  const [shuffleSeed, setShuffleSeed] = useState(0);
+  const questions = useMemo(() => shuffleArray(quizQuestions), [shuffleSeed]);
 
   const currentQuestion = questions[currentIdx];
   const totalQuestions = questions.length;
@@ -87,6 +88,7 @@ export default function OnboardingQuiz() {
     setCurrentIdx(0);
     setShowExplanation(false);
     setResult(null);
+    setShuffleSeed(prev => prev + 1);
     setState('active');
   }, []);
 
@@ -128,7 +130,7 @@ export default function OnboardingQuiz() {
                 <AlertTriangle className="w-10 h-10 text-red-400" />
               )}
             </div>
-            <h1 className="font-oswald font-bold text-4xl text-t1-text uppercase tracking-tight mb-2">
+            <h1 className="font-display font-bold text-4xl text-t1-text uppercase tracking-tight mb-2">
               {passed ? 'Quiz Passed!' : 'Not Yet'}
             </h1>
             <p className="text-t1-muted mb-6">
@@ -166,7 +168,7 @@ export default function OnboardingQuiz() {
           {/* Incorrect Questions Review */}
           {incorrectQuestions.length > 0 && (
             <div className="mb-8">
-              <h2 className="font-oswald font-bold text-xl text-t1-text uppercase tracking-wide mb-4">
+              <h2 className="font-display font-bold text-xl text-t1-text uppercase tracking-wide mb-4">
                 Review Incorrect Answers
               </h2>
               {Object.entries(incorrectByModule).map(([moduleId, questions]) => (
@@ -242,7 +244,7 @@ export default function OnboardingQuiz() {
           {/* Quiz History */}
           {quizResults.length > 1 && (
             <div className="mt-8 bg-t1-surface border border-t1-border rounded-xl p-5">
-              <h3 className="font-oswald font-bold text-lg text-t1-text uppercase tracking-wide mb-3">
+              <h3 className="font-display font-bold text-lg text-t1-text uppercase tracking-wide mb-3">
                 Quiz History
               </h3>
               <div className="space-y-2">
@@ -435,7 +437,7 @@ export default function OnboardingQuiz() {
           <div className="w-20 h-20 rounded-2xl bg-t1-blue/20 flex items-center justify-center mx-auto mb-6">
             <GraduationCap className="w-10 h-10 text-t1-blue" />
           </div>
-          <h1 className="font-oswald font-bold text-4xl md:text-5xl text-t1-text uppercase tracking-tight mb-3">
+          <h1 className="font-display font-bold text-4xl md:text-5xl text-t1-text uppercase tracking-tight mb-3">
             Onboarding Quiz
           </h1>
           <p className="text-t1-muted max-w-lg mx-auto">
@@ -463,7 +465,7 @@ export default function OnboardingQuiz() {
 
         {/* Module Breakdown */}
         <div className="bg-t1-surface border border-t1-border rounded-xl p-6 mb-8">
-          <h3 className="font-oswald font-bold text-lg text-t1-text uppercase tracking-wide mb-4">
+          <h3 className="font-display font-bold text-lg text-t1-text uppercase tracking-wide mb-4">
             Questions By Module
           </h3>
           <div className="space-y-3">
@@ -481,7 +483,7 @@ export default function OnboardingQuiz() {
 
         {/* Rules */}
         <div className="bg-t1-navy border border-t1-blue/20 rounded-xl p-6 mb-8">
-          <h3 className="font-oswald font-bold text-lg text-t1-text uppercase tracking-wide mb-3">
+          <h3 className="font-display font-bold text-lg text-t1-text uppercase tracking-wide mb-3">
             Quiz Rules
           </h3>
           <ul className="space-y-2 text-sm text-t1-blue-light">

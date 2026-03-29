@@ -14,6 +14,7 @@ import { useSessionNotes } from '@/hooks/useSessionNotes';
 import { useSessionHistory } from '@/hooks/useSessionHistory';
 
 interface SessionBlockEntry {
+  key: string;
   blockId: SessionBlockId;
   drillId?: string;
   duration: string;
@@ -94,6 +95,7 @@ export default function SessionBuilder() {
       setSelectedLevel(plan.level);
       setSessionTime(String(plan.totalTime));
       setBlocks(plan.blocks.map(b => ({
+        key: `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
         blockId: mapLabelToBlockId(b.label),
         duration: '',
         notes: b.content,
@@ -123,6 +125,7 @@ export default function SessionBuilder() {
   const addBlock = (blockId: SessionBlockId) => {
     const block = sessionBlocks.find(b => b.id === blockId);
     setBlocks(prev => [...prev, {
+      key: `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
       blockId,
       duration: block?.typicalDuration.split('-')[0].trim() + ' min' || '10 min',
       notes: ''
@@ -144,6 +147,7 @@ export default function SessionBuilder() {
       setSelectedLevel(template.level);
       setSessionTime(template.totalTime.replace(' min', ''));
       setBlocks(template.blocks.map(b => ({
+        key: `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
         blockId: b.blockId,
         duration: b.duration,
         notes: b.notes
@@ -159,7 +163,10 @@ export default function SessionBuilder() {
     if (last) {
       setSelectedLevel(last.level);
       setSessionTime(last.time);
-      setBlocks(last.blocks);
+      setBlocks(last.blocks.map(b => ({
+        ...b,
+        key: b.key || `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+      })));
       setShowTemplates(false);
       setLoadedPlanName(null);
       setLoadedPlanEmphasis(null);
@@ -242,9 +249,10 @@ export default function SessionBuilder() {
               </div>
             </div>
             <div className="sm:w-40">
-              <label className="text-[10px] font-semibold uppercase tracking-wider text-t1-muted mb-1.5 block">Total Time</label>
+              <label htmlFor="session-time" className="text-[10px] font-semibold uppercase tracking-wider text-t1-muted mb-1.5 block">Total Time</label>
               <div className="flex items-center gap-2">
                 <input
+                  id="session-time"
                   type="number"
                   value={sessionTime}
                   onChange={(e) => setSessionTime(e.target.value)}
@@ -263,9 +271,10 @@ export default function SessionBuilder() {
         <div className="bg-t1-surface border border-t1-border rounded-lg p-3 sm:p-5">
           <div className="flex items-center gap-2 mb-1.5">
             <StickyNote className="w-4 h-4 text-t1-blue" />
-            <label className="text-[10px] font-semibold uppercase tracking-wider text-t1-muted">Session Notes</label>
+            <label htmlFor="session-notes" className="text-[10px] font-semibold uppercase tracking-wider text-t1-muted">Session Notes</label>
           </div>
           <textarea
+            id="session-notes"
             value={sessionNotes}
             onChange={(e) => setSessionNotes(e.target.value)}
             placeholder="Focus areas, reminders, player notes... (auto-saved)"
@@ -342,7 +351,7 @@ export default function SessionBuilder() {
             const selectedDrill = block.drillId ? drills.find(d => d.id === block.drillId) : null;
 
             return (
-              <div key={index} className="bg-t1-surface border border-t1-border rounded-lg p-3 sm:p-4">
+              <div key={block.key} className="bg-t1-surface border border-t1-border rounded-lg p-3 sm:p-4">
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-2">
                     <span className="w-6 h-6 rounded-full bg-t1-blue text-white text-[10px] font-bold flex items-center justify-center flex-shrink-0">

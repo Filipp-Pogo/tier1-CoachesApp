@@ -96,6 +96,8 @@ function NavDropdown({ item, isActive }: { item: NavItem; isActive: (href: strin
     <div ref={ref} className="relative" onMouseEnter={handleEnter} onMouseLeave={handleLeave}>
       <button
         onClick={() => setOpen(!open)}
+        aria-expanded={open}
+        aria-haspopup="true"
         className={`flex items-center gap-1 px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
           active
             ? 'bg-t1-blue text-white'

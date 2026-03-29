@@ -7,6 +7,15 @@
 
 import { pathwayStages, sessionBlocks, drills, type PathwayStageId, type SessionBlockId } from './data';
 
+function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
 interface ExportBlock {
   blockId: SessionBlockId;
   drillId?: string;
@@ -34,19 +43,19 @@ export function exportSessionPDF(data: SessionExportData) {
 
     const drillDetails = drill ? `
       <div class="drill-details">
-        <div class="drill-name">${drill.name}</div>
-        <div class="drill-objective"><strong>Objective:</strong> ${drill.objective}</div>
-        <div class="drill-setup"><strong>Setup:</strong> ${drill.setup}</div>
+        <div class="drill-name">${escapeHtml(drill.name)}</div>
+        <div class="drill-objective"><strong>Objective:</strong> ${escapeHtml(drill.objective)}</div>
+        <div class="drill-setup"><strong>Setup:</strong> ${escapeHtml(drill.setup)}</div>
         <div class="drill-cues">
           <strong>Coaching Cues:</strong>
           <ul>
-            ${drill.coachingCues.map(c => `<li>${c}</li>`).join('')}
+            ${drill.coachingCues.map(c => `<li>${escapeHtml(c)}</li>`).join('')}
           </ul>
         </div>
         <div class="drill-standards">
           <strong>Standards:</strong>
           <ul>
-            ${drill.standards.map(s => `<li>${s}</li>`).join('')}
+            ${drill.standards.map(s => `<li>${escapeHtml(s)}</li>`).join('')}
           </ul>
         </div>
       </div>
@@ -55,11 +64,11 @@ export function exportSessionPDF(data: SessionExportData) {
     return `
       <tr class="block-row">
         <td class="block-num">${i + 1}</td>
-        <td class="block-name">${blockInfo?.name || block.blockId}</td>
-        <td class="block-duration">${block.duration}</td>
+        <td class="block-name">${escapeHtml(blockInfo?.name || block.blockId)}</td>
+        <td class="block-duration">${escapeHtml(block.duration)}</td>
         <td class="block-content">
-          ${drill ? drill.name : (block.notes || blockInfo?.description || '—')}
-          ${block.notes && drill ? `<div class="block-notes">Notes: ${block.notes}</div>` : ''}
+          ${drill ? escapeHtml(drill.name) : escapeHtml(block.notes || blockInfo?.description || '—')}
+          ${block.notes && drill ? `<div class="block-notes">Notes: ${escapeHtml(block.notes)}</div>` : ''}
         </td>
       </tr>
       ${drill ? `<tr class="detail-row"><td colspan="4">${drillDetails}</td></tr>` : ''}
@@ -71,7 +80,7 @@ export function exportSessionPDF(data: SessionExportData) {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Tier 1 Session Plan — ${stage?.shortName || data.level} — ${dateStr}</title>
+  <title>Tier 1 Session Plan — ${escapeHtml(stage?.shortName || data.level)} — ${escapeHtml(dateStr)}</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Oswald:wght@500;600;700&display=swap');
 
@@ -321,11 +330,11 @@ export function exportSessionPDF(data: SessionExportData) {
     <div class="meta">
       <div class="meta-item">
         <div class="meta-label">Level</div>
-        <div class="meta-value">${stage?.shortName || data.level}</div>
+        <div class="meta-value">${escapeHtml(stage?.shortName || data.level)}</div>
       </div>
       <div class="meta-item">
         <div class="meta-label">Total Time</div>
-        <div class="meta-value">${data.totalTime} min</div>
+        <div class="meta-value">${escapeHtml(data.totalTime)} min</div>
       </div>
       <div class="meta-item">
         <div class="meta-label">Blocks</div>
@@ -336,7 +345,7 @@ export function exportSessionPDF(data: SessionExportData) {
     ${data.sessionNotes ? `
     <div style="background:#22262b;border:1px solid rgba(255,255,255,0.08);border-radius:6px;padding:12px 16px;margin-bottom:20px;">
       <div style="font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:#a0a5ad;margin-bottom:6px;font-weight:600;">Session Notes</div>
-      <div style="font-size:13px;color:#e8e8e8;line-height:1.5;white-space:pre-wrap;">${data.sessionNotes}</div>
+      <div style="font-size:13px;color:#e8e8e8;line-height:1.5;white-space:pre-wrap;">${escapeHtml(data.sessionNotes)}</div>
     </div>` : ''}
 
     <table class="session-table">

@@ -7,7 +7,7 @@ import { useState, useMemo } from 'react';
 import { Link } from 'wouter';
 import {
   History, Calendar, Clock, Trash2, ChevronDown, ChevronUp,
-  ClipboardList, AlertCircle, Filter, X, AlertTriangle
+  ClipboardList, Filter, X, AlertTriangle
 } from 'lucide-react';
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
