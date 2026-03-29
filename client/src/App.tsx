@@ -4,6 +4,7 @@ import NotFound from "@/pages/NotFound";
 import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
+import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import Layout from "./components/Layout";
 import Dashboard from "./pages/Dashboard";
 import Pathway from "./pages/Pathway";
@@ -19,8 +20,27 @@ import SessionHistory from "./pages/SessionHistory";
 import PlanComparison from "./pages/PlanComparison";
 import Onboarding from "./pages/Onboarding";
 import OnboardingQuiz from "./pages/OnboardingQuiz";
+import AuthPage from "./pages/Auth";
+import { Loader2 } from "lucide-react";
 
 function Router() {
+  const { authEnabled, loading, user } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center text-t1-text">
+        <div className="flex items-center gap-3 text-sm uppercase tracking-widest text-t1-muted">
+          <Loader2 className="h-4 w-4 animate-spin" />
+          Loading Coaches App
+        </div>
+      </div>
+    );
+  }
+
+  if (authEnabled && !user) {
+    return <AuthPage />;
+  }
+
   return (
     <Layout>
       <Switch>
@@ -48,12 +68,14 @@ function Router() {
 function App() {
   return (
     <ErrorBoundary>
-      <ThemeProvider defaultTheme="dark">
-        <TooltipProvider>
-          <Toaster />
-          <Router />
-        </TooltipProvider>
-      </ThemeProvider>
+      <AuthProvider>
+        <ThemeProvider defaultTheme="dark">
+          <TooltipProvider>
+            <Toaster />
+            <Router />
+          </TooltipProvider>
+        </ThemeProvider>
+      </AuthProvider>
     </ErrorBoundary>
   );
 }

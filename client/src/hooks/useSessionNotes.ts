@@ -3,13 +3,13 @@
   Stores a single string under 'tier1-session-notes'.
 */
 import { useState, useEffect, useCallback } from 'react';
+import { loadStoredString, removeStored, saveStoredString } from '@/lib/localState';
+import { STORAGE_KEYS } from '@/lib/storageKeys';
 
-const STORAGE_KEY = 'tier1-session-notes';
+const STORAGE_KEY = STORAGE_KEYS.sessionNotes;
 
 function load(): string {
-  try {
-    return localStorage.getItem(STORAGE_KEY) || '';
-  } catch { return ''; }
+  return loadStoredString(STORAGE_KEY, '');
 }
 
 export function useSessionNotes() {
@@ -26,12 +26,12 @@ export function useSessionNotes() {
 
   const updateNotes = useCallback((value: string) => {
     setNotes(value);
-    localStorage.setItem(STORAGE_KEY, value);
+    saveStoredString(STORAGE_KEY, value);
   }, []);
 
   const clearNotes = useCallback(() => {
     setNotes('');
-    localStorage.removeItem(STORAGE_KEY);
+    removeStored(STORAGE_KEY);
   }, []);
 
   return { notes, updateNotes, clearNotes };

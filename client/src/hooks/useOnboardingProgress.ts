@@ -1,8 +1,10 @@
 import { useState, useEffect, useCallback } from 'react';
 import type { QuizResult } from '@/lib/onboarding';
+import { loadStored, removeStored, saveStored } from '@/lib/localState';
+import { STORAGE_KEYS } from '@/lib/storageKeys';
 
-const PROGRESS_KEY = 'tier1-onboarding-progress';
-const QUIZ_KEY = 'tier1-onboarding-quiz';
+const PROGRESS_KEY = STORAGE_KEYS.onboardingProgress;
+const QUIZ_KEY = STORAGE_KEYS.onboardingQuiz;
 
 interface OnboardingProgress {
   completedLessons: string[];   // lesson IDs
@@ -17,19 +19,11 @@ const defaultProgress: OnboardingProgress = {
 };
 
 function loadProgress(): OnboardingProgress {
-  try {
-    const raw = localStorage.getItem(PROGRESS_KEY);
-    if (raw) return JSON.parse(raw);
-  } catch { /* ignore */ }
-  return { ...defaultProgress };
+  return loadStored<OnboardingProgress>(PROGRESS_KEY, { ...defaultProgress });
 }
 
 function loadQuizResults(): QuizResult[] {
-  try {
-    const raw = localStorage.getItem(QUIZ_KEY);
-    if (raw) return JSON.parse(raw);
-  } catch { /* ignore */ }
-  return [];
+  return loadStored<QuizResult[]>(QUIZ_KEY, []);
 }
 
 export function useOnboardingProgress() {
@@ -38,11 +32,11 @@ export function useOnboardingProgress() {
 
   // Persist progress
   useEffect(() => {
-    localStorage.setItem(PROGRESS_KEY, JSON.stringify(progress));
+    saveStored(PROGRESS_KEY, progress);
   }, [progress]);
 
   useEffect(() => {
-    localStorage.setItem(QUIZ_KEY, JSON.stringify(quizResults));
+    saveStored(QUIZ_KEY, quizResults);
   }, [quizResults]);
 
   // Cross-tab sync
@@ -94,8 +88,8 @@ export function useOnboardingProgress() {
   const resetProgress = useCallback(() => {
     setProgress({ ...defaultProgress });
     setQuizResults([]);
-    localStorage.removeItem(PROGRESS_KEY);
-    localStorage.removeItem(QUIZ_KEY);
+    removeStored(PROGRESS_KEY);
+    removeStored(QUIZ_KEY);
   }, []);
 
   return {

@@ -4,8 +4,10 @@
   Persists across browser sessions. Max 50 entries.
 */
 import { useState, useCallback, useEffect } from 'react';
+import { loadStored, removeStored, saveStored } from '@/lib/localState';
+import { STORAGE_KEYS } from '@/lib/storageKeys';
 
-const HISTORY_KEY = 'tier1-session-history';
+const HISTORY_KEY = STORAGE_KEYS.sessionHistory;
 const MAX_ENTRIES = 50;
 
 export interface SessionHistoryEntry {
@@ -21,22 +23,12 @@ export interface SessionHistoryEntry {
 }
 
 function loadHistory(): SessionHistoryEntry[] {
-  try {
-    const stored = localStorage.getItem(HISTORY_KEY);
-    if (!stored) return [];
-    const parsed = JSON.parse(stored);
-    return Array.isArray(parsed) ? parsed : [];
-  } catch {
-    return [];
-  }
+  const parsed = loadStored<SessionHistoryEntry[]>(HISTORY_KEY, []);
+  return Array.isArray(parsed) ? parsed : [];
 }
 
 function saveHistory(entries: SessionHistoryEntry[]) {
-  try {
-    localStorage.setItem(HISTORY_KEY, JSON.stringify(entries));
-  } catch {
-    // storage full — fail silently
-  }
+  saveStored(HISTORY_KEY, entries);
 }
 
 export function useSessionHistory() {
@@ -74,7 +66,7 @@ export function useSessionHistory() {
 
   const clearHistory = useCallback(() => {
     setEntries([]);
-    try { localStorage.removeItem(HISTORY_KEY); } catch { /* */ }
+    removeStored(HISTORY_KEY);
   }, []);
 
   return { entries, addEntry, removeEntry, clearHistory };

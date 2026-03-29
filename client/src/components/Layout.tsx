@@ -11,9 +11,10 @@ import { Link, useLocation } from 'wouter';
 import {
   Menu, X, ChevronRight, ChevronDown, LayoutDashboard, Route, BookOpen,
   Wrench, Target, TrendingUp, Shield, ClipboardList, History, ArrowLeftRight, GraduationCap,
-  Sun, Moon
+  Sun, Moon, LogOut
 } from 'lucide-react';
 import { useTheme } from '@/contexts/ThemeContext';
+import { useAuth } from '@/contexts/AuthContext';
 
 const TIER1_LOGO_WHITE = 'https://d2xsxph8kpxj0f.cloudfront.net/310519663356767696/ZPsMJTEeF9cNbnWWtGpFHU/tier1_logo_white_e523441d.webp';
 
@@ -161,6 +162,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [location] = useLocation();
   const { isDark } = useTheme();
+  const { authEnabled, user, signOut } = useAuth();
 
   // Close mobile menu on route change
   useEffect(() => {
@@ -227,6 +229,21 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             <div className="ml-2 border-l border-t1-border pl-2">
               <ThemeToggle size="sm" />
             </div>
+            {authEnabled && user && (
+              <div className="ml-2 flex items-center gap-2 border-l border-t1-border pl-3">
+                <div className="hidden xl:block text-right">
+                  <p className="text-xs font-medium text-t1-text leading-tight">{user.email}</p>
+                  <p className="text-[10px] uppercase tracking-widest text-t1-muted">Cloud sync on</p>
+                </div>
+                <button
+                  onClick={() => void signOut()}
+                  className="inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium text-t1-muted hover:text-t1-text hover:bg-t1-surface transition-colors"
+                >
+                  <LogOut className="w-4 h-4" />
+                  Sign Out
+                </button>
+              </div>
+            )}
           </nav>
 
           {/* Mobile: theme toggle visible */}
@@ -356,6 +373,15 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
           {/* Menu Footer */}
           <div className="flex-shrink-0 px-4 py-4 border-t border-t1-border">
+            {authEnabled && user && (
+              <button
+                onClick={() => void signOut()}
+                className="mb-3 w-full flex items-center justify-center gap-2 rounded-xl border border-t1-border bg-t1-surface px-4 py-3 text-sm font-medium text-t1-text"
+              >
+                <LogOut className="w-4 h-4" />
+                Sign Out
+              </button>
+            )}
             <p className="text-[10px] text-t1-muted/50 font-display uppercase tracking-widest text-center">
               The Standard Is The Standard.
             </p>

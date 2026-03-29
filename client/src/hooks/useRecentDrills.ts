@@ -4,19 +4,15 @@
   Syncs across tabs via the storage event.
 */
 import { useState, useEffect, useCallback } from 'react';
+import { loadStored, saveStored } from '@/lib/localState';
+import { STORAGE_KEYS } from '@/lib/storageKeys';
 
-const STORAGE_KEY = 'tier1-recent-drills';
+const STORAGE_KEY = STORAGE_KEYS.recentDrills;
 const MAX_RECENT = 8;
 
 function load(): string[] {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) {
-      const parsed = JSON.parse(raw);
-      if (Array.isArray(parsed)) return parsed.slice(0, MAX_RECENT);
-    }
-  } catch { /* ignore */ }
-  return [];
+  const parsed = loadStored<unknown[]>(STORAGE_KEY, []);
+  return Array.isArray(parsed) ? parsed.slice(0, MAX_RECENT).filter((x): x is string => typeof x === 'string') : [];
 }
 
 export function useRecentDrills() {
@@ -34,7 +30,7 @@ export function useRecentDrills() {
   const addRecent = useCallback((drillId: string) => {
     setRecentIds(prev => {
       const next = [drillId, ...prev.filter(id => id !== drillId)].slice(0, MAX_RECENT);
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+      saveStored(STORAGE_KEY, next);
       return next;
     });
   }, []);

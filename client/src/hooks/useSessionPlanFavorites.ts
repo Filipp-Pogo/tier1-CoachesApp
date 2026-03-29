@@ -3,28 +3,20 @@
   Persists favorite plan IDs and recently viewed plan IDs across sessions.
 */
 import { useState, useCallback, useEffect } from 'react';
+import { loadStored, saveStored } from '@/lib/localState';
+import { STORAGE_KEYS } from '@/lib/storageKeys';
 
-const FAV_KEY = 'tier1-plan-favorites';
-const RECENT_KEY = 'tier1-plan-recent';
+const FAV_KEY = STORAGE_KEYS.sessionPlanFavorites;
+const RECENT_KEY = STORAGE_KEYS.sessionPlanRecent;
 const MAX_RECENT = 10;
 
 function loadArray(key: string): string[] {
-  try {
-    const stored = localStorage.getItem(key);
-    if (!stored) return [];
-    const parsed = JSON.parse(stored);
-    return Array.isArray(parsed) ? parsed.filter((x: unknown) => typeof x === 'string') : [];
-  } catch {
-    return [];
-  }
+  const parsed = loadStored<unknown[]>(key, []);
+  return Array.isArray(parsed) ? parsed.filter((x: unknown) => typeof x === 'string') : [];
 }
 
 function saveArray(key: string, ids: string[]) {
-  try {
-    localStorage.setItem(key, JSON.stringify(ids));
-  } catch {
-    // storage full or unavailable — fail silently
-  }
+  saveStored(key, ids);
 }
 
 export function useSessionPlanFavorites() {

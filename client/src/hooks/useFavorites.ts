@@ -3,24 +3,17 @@
   Persists favorite drill IDs across sessions.
 */
 import { useState, useCallback, useEffect } from 'react';
+import { loadStored, saveStored } from '@/lib/localState';
+import { STORAGE_KEYS } from '@/lib/storageKeys';
 
-const STORAGE_KEY = 'tier1-favorites';
+const STORAGE_KEY = STORAGE_KEYS.favorites;
 
 function loadFavorites(): string[] {
-  try {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    return stored ? JSON.parse(stored) : [];
-  } catch {
-    return [];
-  }
+  return loadStored<string[]>(STORAGE_KEY, []);
 }
 
 function saveFavorites(ids: string[]) {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(ids));
-  } catch {
-    // storage full or unavailable — fail silently
-  }
+  saveStored(STORAGE_KEY, ids);
 }
 
 export function useFavorites() {
