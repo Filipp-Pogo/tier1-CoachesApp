@@ -176,6 +176,20 @@ export default function DrillLibrary() {
     setVisibleCount(DRILLS_PER_PAGE);
   };
 
+  const applyClassPreset = (stageId: PathwayStageId | '') => {
+    setActiveTab('all');
+    setSearchQuery('');
+    setUtrFilter('');
+    setBlockFilter('');
+    setCategoryFilter('');
+    setTypeFilter('');
+    setFeedingFilter('');
+    setFormatFilter('');
+    setShowAdvancedFilters(false);
+    setLevelFilter(stageId);
+    setVisibleCount(DRILLS_PER_PAGE);
+  };
+
   const handleLevelFilter = (stageId: PathwayStageId) => {
     setLevelFilter(levelFilter === stageId ? '' : stageId);
     setVisibleCount(DRILLS_PER_PAGE);
@@ -261,6 +275,39 @@ export default function DrillLibrary() {
         </div>
 
         {/* ALWAYS-VISIBLE Level Filter Pills */}
+        <div className="mb-3 rounded-xl border border-t1-border bg-t1-surface p-3">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="text-[10px] font-semibold uppercase tracking-wider text-t1-muted">Quick Class Mode</p>
+              <p className="text-xs text-t1-muted mt-0.5">One tap to tailor the library for the class you’re walking out to coach.</p>
+            </div>
+            {levelFilter && (
+              <button
+                onClick={() => applyClassPreset('')}
+                className="text-xs text-t1-blue font-medium hover:underline self-start sm:self-auto"
+              >
+                Clear class preset
+              </button>
+            )}
+          </div>
+
+          <div className="mt-3 flex flex-wrap gap-2">
+            {pathwayStages.map(stage => (
+              <button
+                key={`preset-${stage.id}`}
+                onClick={() => applyClassPreset(levelFilter === stage.id ? '' : stage.id)}
+                className={`px-3 py-2 rounded-lg text-xs font-bold uppercase tracking-wider border transition-colors min-h-[40px] ${
+                  levelFilter === stage.id
+                    ? 'bg-t1-blue text-white border-t1-blue'
+                    : 'bg-t1-bg border-t1-border text-t1-muted hover:bg-t1-blue/10'
+                }`}
+              >
+                {stage.shortName}
+              </button>
+            ))}
+          </div>
+        </div>
+
         <div className="mb-3">
           <div className="flex flex-wrap items-center gap-1.5">
             <button
