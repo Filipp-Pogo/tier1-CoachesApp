@@ -419,7 +419,7 @@ export default function DrillLibrary() {
                 <button
                   onClick={(e) => { e.preventDefault(); e.stopPropagation(); openPreview(drill.id); }}
                   className="absolute top-3 right-12 z-10 w-8 h-8 rounded-full flex items-center justify-center transition-all bg-t1-bg/80 text-t1-muted sm:opacity-0 sm:group-hover:opacity-100 hover:text-t1-blue hover:bg-t1-blue/10 active:bg-t1-blue/20"
-                  title="Quick preview"
+                  aria-label={`Quick preview: ${drill.name}`}
                 >
                   <Eye className="w-4 h-4" />
                 </button>
@@ -432,7 +432,7 @@ export default function DrillLibrary() {
                       ? 'bg-yellow-500/15 text-yellow-400'
                       : 'bg-t1-bg/80 text-t1-muted/60 sm:opacity-0 sm:group-hover:opacity-100 hover:text-yellow-400 active:bg-yellow-500/10'
                   }`}
-                  title={favorited ? 'Remove from My Drills' : 'Add to My Drills'}
+                  aria-label={favorited ? `Remove ${drill.name} from My Drills` : `Add ${drill.name} to My Drills`}
                 >
                   <Star className={`w-4 h-4 ${favorited ? 'fill-yellow-400' : ''}`} />
                 </button>

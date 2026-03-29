@@ -27,7 +27,7 @@ const accentColors: Record<string, { border: string; bg: string; text: string }>
 };
 
 function isDraftPlan(plan: SessionPlan): boolean {
-  return plan.level === 'foundations';
+  return plan.planNumber < 0;
 }
 
 interface PlanSelectorProps {

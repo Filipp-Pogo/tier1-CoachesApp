@@ -131,34 +131,33 @@ export default function Assessments() {
           return (
             <section key={idx} className="bg-t1-surface border border-t1-border rounded-lg overflow-hidden">
               {/* Section Header — clickable when in All view */}
-              <div
-                className={`bg-t1-blue/5 border-b border-t1-border px-4 sm:px-6 py-3 sm:py-4 ${
-                  isAllView ? 'cursor-pointer hover:bg-t1-blue/10 transition-colors select-none' : ''
-                }`}
-                onClick={isAllView ? () => toggleSection(assessment.stageId) : undefined}
-              >
-                <div className="flex items-center justify-between">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <h2 className="font-display text-sm sm:text-lg font-semibold uppercase tracking-wide text-t1-text">
-                        {assessment.stageName} Standards
-                      </h2>
-                      {isDraft && (
-                        <span className="text-[10px] bg-yellow-500/15 text-yellow-400 px-1.5 py-0.5 rounded font-medium uppercase tracking-wider">
-                          Draft
-                        </span>
-                      )}
+              {isAllView ? (
+                <button
+                  className="w-full text-left bg-t1-blue/5 border-b border-t1-border px-4 sm:px-6 py-3 sm:py-4 hover:bg-t1-blue/10 transition-colors"
+                  onClick={() => toggleSection(assessment.stageId)}
+                  aria-expanded={isExpanded}
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <h2 className="font-display text-sm sm:text-lg font-semibold uppercase tracking-wide text-t1-text">
+                          {assessment.stageName} Standards
+                        </h2>
+                        {isDraft && (
+                          <span className="text-[10px] bg-yellow-500/15 text-yellow-400 px-1.5 py-0.5 rounded font-medium uppercase tracking-wider">
+                            Draft
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-[10px] sm:text-xs text-t1-muted mt-0.5">
+                        {pathwayStages.find(s => s.id === assessment.stageId)?.name}
+                        {!isExpanded && (
+                          <span className="ml-2 text-t1-muted/60">
+                            {categoryCount} categories &middot; {standardCount} standards
+                          </span>
+                        )}
+                      </p>
                     </div>
-                    <p className="text-[10px] sm:text-xs text-t1-muted mt-0.5">
-                      {pathwayStages.find(s => s.id === assessment.stageId)?.name}
-                      {!isExpanded && (
-                        <span className="ml-2 text-t1-muted/60">
-                          {categoryCount} categories &middot; {standardCount} standards
-                        </span>
-                      )}
-                    </p>
-                  </div>
-                  {isAllView && (
                     <div className="flex-shrink-0 ml-3">
                       {isExpanded ? (
                         <ChevronDown className="w-5 h-5 text-t1-muted" />
@@ -166,9 +165,25 @@ export default function Assessments() {
                         <ChevronRight className="w-5 h-5 text-t1-muted" />
                       )}
                     </div>
-                  )}
+                  </div>
+                </button>
+              ) : (
+                <div className="bg-t1-blue/5 border-b border-t1-border px-4 sm:px-6 py-3 sm:py-4">
+                  <div className="flex items-center gap-2">
+                    <h2 className="font-display text-sm sm:text-lg font-semibold uppercase tracking-wide text-t1-text">
+                      {assessment.stageName} Standards
+                    </h2>
+                    {isDraft && (
+                      <span className="text-[10px] bg-yellow-500/15 text-yellow-400 px-1.5 py-0.5 rounded font-medium uppercase tracking-wider">
+                        Draft
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-[10px] sm:text-xs text-t1-muted mt-0.5">
+                    {pathwayStages.find(s => s.id === assessment.stageId)?.name}
+                  </p>
                 </div>
-              </div>
+              )}
 
               {/* Collapsible Content */}
               <div

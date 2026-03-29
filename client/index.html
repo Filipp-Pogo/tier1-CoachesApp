@@ -5,7 +5,7 @@
     <meta charset="UTF-8" />
     <meta
       name="viewport"
-      content="width=device-width, initial-scale=1.0, maximum-scale=1, viewport-fit=cover" />
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <title>Tier 1 Academy</title>
     <meta name="theme-color" content="#1a1d21" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -19,10 +19,13 @@
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+    <!-- Analytics: only injected when VITE_ANALYTICS_ENDPOINT is set -->
+    <!-- If env vars are unset, Vite leaves the %VAR% tokens which are stripped at build time -->
     <script
       defer
       src="%VITE_ANALYTICS_ENDPOINT%/umami"
-      data-website-id="%VITE_ANALYTICS_WEBSITE_ID%"></script>
+      data-website-id="%VITE_ANALYTICS_WEBSITE_ID%"
+      onerror="this.remove()"></script>
   </body>
 
 </html>
