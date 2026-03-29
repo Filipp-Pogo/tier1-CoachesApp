@@ -1,23 +1,30 @@
 /*
   SESSION PLANS: Tier 1 Performance — Cold Dark Brand
-  MOBILE-FIRST: 52 pre-built session plans organized by level and sub-band.
-  Includes: search, favorites, recently viewed, load plan into builder, draft badges, comparison link.
+  MOBILE-FIRST: stock plans, saved custom plans, and shared plans.
+  Includes: search, favorites, recently viewed, compare link, and editable custom-plan flow.
 */
-import { useState, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link, useLocation } from 'wouter';
 import {
-  Clock, ChevronDown, ChevronUp, Target, AlertTriangle,
-  Zap, ArrowRight, ClipboardList, Copy, Check, Printer,
-  Star, History, Upload, AlertCircle, Search, ArrowLeftRight, X
+  Clock, ChevronDown, ChevronUp, Target, AlertTriangle, Zap, ArrowRight,
+  ClipboardList, Copy, Check, Printer, Star, History, Search, ArrowLeftRight,
+  X, Edit3, Users, Lock,
 } from 'lucide-react';
 import { pathwayStages, type PathwayStageId } from '@/lib/data';
-import { sessionPlans, sessionPlanLevelGroups, type SessionPlan } from '@/lib/sessionPlans';
+import { sessionPlans, sessionPlanLevelGroups } from '@/lib/sessionPlans';
 import { useSessionPlanFavorites } from '@/hooks/useSessionPlanFavorites';
+import { useAuth } from '@/contexts/AuthContext';
+import {
+  fetchSharedCustomPlans,
+  fetchUserCustomPlans,
+  persistCustomPlanDraft,
+  recordToCardPlan,
+  stockPlanToCardPlan,
+  stockPlanToDraft,
+  customRecordToDraft,
+  type SessionPlanCardData,
+} from '@/lib/customPlans';
 
-// localStorage key for loaded plan — Session Builder reads this
-const LOADED_PLAN_KEY = 'tier1-loaded-plan';
-
-// Color map for level badges
 const levelColors: Record<PathwayStageId, string> = {
   foundations: 'bg-red-500/15 text-red-400 border-red-500/20',
   prep: 'bg-green-500/15 text-green-400 border-green-500/20',
@@ -36,23 +43,37 @@ const levelBgColors: Record<PathwayStageId, string> = {
   fta: 'border-l-orange-500',
 };
 
-// Check if a plan is a draft (Foundations plans)
-function isDraftPlan(plan: SessionPlan): boolean {
-  return plan.level === 'foundations';
+type PlansTab = 'all' | 'favorites' | 'recent' | 'custom' | 'shared';
+
+function matchesSearch(plan: SessionPlanCardData, query: string) {
+  if (!query.trim()) return true;
+  const q = query.toLowerCase();
+  return (
+    plan.name.toLowerCase().includes(q) ||
+    plan.objective.toLowerCase().includes(q) ||
+    plan.levelTag.toLowerCase().includes(q) ||
+    plan.coachingEmphasis.toLowerCase().includes(q) ||
+    plan.matchPlayTransfer.toLowerCase().includes(q) ||
+    plan.standards.some((item) => item.toLowerCase().includes(q)) ||
+    plan.commonMistakes.some((item) => item.toLowerCase().includes(q)) ||
+    plan.blocks.some((block) => block.label.toLowerCase().includes(q) || block.content.toLowerCase().includes(q))
+  );
 }
 
 interface PlanCardProps {
-  plan: SessionPlan;
+  plan: SessionPlanCardData;
   isExpanded: boolean;
   onToggle: () => void;
-  isFavorite: boolean;
-  onToggleFavorite: () => void;
-  onLoadPlan: () => void;
+  isFavorite?: boolean;
+  onToggleFavorite?: () => void;
+  onPrimaryAction: () => void;
+  primaryActionLabel?: string;
 }
 
-function PlanCard({ plan, isExpanded, onToggle, isFavorite, onToggleFavorite, onLoadPlan }: PlanCardProps) {
+function PlanCard({ plan, isExpanded, onToggle, isFavorite = false, onToggleFavorite, onPrimaryAction, primaryActionLabel }: PlanCardProps) {
   const [copiedBlock, setCopiedBlock] = useState<string | null>(null);
-  const draft = isDraftPlan(plan);
+  const draft = Boolean(plan.isDraft);
+  const custom = plan.planType === 'custom';
 
   const copyPlanText = () => {
     const text = [
@@ -62,7 +83,7 @@ function PlanCard({ plan, isExpanded, onToggle, isFavorite, onToggleFavorite, on
       `Objective: ${plan.objective}`,
       '',
       'BLOCKS:',
-      ...plan.blocks.map(b => `  ${b.label}: ${b.content}`),
+      ...plan.blocks.map((b) => `  ${b.label}: ${b.content}`),
       '',
       `Coaching Emphasis: ${plan.coachingEmphasis}`,
       `Standards: ${plan.standards.join(', ')}`,
@@ -77,7 +98,9 @@ function PlanCard({ plan, isExpanded, onToggle, isFavorite, onToggleFavorite, on
   };
 
   const handlePrint = () => {
-    const draftBanner = draft ? '<div style="background:#fef3c7;color:#92400e;padding:6px 14px;border-radius:6px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:12px;">Draft — Content to be refined</div>' : '';
+    const draftBanner = draft
+      ? '<div style="background:#fef3c7;color:#92400e;padding:6px 14px;border-radius:6px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:12px;">Draft — Content to be refined</div>'
+      : '';
     const html = `<!DOCTYPE html>
 <html><head>
 <title>${plan.name} — Tier 1 Session Plan</title>
@@ -95,14 +118,12 @@ function PlanCard({ plan, isExpanded, onToggle, isFavorite, onToggleFavorite, on
   tr:nth-child(even) td { background: #f9fafb; }
   .emphasis { background: #eff6ff; padding: 10px 14px; border-radius: 6px; margin-bottom: 12px; border-left: 3px solid #3b82f6; }
   .emphasis strong { font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: #3b82f6; display: block; margin-bottom: 4px; }
-  .emphasis p { font-size: 13px; }
   .section { margin-bottom: 12px; }
   .section-title { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: #666; margin-bottom: 4px; }
   .section ul { list-style: none; padding: 0; }
   .section li { font-size: 12px; padding: 2px 0; padding-left: 14px; position: relative; }
   .section li::before { content: '\\2022'; position: absolute; left: 0; color: #3b82f6; }
   .footer { margin-top: 20px; padding-top: 12px; border-top: 1px solid #e5e7eb; font-size: 10px; color: #999; text-align: center; font-family: 'Oswald', sans-serif; text-transform: uppercase; letter-spacing: 0.1em; }
-  @media print { body { padding: 16px; } }
 </style>
 </head><body>
 ${draftBanner}
@@ -112,22 +133,24 @@ ${draftBanner}
 <h2>Session Blocks</h2>
 <table>
 <thead><tr><th>Block</th><th>Content</th></tr></thead>
-<tbody>${plan.blocks.map(b => `<tr><td style="font-weight:600;white-space:nowrap;width:120px;">${b.label}</td><td>${b.content}</td></tr>`).join('')}</tbody>
+<tbody>${plan.blocks.map((b) => `<tr><td style="font-weight:600;white-space:nowrap;width:120px;">${b.label}</td><td>${b.content}</td></tr>`).join('')}</tbody>
 </table>
 <div class="emphasis"><strong>Coaching Emphasis</strong><p>${plan.coachingEmphasis}</p></div>
-<div class="section"><div class="section-title">Standards to Hold</div><ul>${plan.standards.map(s => `<li>${s}</li>`).join('')}</ul></div>
-<div class="section"><div class="section-title">Common Session Mistakes</div><ul>${plan.commonMistakes.map(m => `<li>${m}</li>`).join('')}</ul></div>
+<div class="section"><div class="section-title">Standards to Hold</div><ul>${plan.standards.map((s) => `<li>${s}</li>`).join('')}</ul></div>
+<div class="section"><div class="section-title">Common Session Mistakes</div><ul>${plan.commonMistakes.map((m) => `<li>${m}</li>`).join('')}</ul></div>
 <div class="section"><div class="section-title">Match Play Transfer</div><p style="font-size:12px;padding-left:14px;">${plan.matchPlayTransfer}</p></div>
 <div class="footer">Tier 1 Performance &middot; The Standard Is The Standard.</div>
 <script>window.print();</script>
 </body></html>`;
     const w = window.open('', '_blank');
-    if (w) { w.document.write(html); w.document.close(); }
+    if (w) {
+      w.document.write(html);
+      w.document.close();
+    }
   };
 
   return (
     <div className={`bg-t1-surface border border-t1-border rounded-lg overflow-hidden border-l-4 ${levelBgColors[plan.level]}`}>
-      {/* Card Header — always visible */}
       <div className="flex items-start">
         <button
           onClick={onToggle}
@@ -142,9 +165,18 @@ ${draftBanner}
                 <Clock className="w-3 h-3" />
                 {plan.totalTime} min
               </span>
+              {custom && plan.visibility && (
+                <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border flex items-center gap-1 ${
+                  plan.visibility === 'shared'
+                    ? 'bg-green-500/15 text-green-400 border-green-500/20'
+                    : 'bg-t1-bg text-t1-muted border-t1-border'
+                }`}>
+                  {plan.visibility === 'shared' ? <Users className="w-3 h-3" /> : <Lock className="w-3 h-3" />}
+                  {plan.visibility}
+                </span>
+              )}
               {draft && (
-                <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-yellow-500/15 text-yellow-400 border border-yellow-500/20 flex items-center gap-1">
-                  <AlertCircle className="w-3 h-3" />
+                <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-yellow-500/15 text-yellow-400 border border-yellow-500/20">
                   Draft
                 </span>
               )}
@@ -157,40 +189,22 @@ ${draftBanner}
             </p>
           </div>
           <div className="flex-shrink-0 mt-1">
-            {isExpanded ? (
-              <ChevronUp className="w-5 h-5 text-t1-muted" />
-            ) : (
-              <ChevronDown className="w-5 h-5 text-t1-muted" />
-            )}
+            {isExpanded ? <ChevronUp className="w-5 h-5 text-t1-muted" /> : <ChevronDown className="w-5 h-5 text-t1-muted" />}
           </div>
         </button>
-        {/* Favorite button — always visible */}
-        <button
-          onClick={(e) => { e.stopPropagation(); onToggleFavorite(); }}
-          className="flex-shrink-0 p-3 sm:p-4 active:scale-90 transition-transform"
-          aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
-        >
-          <Star className={`w-5 h-5 ${isFavorite ? 'text-yellow-400 fill-yellow-400' : 'text-t1-muted/40'}`} />
-        </button>
+        {plan.planType === 'stock' && onToggleFavorite && (
+          <button
+            onClick={(e) => { e.stopPropagation(); onToggleFavorite(); }}
+            className="flex-shrink-0 p-3 sm:p-4 active:scale-90 transition-transform"
+            aria-label={isFavorite ? 'Remove from favorites' : 'Add to favorites'}
+          >
+            <Star className={`w-5 h-5 ${isFavorite ? 'text-yellow-400 fill-yellow-400' : 'text-t1-muted/40'}`} />
+          </button>
+        )}
       </div>
 
-      {/* Expanded Detail */}
       {isExpanded && (
         <div className="border-t border-t1-border px-3 sm:px-4 pb-3 sm:pb-4 pt-3 space-y-3">
-          {/* Draft notice */}
-          {draft && (
-            <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-lg p-3 flex items-start gap-2">
-              <AlertCircle className="w-4 h-4 text-yellow-400 flex-shrink-0 mt-0.5" />
-              <div>
-                <p className="text-xs font-semibold text-yellow-400">Draft Plan</p>
-                <p className="text-[11px] text-t1-muted mt-0.5">
-                  Structure is ready. Content to be refined with Max. Use as a starting framework.
-                </p>
-              </div>
-            </div>
-          )}
-
-          {/* Session Blocks Table */}
           <div>
             <h4 className="text-[10px] font-semibold uppercase tracking-wider text-t1-blue mb-2 flex items-center gap-1.5">
               <ClipboardList className="w-3.5 h-3.5" />
@@ -206,49 +220,43 @@ ${draftBanner}
             </div>
           </div>
 
-          {/* Coaching Emphasis */}
           <div className="bg-t1-blue/5 border border-t1-blue/15 rounded-lg p-3">
             <h4 className="text-[10px] font-semibold uppercase tracking-wider text-t1-blue mb-1 flex items-center gap-1.5">
               <Zap className="w-3.5 h-3.5" />
               Coaching Emphasis
             </h4>
-            <p className="text-sm text-t1-text font-medium">
-              {plan.coachingEmphasis}
-            </p>
+            <p className="text-sm text-t1-text font-medium">{plan.coachingEmphasis}</p>
           </div>
 
-          {/* Standards */}
           <div>
             <h4 className="text-[10px] font-semibold uppercase tracking-wider text-t1-muted mb-1.5 flex items-center gap-1.5">
               <Target className="w-3.5 h-3.5" />
               Standards to Hold
             </h4>
             <div className="flex flex-wrap gap-1.5">
-              {plan.standards.map((s, i) => (
+              {plan.standards.map((item, i) => (
                 <span key={i} className="text-[11px] px-2.5 py-1 bg-t1-bg border border-t1-border rounded-full text-t1-muted">
-                  {s}
+                  {item}
                 </span>
               ))}
             </div>
           </div>
 
-          {/* Common Mistakes */}
           <div>
             <h4 className="text-[10px] font-semibold uppercase tracking-wider text-red-400/80 mb-1.5 flex items-center gap-1.5">
               <AlertTriangle className="w-3.5 h-3.5" />
               Common Session Mistakes
             </h4>
             <ul className="space-y-1">
-              {plan.commonMistakes.map((m, i) => (
+              {plan.commonMistakes.map((item, i) => (
                 <li key={i} className="text-xs text-red-400/70 flex items-start gap-1.5">
                   <span className="text-red-400 mt-0.5">•</span>
-                  {m}
+                  {item}
                 </li>
               ))}
             </ul>
           </div>
 
-          {/* Match Play Transfer */}
           <div>
             <h4 className="text-[10px] font-semibold uppercase tracking-wider text-t1-muted mb-1 flex items-center gap-1.5">
               <ArrowRight className="w-3.5 h-3.5" />
@@ -257,8 +265,7 @@ ${draftBanner}
             <p className="text-xs text-t1-text">{plan.matchPlayTransfer}</p>
           </div>
 
-          {/* Action Buttons */}
-          <div className="flex items-center gap-2 pt-2 border-t border-t1-border/50">
+          <div className="flex items-center gap-2 pt-2 border-t border-t1-border/50 flex-wrap">
             <button
               onClick={copyPlanText}
               className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-t1-bg border border-t1-border rounded-lg text-t1-muted hover:text-t1-text transition-colors"
@@ -274,11 +281,11 @@ ${draftBanner}
               Print
             </button>
             <button
-              onClick={onLoadPlan}
+              onClick={onPrimaryAction}
               className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-t1-blue text-white rounded-lg hover:bg-t1-blue/90 transition-colors ml-auto"
             >
-              <Upload className="w-3.5 h-3.5" />
-              Load into Builder
+              <Edit3 className="w-3.5 h-3.5" />
+              {primaryActionLabel || (plan.planType === 'stock' ? 'Customize Copy' : 'Edit in Builder')}
             </button>
           </div>
         </div>
@@ -292,113 +299,159 @@ export default function SessionPlans() {
   const [activeSubBand, setActiveSubBand] = useState<string | null>(null);
   const [expandedPlan, setExpandedPlan] = useState<string | null>(null);
   const [durationFilter, setDurationFilter] = useState<number | null>(null);
-  const [activeTab, setActiveTab] = useState<'all' | 'favorites' | 'recent'>('all');
-  const [loadedToast, setLoadedToast] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<PlansTab>('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [customPlans, setCustomPlans] = useState<SessionPlanCardData[]>([]);
+  const [sharedPlans, setSharedPlans] = useState<SessionPlanCardData[]>([]);
+  const [loadingCustomPlans, setLoadingCustomPlans] = useState(false);
   const [, navigate] = useLocation();
-
   const { favorites, recentIds, toggleFavorite, isFavorite, addRecent } = useSessionPlanFavorites();
+  const { user, authEnabled } = useAuth();
 
-  // Expand a plan and mark it as recently viewed
+  useEffect(() => {
+    if (!authEnabled || !user) {
+      setCustomPlans([]);
+      setSharedPlans([]);
+      return;
+    }
+
+    let mounted = true;
+
+    const load = async () => {
+      setLoadingCustomPlans(true);
+      try {
+        const [mine, shared] = await Promise.all([
+          fetchUserCustomPlans(user.id),
+          fetchSharedCustomPlans(user.id),
+        ]);
+        if (!mounted) return;
+        setCustomPlans(mine.map(recordToCardPlan));
+        setSharedPlans(shared.map(recordToCardPlan));
+      } catch (error) {
+        console.error('Failed to load custom plans', error);
+      } finally {
+        if (mounted) setLoadingCustomPlans(false);
+      }
+    };
+
+    void load();
+
+    const handleRefresh = () => { void load(); };
+    window.addEventListener('tier1-custom-plans-updated', handleRefresh as EventListener);
+
+    return () => {
+      mounted = false;
+      window.removeEventListener('tier1-custom-plans-updated', handleRefresh as EventListener);
+    };
+  }, [authEnabled, user]);
+
+  const stockPlanCards = useMemo(() => sessionPlans.map(stockPlanToCardPlan), []);
+
   const handleExpand = (planId: string) => {
     if (expandedPlan === planId) {
       setExpandedPlan(null);
-    } else {
-      setExpandedPlan(planId);
+      return;
+    }
+
+    setExpandedPlan(planId);
+    if (stockPlanCards.some((plan) => plan.id === planId)) {
       addRecent(planId);
     }
   };
 
-  // Load a plan into the Session Builder via localStorage
-  const handleLoadPlan = (plan: SessionPlan) => {
-    const payload = {
-      planId: plan.id,
-      planName: plan.name,
-      level: plan.level,
-      totalTime: plan.totalTime,
-      blocks: plan.blocks,
-      coachingEmphasis: plan.coachingEmphasis,
-      objective: plan.objective,
-    };
-    try {
-      localStorage.setItem(LOADED_PLAN_KEY, JSON.stringify(payload));
-    } catch { /* ignore */ }
-    addRecent(plan.id);
-    setLoadedToast(plan.name);
-    setTimeout(() => {
-      setLoadedToast(null);
-      navigate('/session-builder');
-    }, 800);
+  const openPlanInBuilder = (plan: SessionPlanCardData) => {
+    const draft = plan.planType === 'stock'
+      ? stockPlanToDraft(sessionPlans.find((item) => item.id === plan.id)!)
+      : customRecordToDraft({
+          id: plan.id,
+          user_id: user?.id || '',
+          source_plan_id: plan.sourcePlanId ?? null,
+          source_type: plan.sourceType ?? 'custom',
+          name: plan.name,
+          level: plan.level,
+          sub_band: plan.subBand ?? null,
+          total_time: plan.totalTime,
+          objective: plan.objective,
+          coaching_emphasis: plan.coachingEmphasis,
+          standards: plan.standards,
+          common_mistakes: plan.commonMistakes,
+          match_play_transfer: plan.matchPlayTransfer,
+          visibility: plan.visibility ?? 'private',
+          blocks: plan.blocks,
+          created_at: plan.updatedAt ?? new Date().toISOString(),
+          updated_at: plan.updatedAt ?? new Date().toISOString(),
+        });
+
+    persistCustomPlanDraft(plan.planType === 'stock' ? draft : draft);
+    navigate('/session-builder');
   };
 
-  // Get available levels that have plans
+  const customizeSharedPlan = (plan: SessionPlanCardData) => {
+    const draft = customRecordToDraft({
+      id: plan.id,
+      user_id: user?.id || '',
+      source_plan_id: plan.sourcePlanId ?? plan.id,
+      source_type: 'custom',
+      name: `${plan.name} — Custom`,
+      level: plan.level,
+      sub_band: plan.subBand ?? null,
+      total_time: plan.totalTime,
+      objective: plan.objective,
+      coaching_emphasis: plan.coachingEmphasis,
+      standards: plan.standards,
+      common_mistakes: plan.commonMistakes,
+      match_play_transfer: plan.matchPlayTransfer,
+      visibility: 'private',
+      blocks: plan.blocks,
+      created_at: plan.updatedAt ?? new Date().toISOString(),
+      updated_at: plan.updatedAt ?? new Date().toISOString(),
+    });
+    draft.customPlanId = undefined;
+    draft.sourcePlanId = plan.id;
+    draft.sourceType = plan.planType === 'stock' ? 'stock' : 'custom';
+    draft.visibility = 'private';
+    persistCustomPlanDraft(draft);
+    navigate('/session-builder');
+  };
+
   const availableLevels = useMemo(() => {
-    const levels = new Set(sessionPlans.map(p => p.level));
-    return pathwayStages.filter(s => levels.has(s.id));
+    const levels = new Set(sessionPlans.map((plan) => plan.level));
+    return pathwayStages.filter((stage) => levels.has(stage.id));
   }, []);
 
-  // Get sub-bands for active level
   const availableSubBands = useMemo(() => {
     if (activeLevel === 'all') return [];
-    return sessionPlanLevelGroups.filter(g => g.level === activeLevel);
+    return sessionPlanLevelGroups.filter((group) => group.level === activeLevel);
   }, [activeLevel]);
 
-  // Get unique durations for the filter
   const availableDurations = useMemo(() => {
-    const durations = new Set(sessionPlans.map(p => p.totalTime));
+    const durations = new Set(sessionPlans.map((plan) => plan.totalTime));
     return Array.from(durations).sort((a, b) => a - b);
   }, []);
 
-  // Favorite plans
   const favoritePlans = useMemo(() => {
-    return sessionPlans.filter(p => favorites.includes(p.id));
-  }, [favorites]);
+    return stockPlanCards.filter((plan) => favorites.includes(plan.id));
+  }, [favorites, stockPlanCards]);
 
-  // Recent plans
   const recentPlans = useMemo(() => {
     return recentIds
-      .map(id => sessionPlans.find(p => p.id === id))
-      .filter((p): p is SessionPlan => !!p);
-  }, [recentIds]);
+      .map((id) => stockPlanCards.find((plan) => plan.id === id))
+      .filter((plan): plan is SessionPlanCardData => Boolean(plan));
+  }, [recentIds, stockPlanCards]);
 
-  // Search filter function
-  const matchesSearch = (plan: SessionPlan): boolean => {
-    if (!searchQuery.trim()) return true;
-    const q = searchQuery.toLowerCase();
-    return (
-      plan.name.toLowerCase().includes(q) ||
-      plan.objective.toLowerCase().includes(q) ||
-      plan.levelTag.toLowerCase().includes(q) ||
-      plan.coachingEmphasis.toLowerCase().includes(q) ||
-      plan.matchPlayTransfer.toLowerCase().includes(q) ||
-      plan.standards.some(s => s.toLowerCase().includes(q)) ||
-      plan.blocks.some(b => b.content.toLowerCase().includes(q) || b.label.toLowerCase().includes(q))
-    );
-  };
-
-  // Filter plans
-  const filteredPlans = useMemo(() => {
-    let result = sessionPlans;
-    if (activeLevel !== 'all') {
-      result = result.filter(p => p.level === activeLevel);
-    }
-    if (activeSubBand) {
-      result = result.filter(p => p.subBand === activeSubBand);
-    }
-    if (durationFilter) {
-      result = result.filter(p => p.totalTime === durationFilter);
-    }
-    if (searchQuery.trim()) {
-      result = result.filter(matchesSearch);
-    }
+  const filteredStockPlans = useMemo(() => {
+    let result = [...stockPlanCards];
+    if (activeLevel !== 'all') result = result.filter((plan) => plan.level === activeLevel);
+    if (activeSubBand) result = result.filter((plan) => plan.subBand === activeSubBand);
+    if (durationFilter) result = result.filter((plan) => plan.totalTime === durationFilter);
+    if (searchQuery.trim()) result = result.filter((plan) => matchesSearch(plan, searchQuery));
     return result;
-  }, [activeLevel, activeSubBand, durationFilter, searchQuery]);
+  }, [activeLevel, activeSubBand, durationFilter, searchQuery, stockPlanCards]);
 
-  // Group plans by level tag for display
   const groupedPlans = useMemo(() => {
-    const groups: { label: string; plans: SessionPlan[] }[] = [];
+    const groups: { label: string; plans: SessionPlanCardData[] }[] = [];
     let currentLabel = '';
-    for (const plan of filteredPlans) {
+    for (const plan of filteredStockPlans) {
       if (plan.levelTag !== currentLabel) {
         currentLabel = plan.levelTag;
         groups.push({ label: currentLabel, plans: [plan] });
@@ -407,7 +460,12 @@ export default function SessionPlans() {
       }
     }
     return groups;
-  }, [filteredPlans]);
+  }, [filteredStockPlans]);
+
+  const filteredFavorites = useMemo(() => favoritePlans.filter((plan) => matchesSearch(plan, searchQuery)), [favoritePlans, searchQuery]);
+  const filteredRecent = useMemo(() => recentPlans.filter((plan) => matchesSearch(plan, searchQuery)), [recentPlans, searchQuery]);
+  const filteredCustom = useMemo(() => customPlans.filter((plan) => matchesSearch(plan, searchQuery)), [customPlans, searchQuery]);
+  const filteredShared = useMemo(() => sharedPlans.filter((plan) => matchesSearch(plan, searchQuery)), [sharedPlans, searchQuery]);
 
   const handleLevelChange = (level: PathwayStageId | 'all') => {
     setActiveLevel(level);
@@ -415,31 +473,14 @@ export default function SessionPlans() {
     setExpandedPlan(null);
   };
 
-  // Determine which plans to show based on active tab
-  const displayPlans = activeTab === 'favorites' ? favoritePlans : activeTab === 'recent' ? recentPlans : null;
-
-  // Search-filtered favorites/recent
-  const searchFilteredFavorites = useMemo(() => {
-    if (!searchQuery.trim()) return favoritePlans;
-    return favoritePlans.filter(matchesSearch);
-  }, [favoritePlans, searchQuery]);
-
-  const searchFilteredRecent = useMemo(() => {
-    if (!searchQuery.trim()) return recentPlans;
-    return recentPlans.filter(matchesSearch);
-  }, [recentPlans, searchQuery]);
+  const emptyMessage = activeTab === 'custom'
+    ? authEnabled ? 'No saved custom plans yet.' : 'Connect Supabase to save custom plans.'
+    : activeTab === 'shared'
+      ? authEnabled ? 'No shared plans available yet.' : 'Connect Supabase to view shared plans.'
+      : 'No plans found.';
 
   return (
     <div>
-      {/* Loaded toast */}
-      {loadedToast && (
-        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 bg-green-500 text-white px-4 py-2.5 rounded-lg shadow-lg flex items-center gap-2 text-sm font-semibold animate-in fade-in slide-in-from-top-2">
-          <Check className="w-4 h-4" />
-          Loaded: {loadedToast}
-        </div>
-      )}
-
-      {/* Header */}
       <section className="bg-t1-navy border-b border-t1-border">
         <div className="container py-4 sm:py-6">
           <div className="flex items-start justify-between">
@@ -448,7 +489,7 @@ export default function SessionPlans() {
                 Session Plans
               </h1>
               <p className="mt-1 text-t1-muted text-xs sm:text-sm">
-                {sessionPlans.length} session plans by level and sub-band. Browse, favorite, print, or load into the builder.
+                Stock plans stay in code. Your custom plans sync through Supabase. Shared plans are the lightweight team lane.
               </p>
             </div>
             <Link
@@ -463,14 +504,13 @@ export default function SessionPlans() {
       </section>
 
       <div className="container mt-3 sm:mt-4 space-y-3 sm:space-y-4">
-        {/* Search Bar */}
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-t1-muted" />
           <input
             type="text"
             value={searchQuery}
-            onChange={e => setSearchQuery(e.target.value)}
-            placeholder="Search plans by name, drill, keyword..."
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search plans by name, emphasis, block, or keyword..."
             className="w-full pl-10 pr-10 py-3 bg-t1-surface border border-t1-border rounded-lg text-sm text-t1-text placeholder:text-t1-muted/50 focus:outline-none focus:border-t1-blue/50 transition-colors"
           />
           {searchQuery && (
@@ -483,7 +523,6 @@ export default function SessionPlans() {
           )}
         </div>
 
-        {/* Mobile compare link */}
         <Link
           href="/compare-plans"
           className="sm:hidden flex items-center justify-center gap-1.5 px-3 py-2.5 text-xs font-semibold bg-t1-surface border border-t1-border rounded-lg text-t1-muted hover:text-t1-text transition-colors no-underline"
@@ -492,29 +531,26 @@ export default function SessionPlans() {
           Compare Two Plans Side by Side
         </Link>
 
-        {/* Tabs: All / Favorites / Recent */}
-        <div className="flex gap-1 bg-t1-surface border border-t1-border rounded-lg p-1">
+        <div className="grid grid-cols-2 sm:grid-cols-5 gap-1 bg-t1-surface border border-t1-border rounded-lg p-1">
           {[
-            { key: 'all' as const, label: 'All Plans', icon: ClipboardList, count: sessionPlans.length },
+            { key: 'all' as const, label: 'All Plans', icon: ClipboardList, count: stockPlanCards.length },
             { key: 'favorites' as const, label: 'Favorites', icon: Star, count: favoritePlans.length },
             { key: 'recent' as const, label: 'Recent', icon: History, count: recentPlans.length },
-          ].map(tab => (
+            { key: 'custom' as const, label: 'Custom', icon: Edit3, count: customPlans.length },
+            { key: 'shared' as const, label: 'Shared', icon: Users, count: sharedPlans.length },
+          ].map((tab) => (
             <button
               key={tab.key}
               onClick={() => setActiveTab(tab.key)}
-              className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-md text-xs font-semibold uppercase tracking-wider transition-colors min-h-[40px] ${
-                activeTab === tab.key
-                  ? 'bg-t1-blue text-white'
-                  : 'text-t1-muted hover:text-t1-text active:bg-t1-bg'
+              className={`flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-md text-xs font-semibold uppercase tracking-wider transition-colors min-h-[40px] ${
+                activeTab === tab.key ? 'bg-t1-blue text-white' : 'text-t1-muted hover:text-t1-text active:bg-t1-bg'
               }`}
             >
               <tab.icon className={`w-3.5 h-3.5 ${activeTab === tab.key && tab.key === 'favorites' ? 'fill-white' : ''}`} />
               <span className="hidden sm:inline">{tab.label}</span>
-              <span className="sm:hidden">{tab.key === 'all' ? 'All' : tab.key === 'favorites' ? 'Favs' : 'Recent'}</span>
+              <span className="sm:hidden">{tab.label}</span>
               {tab.count > 0 && (
-                <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${
-                  activeTab === tab.key ? 'bg-white/20' : 'bg-t1-bg'
-                }`}>
+                <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${activeTab === tab.key ? 'bg-white/20' : 'bg-t1-bg'}`}>
                   {tab.count}
                 </span>
               )}
@@ -522,204 +558,114 @@ export default function SessionPlans() {
           ))}
         </div>
 
-        {/* Favorites Tab */}
-        {activeTab === 'favorites' && (
-          <>
-            {searchFilteredFavorites.length === 0 ? (
-              <div className="bg-t1-surface border border-t1-border rounded-lg p-8 text-center">
-                <Star className="w-8 h-8 text-t1-muted/30 mx-auto mb-2" />
-                <p className="text-sm text-t1-muted">
-                  {searchQuery.trim() ? 'No favorite plans match your search.' : 'No favorite plans yet.'}
-                </p>
-                {!searchQuery.trim() && (
-                  <p className="text-xs text-t1-muted/60 mt-1">Tap the star on any plan to save it here.</p>
-                )}
-              </div>
-            ) : (
-              <div className="space-y-2">
-                {searchFilteredFavorites.map(plan => (
-                  <PlanCard
-                    key={plan.id}
-                    plan={plan}
-                    isExpanded={expandedPlan === plan.id}
-                    onToggle={() => handleExpand(plan.id)}
-                    isFavorite={true}
-                    onToggleFavorite={() => toggleFavorite(plan.id)}
-                    onLoadPlan={() => handleLoadPlan(plan)}
-                  />
-                ))}
-              </div>
-            )}
-          </>
-        )}
-
-        {/* Recent Tab */}
-        {activeTab === 'recent' && (
-          <>
-            {searchFilteredRecent.length === 0 ? (
-              <div className="bg-t1-surface border border-t1-border rounded-lg p-8 text-center">
-                <History className="w-8 h-8 text-t1-muted/30 mx-auto mb-2" />
-                <p className="text-sm text-t1-muted">
-                  {searchQuery.trim() ? 'No recent plans match your search.' : 'No recently viewed plans.'}
-                </p>
-                {!searchQuery.trim() && (
-                  <p className="text-xs text-t1-muted/60 mt-1">Plans you expand will appear here.</p>
-                )}
-              </div>
-            ) : (
-              <div className="space-y-2">
-                {searchFilteredRecent.map(plan => (
-                  <PlanCard
-                    key={plan.id}
-                    plan={plan}
-                    isExpanded={expandedPlan === plan.id}
-                    onToggle={() => handleExpand(plan.id)}
-                    isFavorite={isFavorite(plan.id)}
-                    onToggleFavorite={() => toggleFavorite(plan.id)}
-                    onLoadPlan={() => handleLoadPlan(plan)}
-                  />
-                ))}
-              </div>
-            )}
-          </>
-        )}
-
-        {/* All Plans Tab — with filters */}
         {activeTab === 'all' && (
-          <>
-            {/* Filters */}
-            <div className="bg-t1-surface border border-t1-border rounded-lg p-3 sm:p-4 space-y-3">
-              {/* Level Filter */}
-              <div>
-                <label className="text-[10px] font-semibold uppercase tracking-wider text-t1-muted mb-1.5 block">Level</label>
-                <div className="flex flex-wrap gap-1.5">
-                  <button
-                    onClick={() => handleLevelChange('all')}
-                    className={`px-2.5 py-1.5 rounded-full text-xs font-medium border transition-colors min-h-[32px] ${
-                      activeLevel === 'all'
-                        ? 'bg-t1-blue text-white border-t1-blue'
-                        : 'bg-t1-bg border-t1-border text-t1-muted active:bg-t1-blue/10'
-                    }`}
-                  >
-                    All ({sessionPlans.length})
-                  </button>
-                  {availableLevels.map(stage => {
-                    const count = sessionPlans.filter(p => p.level === stage.id).length;
-                    return (
-                      <button
-                        key={stage.id}
-                        onClick={() => handleLevelChange(stage.id)}
-                        className={`px-2.5 py-1.5 rounded-full text-xs font-medium border transition-colors min-h-[32px] ${
-                          activeLevel === stage.id
-                            ? 'bg-t1-blue text-white border-t1-blue'
-                            : 'bg-t1-bg border-t1-border text-t1-muted active:bg-t1-blue/10'
-                        }`}
-                      >
-                        {stage.shortName} ({count})
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* Sub-Band Filter */}
-              {availableSubBands.length > 0 && (
-                <div>
-                  <label className="text-[10px] font-semibold uppercase tracking-wider text-t1-muted mb-1.5 block">Sub-Band</label>
-                  <div className="flex flex-wrap gap-1.5">
+          <div className="bg-t1-surface border border-t1-border rounded-lg p-3 sm:p-4 space-y-3">
+            <div>
+              <label className="text-[10px] font-semibold uppercase tracking-wider text-t1-muted mb-1.5 block">Level</label>
+              <div className="flex flex-wrap gap-1.5">
+                <button
+                  onClick={() => handleLevelChange('all')}
+                  className={`px-2.5 py-1.5 rounded-full text-xs font-medium border transition-colors min-h-[32px] ${
+                    activeLevel === 'all' ? 'bg-t1-blue text-white border-t1-blue' : 'bg-t1-bg border-t1-border text-t1-muted active:bg-t1-blue/10'
+                  }`}
+                >
+                  All ({stockPlanCards.length})
+                </button>
+                {availableLevels.map((stage) => {
+                  const count = stockPlanCards.filter((plan) => plan.level === stage.id).length;
+                  return (
                     <button
-                      onClick={() => { setActiveSubBand(null); setExpandedPlan(null); }}
+                      key={stage.id}
+                      onClick={() => handleLevelChange(stage.id)}
                       className={`px-2.5 py-1.5 rounded-full text-xs font-medium border transition-colors min-h-[32px] ${
-                        !activeSubBand
-                          ? 'bg-t1-blue text-white border-t1-blue'
-                          : 'bg-t1-bg border-t1-border text-t1-muted active:bg-t1-blue/10'
+                        activeLevel === stage.id ? 'bg-t1-blue text-white border-t1-blue' : 'bg-t1-bg border-t1-border text-t1-muted active:bg-t1-blue/10'
                       }`}
                     >
-                      All
+                      {stage.shortName} ({count})
                     </button>
-                    {availableSubBands.map(g => (
-                      <button
-                        key={g.subBand}
-                        onClick={() => { setActiveSubBand(g.subBand); setExpandedPlan(null); }}
-                        className={`px-2.5 py-1.5 rounded-full text-xs font-medium border transition-colors min-h-[32px] ${
-                          activeSubBand === g.subBand
-                            ? 'bg-t1-blue text-white border-t1-blue'
-                            : 'bg-t1-bg border-t1-border text-t1-muted active:bg-t1-blue/10'
-                        }`}
-                      >
-                        {g.label} ({g.planCount})
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
+                  );
+                })}
+              </div>
+            </div>
 
-              {/* Duration Filter */}
+            {availableSubBands.length > 0 && (
               <div>
-                <label className="text-[10px] font-semibold uppercase tracking-wider text-t1-muted mb-1.5 block">Duration</label>
+                <label className="text-[10px] font-semibold uppercase tracking-wider text-t1-muted mb-1.5 block">Sub-Band</label>
                 <div className="flex flex-wrap gap-1.5">
                   <button
-                    onClick={() => { setDurationFilter(null); setExpandedPlan(null); }}
+                    onClick={() => { setActiveSubBand(null); setExpandedPlan(null); }}
                     className={`px-2.5 py-1.5 rounded-full text-xs font-medium border transition-colors min-h-[32px] ${
-                      durationFilter === null
-                        ? 'bg-t1-blue text-white border-t1-blue'
-                        : 'bg-t1-bg border-t1-border text-t1-muted active:bg-t1-blue/10'
+                      !activeSubBand ? 'bg-t1-blue text-white border-t1-blue' : 'bg-t1-bg border-t1-border text-t1-muted active:bg-t1-blue/10'
                     }`}
                   >
                     All
                   </button>
-                  {availableDurations.map(dur => (
+                  {availableSubBands.map((group) => (
                     <button
-                      key={dur}
-                      onClick={() => { setDurationFilter(dur); setExpandedPlan(null); }}
+                      key={group.subBand}
+                      onClick={() => { setActiveSubBand(group.subBand); setExpandedPlan(null); }}
                       className={`px-2.5 py-1.5 rounded-full text-xs font-medium border transition-colors min-h-[32px] ${
-                        durationFilter === dur
-                          ? 'bg-t1-blue text-white border-t1-blue'
-                          : 'bg-t1-bg border-t1-border text-t1-muted active:bg-t1-blue/10'
+                        activeSubBand === group.subBand ? 'bg-t1-blue text-white border-t1-blue' : 'bg-t1-bg border-t1-border text-t1-muted active:bg-t1-blue/10'
                       }`}
                     >
-                      {dur} min
+                      {group.label} ({group.planCount})
                     </button>
                   ))}
                 </div>
               </div>
-            </div>
+            )}
 
-            {/* Results Count */}
+            <div>
+              <label className="text-[10px] font-semibold uppercase tracking-wider text-t1-muted mb-1.5 block">Duration</label>
+              <div className="flex flex-wrap gap-1.5">
+                <button
+                  onClick={() => { setDurationFilter(null); setExpandedPlan(null); }}
+                  className={`px-2.5 py-1.5 rounded-full text-xs font-medium border transition-colors min-h-[32px] ${
+                    durationFilter === null ? 'bg-t1-blue text-white border-t1-blue' : 'bg-t1-bg border-t1-border text-t1-muted active:bg-t1-blue/10'
+                  }`}
+                >
+                  All
+                </button>
+                {availableDurations.map((duration) => (
+                  <button
+                    key={duration}
+                    onClick={() => { setDurationFilter(duration); setExpandedPlan(null); }}
+                    className={`px-2.5 py-1.5 rounded-full text-xs font-medium border transition-colors min-h-[32px] ${
+                      durationFilter === duration ? 'bg-t1-blue text-white border-t1-blue' : 'bg-t1-bg border-t1-border text-t1-muted active:bg-t1-blue/10'
+                    }`}
+                  >
+                    {duration} min
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'all' && (
+          <>
             <div className="flex items-center justify-between">
               <p className="text-xs text-t1-muted">
-                {filteredPlans.length} session plan{filteredPlans.length !== 1 ? 's' : ''}
+                {filteredStockPlans.length} stock plan{filteredStockPlans.length !== 1 ? 's' : ''}
                 {searchQuery.trim() && ` matching "${searchQuery}"`}
               </p>
               {searchQuery.trim() && (
-                <button
-                  onClick={() => setSearchQuery('')}
-                  className="text-xs text-t1-blue hover:underline"
-                >
+                <button onClick={() => setSearchQuery('')} className="text-xs text-t1-blue hover:underline">
                   Clear search
                 </button>
               )}
             </div>
 
-            {/* Plans List — grouped by level tag */}
             {groupedPlans.length === 0 ? (
               <div className="bg-t1-surface border border-t1-border rounded-lg p-8 text-center">
                 <ClipboardList className="w-8 h-8 text-t1-muted/40 mx-auto mb-2" />
                 <p className="text-sm text-t1-muted">
                   {searchQuery.trim() ? `No session plans match "${searchQuery}".` : 'No session plans match your filters.'}
                 </p>
-                {searchQuery.trim() && (
-                  <button
-                    onClick={() => setSearchQuery('')}
-                    className="mt-2 text-xs text-t1-blue hover:underline"
-                  >
-                    Clear search
-                  </button>
-                )}
               </div>
             ) : (
               <div className="space-y-4">
-                {groupedPlans.map(group => (
+                {groupedPlans.map((group) => (
                   <div key={group.label}>
                     <h2 className="font-display text-xs sm:text-sm font-semibold uppercase tracking-wider text-t1-muted mb-2 px-1">
                       {group.label}
@@ -728,7 +674,7 @@ export default function SessionPlans() {
                       </span>
                     </h2>
                     <div className="space-y-2">
-                      {group.plans.map(plan => (
+                      {group.plans.map((plan) => (
                         <PlanCard
                           key={plan.id}
                           plan={plan}
@@ -736,7 +682,8 @@ export default function SessionPlans() {
                           onToggle={() => handleExpand(plan.id)}
                           isFavorite={isFavorite(plan.id)}
                           onToggleFavorite={() => toggleFavorite(plan.id)}
-                          onLoadPlan={() => handleLoadPlan(plan)}
+                          onPrimaryAction={() => openPlanInBuilder(plan)}
+                          primaryActionLabel="Customize Copy"
                         />
                       ))}
                     </div>
@@ -747,7 +694,61 @@ export default function SessionPlans() {
           </>
         )}
 
-        {/* Bottom Spacer for mobile nav */}
+        {activeTab !== 'all' && (
+          <>
+            {loadingCustomPlans && (activeTab === 'custom' || activeTab === 'shared') ? (
+              <div className="bg-t1-surface border border-t1-border rounded-lg p-8 text-center text-sm text-t1-muted">
+                Loading synced plans…
+              </div>
+            ) : (() => {
+              const plans = activeTab === 'favorites'
+                ? filteredFavorites
+                : activeTab === 'recent'
+                  ? filteredRecent
+                  : activeTab === 'custom'
+                    ? filteredCustom
+                    : filteredShared;
+
+              if (plans.length === 0) {
+                return (
+                  <div className="bg-t1-surface border border-t1-border rounded-lg p-8 text-center">
+                    <ClipboardList className="w-8 h-8 text-t1-muted/30 mx-auto mb-2" />
+                    <p className="text-sm text-t1-muted">
+                      {searchQuery.trim() ? `No ${activeTab} plans match your search.` : emptyMessage}
+                    </p>
+                    {(activeTab === 'custom' || activeTab === 'shared') && !authEnabled && (
+                      <p className="text-xs text-t1-muted/60 mt-1">Add Supabase keys and sign in to unlock synced plans.</p>
+                    )}
+                  </div>
+                );
+              }
+
+              return (
+                <div className="space-y-2">
+                  {plans.map((plan) => (
+                    <PlanCard
+                      key={plan.id}
+                      plan={plan}
+                      isExpanded={expandedPlan === plan.id}
+                      onToggle={() => handleExpand(plan.id)}
+                      isFavorite={activeTab === 'favorites' || activeTab === 'recent' ? isFavorite(plan.id) : false}
+                      onToggleFavorite={plan.planType === 'stock' ? () => toggleFavorite(plan.id) : undefined}
+                      onPrimaryAction={() => {
+                        if (activeTab === 'shared') {
+                          customizeSharedPlan(plan);
+                        } else {
+                          openPlanInBuilder(plan);
+                        }
+                      }}
+                      primaryActionLabel={activeTab === 'shared' ? 'Customize Copy' : plan.planType === 'stock' ? 'Customize Copy' : 'Edit in Builder'}
+                    />
+                  ))}
+                </div>
+              );
+            })()}
+          </>
+        )}
+
         <div className="h-4" />
       </div>
     </div>

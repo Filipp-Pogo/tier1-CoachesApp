@@ -12,6 +12,7 @@ import { drills, pathwayStages, sessionBlocks, skillCategories, type PathwayStag
 import { useFavorites } from '@/hooks/useFavorites';
 import { useRecentDrills } from '@/hooks/useRecentDrills';
 import { DrillQuickPreview } from '@/components/DrillQuickPreview';
+import { scoreDrillSearch } from '@/lib/drillSearch';
 
 const DRILLS_PER_PAGE = 24;
 
@@ -56,14 +57,6 @@ export default function DrillLibrary() {
   const filteredDrills = useMemo(() => {
     let result = [...drills];
     if (activeTab === 'favorites') result = result.filter(d => favorites.includes(d.id));
-    if (searchQuery) {
-      const q = searchQuery.toLowerCase();
-      result = result.filter(d =>
-        d.name.toLowerCase().includes(q) ||
-        d.objective.toLowerCase().includes(q) ||
-        d.coachingCues.some(c => c.toLowerCase().includes(q))
-      );
-    }
     if (levelFilter) result = result.filter(d => d.level.includes(levelFilter));
     if (blockFilter) result = result.filter(d => d.sessionBlock === blockFilter);
     if (categoryFilter) result = result.filter(d => d.skillCategory === categoryFilter);
@@ -73,6 +66,13 @@ export default function DrillLibrary() {
       if (formatFilter === 'doubles') result = result.filter(d => d.skillCategory === 'doubles');
       else if (formatFilter === 'private') result = result.filter(d => d.format === 'private' || d.format === 'group-or-private');
       else result = result.filter(d => d.skillCategory !== 'doubles');
+    }
+    if (searchQuery.trim()) {
+      result = result
+        .map(d => ({ drill: d, score: scoreDrillSearch(d, searchQuery) }))
+        .filter(item => item.score > 0)
+        .sort((a, b) => b.score - a.score || a.drill.name.localeCompare(b.drill.name))
+        .map(item => item.drill);
     }
     return result;
   }, [searchQuery, levelFilter, blockFilter, categoryFilter, typeFilter, feedingFilter, formatFilter, activeTab, favorites]);
@@ -163,7 +163,7 @@ export default function DrillLibrary() {
               type="text"
               value={searchQuery}
               onChange={(e) => { setSearchQuery(e.target.value); setVisibleCount(DRILLS_PER_PAGE); }}
-              placeholder="Search drills by name, objective, or coaching cue..."
+              placeholder="Search drills by name, coaching cue, objective, or setup..."
               className="w-full pl-9 pr-3 py-2.5 bg-t1-surface border border-t1-border rounded-lg text-sm text-t1-text placeholder:text-t1-muted/50 focus:outline-none focus:ring-2 focus:ring-t1-blue/30 min-h-[40px]"
             />
             {searchQuery && (

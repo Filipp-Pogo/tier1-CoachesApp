@@ -2,16 +2,27 @@
   SESSION BUILDER: Tier 1 Performance — Cold Dark Brand
   MOBILE-FIRST: Large touch targets, stacked block layout on mobile,
   favorites shown first, export PDF, session notes with localStorage.
-  Supports loading pre-built session plans from the Session Plans page.
+  Also acts as the editable custom-plan flow for stock and saved plans.
 */
 import { useState, useMemo, useEffect } from 'react';
 import { Link } from 'wouter';
-import { Plus, X, Clock, ChevronRight, Dumbbell, Printer, FileDown, Star, StickyNote, RotateCcw, ClipboardList, AlertCircle, History, Check } from 'lucide-react';
+import {
+  Plus, X, Clock, ChevronRight, Dumbbell, Printer, FileDown, Star,
+  StickyNote, RotateCcw, ClipboardList, History, Check, Save, Users,
+} from 'lucide-react';
+import { toast } from 'sonner';
 import { pathwayStages, sessionBlocks, drills, sessionTemplates, type PathwayStageId, type SessionBlockId } from '@/lib/data';
 import { exportSessionPDF } from '@/lib/session-pdf';
 import { useFavorites } from '@/hooks/useFavorites';
 import { useSessionNotes } from '@/hooks/useSessionNotes';
 import { useSessionHistory } from '@/hooks/useSessionHistory';
+import { useAuth } from '@/contexts/AuthContext';
+import {
+  consumeCustomPlanDraft,
+  type BuilderCustomPlanDraft,
+  type PlanVisibility,
+  saveCustomPlan,
+} from '@/lib/customPlans';
 
 interface SessionBlockEntry {
   key: string;
@@ -22,18 +33,6 @@ interface SessionBlockEntry {
 }
 
 const LAST_SESSION_KEY = 'tier1-last-session';
-const LOADED_PLAN_KEY = 'tier1-loaded-plan';
-
-// Loaded plan shape from Session Plans page
-interface LoadedPlan {
-  planId: string;
-  planName: string;
-  level: PathwayStageId;
-  totalTime: number;
-  blocks: { label: string; content: string }[];
-  coachingEmphasis: string;
-  objective: string;
-}
 
 function saveLastSession(data: { level: PathwayStageId; time: string; blocks: SessionBlockEntry[] }) {
   try { localStorage.setItem(LAST_SESSION_KEY, JSON.stringify(data)); } catch { /* ignore */ }
@@ -47,18 +46,6 @@ function loadLastSession(): { level: PathwayStageId; time: string; blocks: Sessi
   return null;
 }
 
-function consumeLoadedPlan(): LoadedPlan | null {
-  try {
-    const raw = localStorage.getItem(LOADED_PLAN_KEY);
-    if (raw) {
-      localStorage.removeItem(LOADED_PLAN_KEY);
-      return JSON.parse(raw);
-    }
-  } catch { /* ignore */ }
-  return null;
-}
-
-// Map plan block labels to session block IDs
 function mapLabelToBlockId(label: string): SessionBlockId {
   const lower = label.toLowerCase().trim();
   if (lower.includes('warm')) return 'warmup';
@@ -74,6 +61,26 @@ function mapLabelToBlockId(label: string): SessionBlockId {
   return 'feeding';
 }
 
+function blockLabelFromId(blockId: SessionBlockId) {
+  return sessionBlocks.find((block) => block.id === blockId)?.shortName ?? 'Block';
+}
+
+function parseListInput(value: string) {
+  return value
+    .split(/\n|,/)
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
+function stringifyListInput(values: string[]) {
+  return values.join('\n');
+}
+
+function createDefaultPlanName(level: PathwayStageId) {
+  const stage = pathwayStages.find((item) => item.id === level);
+  return `${stage?.shortName || 'Custom'} Session Plan`;
+}
+
 export default function SessionBuilder() {
   const [selectedLevel, setSelectedLevel] = useState<PathwayStageId>('foundations');
   const [sessionTime, setSessionTime] = useState('60');
@@ -82,33 +89,71 @@ export default function SessionBuilder() {
   const { favorites, isFavorite } = useFavorites();
   const { notes: sessionNotes, updateNotes: setSessionNotes } = useSessionNotes();
   const { addEntry } = useSessionHistory();
+  const { user, authEnabled } = useAuth();
   const [hasLastSession, setHasLastSession] = useState(false);
-  const [loadedPlanName, setLoadedPlanName] = useState<string | null>(null);
-  const [loadedPlanEmphasis, setLoadedPlanEmphasis] = useState<string | null>(null);
   const [savedToHistory, setSavedToHistory] = useState(false);
-  const [loadedPlanId, setLoadedPlanId] = useState<string | null>(null);
+  const [savingPlan, setSavingPlan] = useState(false);
 
-  // Check for loaded plan on mount
-  useEffect(() => {
-    const plan = consumeLoadedPlan();
-    if (plan) {
-      setSelectedLevel(plan.level);
-      setSessionTime(String(plan.totalTime));
-      setBlocks(plan.blocks.map(b => ({
-        key: `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
-        blockId: mapLabelToBlockId(b.label),
-        duration: '',
-        notes: b.content,
-      })));
-      setShowTemplates(false);
-      setLoadedPlanName(plan.planName);
-      setLoadedPlanEmphasis(plan.coachingEmphasis);
-      setLoadedPlanId(plan.planId);
-      // Set session notes to objective + emphasis
-      setSessionNotes(`Plan: ${plan.planName}\nObjective: ${plan.objective}\nEmphasis: ${plan.coachingEmphasis}`);
-    } else {
-      setHasLastSession(!!loadLastSession());
+  const [customPlanId, setCustomPlanId] = useState<string | null>(null);
+  const [sourcePlanId, setSourcePlanId] = useState<string | null>(null);
+  const [sourceType, setSourceType] = useState<'stock' | 'custom'>('custom');
+  const [planName, setPlanName] = useState(createDefaultPlanName('foundations'));
+  const [planObjective, setPlanObjective] = useState('');
+  const [planEmphasis, setPlanEmphasis] = useState('');
+  const [planVisibility, setPlanVisibility] = useState<PlanVisibility>('private');
+  const [standardsInput, setStandardsInput] = useState('');
+  const [commonMistakesInput, setCommonMistakesInput] = useState('');
+  const [matchPlayTransfer, setMatchPlayTransfer] = useState('');
+  const [sourceBanner, setSourceBanner] = useState<string | null>(null);
+
+  const applyDraft = (draft: BuilderCustomPlanDraft) => {
+    setSelectedLevel(draft.level);
+    setSessionTime(String(draft.totalTime));
+    setBlocks(draft.blocks.map((block) => ({
+      key: `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+      blockId: mapLabelToBlockId(block.label),
+      duration: '',
+      notes: block.content,
+    })));
+    setShowTemplates(false);
+    setCustomPlanId(draft.customPlanId ?? null);
+    setSourcePlanId(draft.sourcePlanId ?? null);
+    setSourceType(draft.sourceType);
+    setPlanName(draft.name);
+    setPlanObjective(draft.objective);
+    setPlanEmphasis(draft.coachingEmphasis);
+    setPlanVisibility(draft.visibility);
+    setStandardsInput(stringifyListInput(draft.standards));
+    setCommonMistakesInput(stringifyListInput(draft.commonMistakes));
+    setMatchPlayTransfer(draft.matchPlayTransfer);
+    setSourceBanner(draft.customPlanId ? `Editing saved custom plan: ${draft.name}` : `Customizing plan: ${draft.name}`);
+    if (!sessionNotes.trim()) {
+      setSessionNotes(`Plan: ${draft.name}\nObjective: ${draft.objective}\nEmphasis: ${draft.coachingEmphasis}`);
     }
+  };
+
+  const resetPlanMetadata = (level: PathwayStageId, name?: string) => {
+    setCustomPlanId(null);
+    setSourcePlanId(null);
+    setSourceType('custom');
+    setPlanName(name || createDefaultPlanName(level));
+    setPlanObjective('');
+    setPlanEmphasis('');
+    setPlanVisibility('private');
+    setStandardsInput('');
+    setCommonMistakesInput('');
+    setMatchPlayTransfer('');
+    setSourceBanner(null);
+  };
+
+  useEffect(() => {
+    const draft = consumeCustomPlanDraft();
+    if (draft) {
+      applyDraft(draft);
+      return;
+    }
+
+    setHasLastSession(!!loadLastSession());
   }, []);
 
   useEffect(() => {
@@ -153,8 +198,7 @@ export default function SessionBuilder() {
         notes: b.notes
       })));
       setShowTemplates(false);
-      setLoadedPlanName(null);
-      setLoadedPlanEmphasis(null);
+      resetPlanMetadata(template.level, `${template.name} — Custom`);
     }
   };
 
@@ -168,8 +212,7 @@ export default function SessionBuilder() {
         key: b.key || `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
       })));
       setShowTemplates(false);
-      setLoadedPlanName(null);
-      setLoadedPlanEmphasis(null);
+      resetPlanMetadata(last.level);
     }
   };
 
@@ -189,37 +232,99 @@ export default function SessionBuilder() {
     return { favs, rest };
   };
 
+  const buildCustomPlanDraft = (): BuilderCustomPlanDraft => ({
+    customPlanId: customPlanId ?? undefined,
+    sourcePlanId,
+    sourceType,
+    name: planName.trim() || createDefaultPlanName(selectedLevel),
+    level: selectedLevel,
+    subBand: null,
+    totalTime: parseInt(sessionTime, 10) || 60,
+    objective: planObjective.trim(),
+    coachingEmphasis: planEmphasis.trim(),
+    standards: parseListInput(standardsInput),
+    commonMistakes: parseListInput(commonMistakesInput),
+    matchPlayTransfer: matchPlayTransfer.trim(),
+    visibility: planVisibility,
+    blocks: blocks.map((block) => {
+      const drill = block.drillId ? drills.find((item) => item.id === block.drillId) : null;
+      const content = [drill?.name, block.notes.trim()].filter(Boolean).join(' — ');
+      return {
+        label: blockLabelFromId(block.blockId),
+        content: content || sessionBlocks.find((item) => item.id === block.blockId)?.description || '',
+      };
+    }),
+  });
+
+  const handleSaveCustomPlan = async () => {
+    if (!authEnabled) {
+      toast.error('Connect Supabase first to save custom plans.');
+      return;
+    }
+
+    if (!user) {
+      toast.error('Sign in to save custom plans.');
+      return;
+    }
+
+    if (!planName.trim()) {
+      toast.error('Add a custom plan name first.');
+      return;
+    }
+
+    if (!planObjective.trim()) {
+      toast.error('Add a session objective before saving.');
+      return;
+    }
+
+    if (blocks.length === 0) {
+      toast.error('Add at least one block before saving.');
+      return;
+    }
+
+    setSavingPlan(true);
+    try {
+      const saved = await saveCustomPlan(user, buildCustomPlanDraft());
+      setCustomPlanId(saved.id);
+      setSourceBanner(`Editing saved custom plan: ${saved.name}`);
+      window.dispatchEvent(new CustomEvent('tier1-custom-plans-updated'));
+      toast.success(customPlanId ? 'Custom plan updated.' : 'Custom plan saved.');
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to save custom plan.';
+      toast.error(message);
+    } finally {
+      setSavingPlan(false);
+    }
+  };
+
   return (
     <div>
-      {/* Header — compact on mobile */}
       <section className="bg-t1-navy border-b border-t1-border">
         <div className="container py-4 sm:py-6">
           <h1 className="font-display text-xl sm:text-4xl font-bold text-t1-text dark:text-white uppercase tracking-wide">
             Session Builder
           </h1>
           <p className="mt-1 text-t1-muted text-xs sm:text-sm">
-            Build a practice. Select level, choose blocks, assign drills.
+            Build, customize, and save session plans.
           </p>
         </div>
       </section>
 
       <div className="container mt-3 sm:mt-4 space-y-3 sm:space-y-4">
-        {/* Loaded Plan Banner */}
-        {loadedPlanName && (
+        {sourceBanner && (
           <div className="bg-t1-blue/10 border border-t1-blue/25 rounded-lg p-3 sm:p-4 flex items-start gap-3">
             <ClipboardList className="w-5 h-5 text-t1-blue flex-shrink-0 mt-0.5" />
             <div className="flex-1 min-w-0">
-              <p className="text-xs font-semibold text-t1-blue uppercase tracking-wider">Loaded from Session Plans</p>
-              <p className="text-sm font-bold text-t1-text mt-0.5">{loadedPlanName}</p>
-              {loadedPlanEmphasis && (
-                <p className="text-xs text-t1-muted mt-1">Emphasis: {loadedPlanEmphasis}</p>
-              )}
+              <p className="text-xs font-semibold text-t1-blue uppercase tracking-wider">
+                {customPlanId ? 'Saved Custom Plan' : sourceType === 'stock' ? 'Customizing Stock Plan' : 'Custom Plan Draft'}
+              </p>
+              <p className="text-sm font-bold text-t1-text mt-0.5">{sourceBanner}</p>
               <p className="text-[10px] text-t1-muted/60 mt-1">
-                Block notes are pre-filled from the plan. Assign drills and adjust durations as needed.
+                Save here, then find it later under Custom Plans. Shared plans appear in the Shared Plans tab for other signed-in coaches.
               </p>
             </div>
             <button
-              onClick={() => { setLoadedPlanName(null); setLoadedPlanEmphasis(null); }}
+              onClick={() => setSourceBanner(null)}
               className="flex-shrink-0 text-t1-muted hover:text-t1-text"
             >
               <X className="w-4 h-4" />
@@ -227,7 +332,6 @@ export default function SessionBuilder() {
           </div>
         )}
 
-        {/* Session Config */}
         <div className="bg-t1-surface border border-t1-border rounded-lg p-3 sm:p-5">
           <div className="space-y-3 sm:space-y-0 sm:flex sm:gap-4">
             <div className="flex-1">
@@ -236,7 +340,12 @@ export default function SessionBuilder() {
                 {pathwayStages.map(stage => (
                   <button
                     key={stage.id}
-                    onClick={() => setSelectedLevel(stage.id)}
+                    onClick={() => {
+                      setSelectedLevel(stage.id);
+                      if (!customPlanId && !sourcePlanId && !planName.trim()) {
+                        setPlanName(createDefaultPlanName(stage.id));
+                      }
+                    }}
                     className={`px-2.5 py-1.5 rounded-full text-xs font-medium border transition-colors min-h-[32px] ${
                       selectedLevel === stage.id
                         ? 'bg-t1-blue text-white border-t1-blue'
@@ -267,7 +376,122 @@ export default function SessionBuilder() {
           </div>
         </div>
 
-        {/* Session Notes */}
+        <div className="bg-t1-surface border border-t1-border rounded-lg p-3 sm:p-5 space-y-3">
+          <div className="flex items-center justify-between gap-2">
+            <div>
+              <h2 className="font-display text-xs sm:text-sm font-semibold uppercase tracking-wider text-t1-text">Custom Plan Details</h2>
+              <p className="text-[10px] text-t1-muted mt-1">This is what gets saved to Supabase as your custom plan.</p>
+            </div>
+            <button
+              onClick={handleSaveCustomPlan}
+              disabled={savingPlan}
+              className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-lg text-xs font-semibold uppercase tracking-wider min-h-[40px] transition-colors ${
+                savingPlan ? 'bg-t1-blue/50 text-white' : 'bg-t1-blue text-white hover:bg-t1-blue/90'
+              }`}
+            >
+              {customPlanId ? <Save className="w-3.5 h-3.5" /> : <Check className="w-3.5 h-3.5" />}
+              {savingPlan ? 'Saving…' : customPlanId ? 'Update Custom Plan' : 'Save Custom Plan'}
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label className="text-[10px] font-semibold uppercase tracking-wider text-t1-muted mb-1.5 block">Plan Name</label>
+              <input
+                value={planName}
+                onChange={(e) => setPlanName(e.target.value)}
+                placeholder="Prep Green Heavy Topspin Day"
+                className="w-full px-3 py-2 bg-t1-bg border border-t1-border rounded-lg text-sm text-t1-text placeholder:text-t1-muted/50 focus:outline-none focus:ring-2 focus:ring-t1-blue/30 min-h-[40px]"
+              />
+            </div>
+            <div>
+              <label className="text-[10px] font-semibold uppercase tracking-wider text-t1-muted mb-1.5 block">Visibility</label>
+              <div className="flex gap-2">
+                {([
+                  { key: 'private', label: 'Private', icon: Save },
+                  { key: 'shared', label: 'Shared', icon: Users },
+                ] as const).map((option) => (
+                  <button
+                    key={option.key}
+                    onClick={() => setPlanVisibility(option.key)}
+                    className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg border text-xs font-semibold uppercase tracking-wider min-h-[40px] transition-colors ${
+                      planVisibility === option.key
+                        ? 'bg-t1-blue text-white border-t1-blue'
+                        : 'bg-t1-bg border-t1-border text-t1-muted'
+                    }`}
+                  >
+                    <option.icon className="w-3.5 h-3.5" />
+                    {option.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <label className="text-[10px] font-semibold uppercase tracking-wider text-t1-muted mb-1.5 block">Objective</label>
+            <textarea
+              value={planObjective}
+              onChange={(e) => setPlanObjective(e.target.value)}
+              rows={2}
+              placeholder="What this session is actually trying to build."
+              className="w-full px-3 py-2.5 bg-t1-bg border border-t1-border rounded-lg text-sm text-t1-text placeholder:text-t1-muted/50 focus:outline-none focus:ring-2 focus:ring-t1-blue/30 resize-none"
+            />
+          </div>
+
+          <div>
+            <label className="text-[10px] font-semibold uppercase tracking-wider text-t1-muted mb-1.5 block">Coaching Emphasis</label>
+            <input
+              value={planEmphasis}
+              onChange={(e) => setPlanEmphasis(e.target.value)}
+              placeholder="Spacing before power."
+              className="w-full px-3 py-2 bg-t1-bg border border-t1-border rounded-lg text-sm text-t1-text placeholder:text-t1-muted/50 focus:outline-none focus:ring-2 focus:ring-t1-blue/30 min-h-[40px]"
+            />
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label className="text-[10px] font-semibold uppercase tracking-wider text-t1-muted mb-1.5 block">Standards to Hold</label>
+              <textarea
+                value={standardsInput}
+                onChange={(e) => setStandardsInput(e.target.value)}
+                rows={4}
+                placeholder={'Split step\nRecovery\nShape'}
+                className="w-full px-3 py-2.5 bg-t1-bg border border-t1-border rounded-lg text-sm text-t1-text placeholder:text-t1-muted/50 focus:outline-none focus:ring-2 focus:ring-t1-blue/30 resize-none"
+              />
+              <p className="text-[10px] text-t1-muted/60 mt-1">One per line.</p>
+            </div>
+            <div>
+              <label className="text-[10px] font-semibold uppercase tracking-wider text-t1-muted mb-1.5 block">Common Mistakes</label>
+              <textarea
+                value={commonMistakesInput}
+                onChange={(e) => setCommonMistakesInput(e.target.value)}
+                rows={4}
+                placeholder={'Too much speed\nRandom points'}
+                className="w-full px-3 py-2.5 bg-t1-bg border border-t1-border rounded-lg text-sm text-t1-text placeholder:text-t1-muted/50 focus:outline-none focus:ring-2 focus:ring-t1-blue/30 resize-none"
+              />
+              <p className="text-[10px] text-t1-muted/60 mt-1">One per line.</p>
+            </div>
+          </div>
+
+          <div>
+            <label className="text-[10px] font-semibold uppercase tracking-wider text-t1-muted mb-1.5 block">Match Play Transfer</label>
+            <textarea
+              value={matchPlayTransfer}
+              onChange={(e) => setMatchPlayTransfer(e.target.value)}
+              rows={2}
+              placeholder="How this session should show up in real matches."
+              className="w-full px-3 py-2.5 bg-t1-bg border border-t1-border rounded-lg text-sm text-t1-text placeholder:text-t1-muted/50 focus:outline-none focus:ring-2 focus:ring-t1-blue/30 resize-none"
+            />
+          </div>
+
+          {!authEnabled && (
+            <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs text-amber-200">
+              Supabase isn’t configured yet, so save/update is disabled. Builder still works locally.
+            </div>
+          )}
+        </div>
+
         <div className="bg-t1-surface border border-t1-border rounded-lg p-3 sm:p-5">
           <div className="flex items-center gap-2 mb-1.5">
             <StickyNote className="w-4 h-4 text-t1-blue" />
@@ -286,7 +510,6 @@ export default function SessionBuilder() {
           )}
         </div>
 
-        {/* Templates + Load Last Session + Browse Plans */}
         {showTemplates && blocks.length === 0 && (
           <div className="bg-t1-surface border border-t1-border rounded-lg p-3 sm:p-5">
             <div className="flex items-center justify-between mb-3 gap-2">
@@ -321,14 +544,13 @@ export default function SessionBuilder() {
               ))}
             </div>
 
-            {/* Browse Session Plans CTA */}
             <div className="mt-3 pt-3 border-t border-t1-border">
               <Link
                 href="/session-plans"
                 className="flex items-center justify-center gap-2 w-full p-3 bg-t1-blue/5 border border-t1-blue/20 rounded-lg text-t1-blue text-xs font-semibold uppercase tracking-wider active:bg-t1-blue/10 transition-colors no-underline min-h-[44px]"
               >
                 <ClipboardList className="w-4 h-4" />
-                Browse {52} Session Plans
+                Browse Session Plans
               </Link>
             </div>
 
@@ -343,7 +565,6 @@ export default function SessionBuilder() {
           </div>
         )}
 
-        {/* Session Blocks */}
         <div className="space-y-2 sm:space-y-3">
           {blocks.map((block, index) => {
             const blockInfo = sessionBlocks.find(b => b.id === block.blockId);
@@ -366,7 +587,6 @@ export default function SessionBuilder() {
                   </button>
                 </div>
 
-                {/* Stacked layout on mobile, row on desktop */}
                 <div className="space-y-2 sm:space-y-0 sm:flex sm:gap-3">
                   <div className="sm:w-24">
                     <label className="text-[10px] font-semibold uppercase tracking-wider text-t1-muted mb-1 block">Duration</label>
@@ -431,7 +651,6 @@ export default function SessionBuilder() {
           })}
         </div>
 
-        {/* Add Block — horizontal scroll on mobile */}
         <div className="bg-t1-surface border border-dashed border-t1-border-strong rounded-lg p-3 sm:p-4">
           <h3 className="text-[10px] font-semibold uppercase tracking-wider text-t1-muted mb-2">Add a Block</h3>
           <div className="flex flex-wrap gap-1.5 sm:gap-2">
@@ -447,7 +666,6 @@ export default function SessionBuilder() {
           </div>
         </div>
 
-        {/* Session Summary + Export */}
         {blocks.length > 0 && (
           <div className="bg-t1-surface border border-t1-border rounded-lg p-3 sm:p-5">
             <div className="flex items-center justify-between mb-3 gap-2">
@@ -466,12 +684,17 @@ export default function SessionBuilder() {
               <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5" /> {sessionTime} min</span>
               <span>{blocks.length} blocks</span>
               <span>{pathwayStages.find(s => s.id === selectedLevel)?.shortName}</span>
-              {loadedPlanName && (
-                <span className="flex items-center gap-1 text-t1-blue">
-                  <ClipboardList className="w-3 h-3" />
-                  {loadedPlanName}
-                </span>
-              )}
+              <span className="flex items-center gap-1 text-t1-blue">
+                <ClipboardList className="w-3 h-3" />
+                {planName || createDefaultPlanName(selectedLevel)}
+              </span>
+              <span className={`px-2 py-0.5 rounded-full text-[10px] uppercase tracking-wider border ${
+                planVisibility === 'shared'
+                  ? 'bg-green-500/10 text-green-400 border-green-500/20'
+                  : 'bg-t1-bg text-t1-muted border-t1-border'
+              }`}>
+                {planVisibility}
+              </span>
             </div>
 
             {sessionNotes && (
@@ -511,14 +734,24 @@ export default function SessionBuilder() {
                 Save as PDF
               </button>
               <button
+                onClick={handleSaveCustomPlan}
+                disabled={savingPlan}
+                className={`inline-flex items-center gap-1.5 text-xs font-medium min-h-[36px] transition-colors ${
+                  savingPlan ? 'text-t1-blue/60' : 'text-t1-blue hover:underline'
+                }`}
+              >
+                <Save className="w-3.5 h-3.5" />
+                {customPlanId ? 'Update saved custom plan' : 'Save this as custom plan'}
+              </button>
+              <button
                 onClick={() => {
                   const stage = pathwayStages.find(s => s.id === selectedLevel);
                   addEntry({
-                    planId: loadedPlanId || undefined,
-                    planName: loadedPlanName || `Custom ${stage?.shortName || ''} Session`,
+                    planId: customPlanId || sourcePlanId || undefined,
+                    planName: planName || `Custom ${stage?.shortName || ''} Session`,
                     level: selectedLevel,
                     subBand: undefined,
-                    duration: parseInt(sessionTime) || 60,
+                    duration: parseInt(sessionTime, 10) || 60,
                     notes: sessionNotes || '',
                     blockCount: blocks.length,
                   });
