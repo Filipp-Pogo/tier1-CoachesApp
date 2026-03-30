@@ -2,43 +2,76 @@
   Tier 1 Academy — Coach Onboarding
   Style: Theme-responsive using t1-* tokens, Oswald headings, structured learning modules
 */
-import { useState, useEffect, useMemo } from 'react';
-import { Link } from 'wouter';
+import { useState, useEffect, useMemo } from "react";
+import { Link } from "wouter";
 import {
-  Shield, Route, LayoutList, Target, Award, TrendingUp,
-  ChevronRight, ChevronDown, CheckCircle2, Circle, BookOpen,
-  GraduationCap, ArrowRight, Lock, RotateCcw, Lightbulb, Quote, AlertTriangle
-} from 'lucide-react';
+  Shield,
+  Route,
+  LayoutList,
+  Target,
+  Award,
+  TrendingUp,
+  ChevronRight,
+  ChevronDown,
+  CheckCircle2,
+  Circle,
+  BookOpen,
+  GraduationCap,
+  ArrowRight,
+  Lock,
+  RotateCcw,
+  Lightbulb,
+  Quote,
+  AlertTriangle,
+} from "lucide-react";
 import {
-  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
-  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader,
-  AlertDialogTitle, AlertDialogTrigger,
-} from '@/components/ui/alert-dialog';
-import { onboardingModules } from '@/lib/onboarding';
-import type { OnboardingModule, OnboardingLesson } from '@/lib/onboarding';
-import { useOnboardingProgress } from '@/hooks/useOnboardingProgress';
-import { PASS_THRESHOLD } from '@/lib/onboarding';
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { onboardingModules } from "@/lib/onboarding";
+import type { OnboardingModule, OnboardingLesson } from "@/lib/onboarding";
+import { useOnboardingProgress } from "@/hooks/useOnboardingProgress";
+import { PASS_THRESHOLD } from "@/lib/onboarding";
 
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
-  Shield, Route, LayoutList, Target, Award, TrendingUp
+  Shield,
+  Route,
+  LayoutList,
+  Target,
+  Award,
+  TrendingUp,
 };
 
 export default function Onboarding() {
   const {
-    progress, completeLesson, completeModule, isLessonComplete,
-    isModuleComplete, hasPassed, bestQuizResult, resetProgress
+    progress,
+    completeLesson,
+    completeModule,
+    isLessonComplete,
+    isModuleComplete,
+    hasPassed,
+    bestQuizResult,
+    resetProgress,
   } = useOnboardingProgress();
 
   const [activeModuleId, setActiveModuleId] = useState<string | null>(null);
   const [activeLessonId, setActiveLessonId] = useState<string | null>(null);
 
   // Calculate overall progress
-  const totalLessons = useMemo(() =>
-    onboardingModules.reduce((sum, m) => sum + m.lessons.length, 0),
+  const totalLessons = useMemo(
+    () => onboardingModules.reduce((sum, m) => sum + m.lessons.length, 0),
     []
   );
   const completedCount = progress.completedLessons.length;
-  const progressPercent = totalLessons > 0 ? Math.round((completedCount / totalLessons) * 100) : 0;
+  const progressPercent =
+    totalLessons > 0 ? Math.round((completedCount / totalLessons) * 100) : 0;
 
   // Auto-complete module when all lessons are done
   useEffect(() => {
@@ -48,22 +81,30 @@ export default function Onboarding() {
         completeModule(mod.id);
       }
     });
-  }, [progress.completedLessons, isLessonComplete, isModuleComplete, completeModule]);
+  }, [
+    progress.completedLessons,
+    isLessonComplete,
+    isModuleComplete,
+    completeModule,
+  ]);
 
-  const allModulesComplete = onboardingModules.every(m => isModuleComplete(m.id));
+  const allModulesComplete = onboardingModules.every(m =>
+    isModuleComplete(m.id)
+  );
 
   // Active lesson data
   const activeModule = activeModuleId
-    ? onboardingModules.find(m => m.id === activeModuleId) ?? null
+    ? (onboardingModules.find(m => m.id === activeModuleId) ?? null)
     : null;
-  const activeLesson = activeModule && activeLessonId
-    ? activeModule.lessons.find(l => l.id === activeLessonId) ?? null
-    : null;
+  const activeLesson =
+    activeModule && activeLessonId
+      ? (activeModule.lessons.find(l => l.id === activeLessonId) ?? null)
+      : null;
 
   function openLesson(mod: OnboardingModule, lesson: OnboardingLesson) {
     setActiveModuleId(mod.id);
     setActiveLessonId(lesson.id);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
   function handleMarkComplete() {
@@ -71,10 +112,12 @@ export default function Onboarding() {
       completeLesson(activeLessonId);
       // Auto-advance to next lesson
       if (activeModule) {
-        const idx = activeModule.lessons.findIndex(l => l.id === activeLessonId);
+        const idx = activeModule.lessons.findIndex(
+          l => l.id === activeLessonId
+        );
         if (idx < activeModule.lessons.length - 1) {
           setActiveLessonId(activeModule.lessons[idx + 1].id);
-          window.scrollTo({ top: 0, behavior: 'smooth' });
+          window.scrollTo({ top: 0, behavior: "smooth" });
         } else {
           // Module complete — go back to overview
           setActiveLessonId(null);
@@ -94,21 +137,36 @@ export default function Onboarding() {
 
   // ─── Lesson Detail View ─────────────────────────────────────
   if (activeLesson && activeModule) {
-    const lessonIdx = activeModule.lessons.findIndex(l => l.id === activeLesson.id);
+    const lessonIdx = activeModule.lessons.findIndex(
+      l => l.id === activeLesson.id
+    );
     const isComplete = isLessonComplete(activeLesson.id);
-    const prevLesson = lessonIdx > 0 ? activeModule.lessons[lessonIdx - 1] : null;
-    const nextLesson = lessonIdx < activeModule.lessons.length - 1 ? activeModule.lessons[lessonIdx + 1] : null;
+    const prevLesson =
+      lessonIdx > 0 ? activeModule.lessons[lessonIdx - 1] : null;
+    const nextLesson =
+      lessonIdx < activeModule.lessons.length - 1
+        ? activeModule.lessons[lessonIdx + 1]
+        : null;
 
     return (
       <div className="min-h-screen bg-t1-bg transition-colors duration-200">
         <div className="max-w-4xl mx-auto px-4 py-8">
           {/* Breadcrumb */}
           <div className="flex items-center gap-2 text-sm text-t1-muted mb-6">
-            <button onClick={() => { setActiveModuleId(null); setActiveLessonId(null); }} className="hover:text-t1-blue transition-colors">
+            <button
+              onClick={() => {
+                setActiveModuleId(null);
+                setActiveLessonId(null);
+              }}
+              className="hover:text-t1-blue transition-colors"
+            >
               Onboarding
             </button>
             <ChevronRight className="w-3 h-3" />
-            <button onClick={() => setActiveLessonId(null)} className="hover:text-t1-blue transition-colors">
+            <button
+              onClick={() => setActiveLessonId(null)}
+              className="hover:text-t1-blue transition-colors"
+            >
               {activeModule.title}
             </button>
             <ChevronRight className="w-3 h-3" />
@@ -119,7 +177,8 @@ export default function Onboarding() {
           <div className="mb-8">
             <div className="flex items-center gap-3 mb-2">
               <span className="text-xs font-medium tracking-wider text-t1-blue uppercase">
-                {activeModule.title} — Lesson {lessonIdx + 1} of {activeModule.lessons.length}
+                {activeModule.title} — Lesson {lessonIdx + 1} of{" "}
+                {activeModule.lessons.length}
               </span>
               {isComplete && (
                 <span className="flex items-center gap-1 text-xs text-emerald-400">
@@ -135,7 +194,10 @@ export default function Onboarding() {
           {/* Lesson Content */}
           <div className="space-y-5 mb-10">
             {activeLesson.content.map((paragraph, i) => (
-              <p key={i} className="text-t1-text/90 leading-relaxed text-[15px]">
+              <p
+                key={i}
+                className="text-t1-text/90 leading-relaxed text-[15px]"
+              >
                 {paragraph}
               </p>
             ))}
@@ -165,7 +227,9 @@ export default function Onboarding() {
               {activeLesson.keyTakeaways.map((takeaway, i) => (
                 <li key={i} className="flex items-start gap-3">
                   <CheckCircle2 className="w-4 h-4 text-t1-blue flex-shrink-0 mt-0.5" />
-                  <span className="text-t1-text/90 text-sm leading-relaxed">{takeaway}</span>
+                  <span className="text-t1-text/90 text-sm leading-relaxed">
+                    {takeaway}
+                  </span>
                 </li>
               ))}
             </ul>
@@ -179,7 +243,8 @@ export default function Onboarding() {
                 className="flex items-center justify-center gap-2 bg-t1-blue hover:bg-t1-blue-light text-white font-semibold py-3 px-6 rounded-lg transition-colors"
               >
                 <CheckCircle2 className="w-5 h-5" />
-                Mark as Complete{nextLesson ? ' & Continue' : ' & Finish Module'}
+                Mark as Complete
+                {nextLesson ? " & Continue" : " & Finish Module"}
               </button>
             ) : (
               <div className="flex items-center gap-2 text-emerald-400 py-3 px-6 bg-emerald-400/10 rounded-lg">
@@ -193,25 +258,37 @@ export default function Onboarding() {
           <div className="flex justify-between items-center border-t border-t1-border pt-6">
             {prevLesson ? (
               <button
-                onClick={() => { setActiveLessonId(prevLesson.id); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+                onClick={() => {
+                  setActiveLessonId(prevLesson.id);
+                  window.scrollTo({ top: 0, behavior: "smooth" });
+                }}
                 className="text-sm text-t1-muted hover:text-t1-blue transition-colors"
               >
                 ← {prevLesson.title}
               </button>
             ) : (
-              <button onClick={handleBack} className="text-sm text-t1-muted hover:text-t1-blue transition-colors">
+              <button
+                onClick={handleBack}
+                className="text-sm text-t1-muted hover:text-t1-blue transition-colors"
+              >
                 ← Back to Modules
               </button>
             )}
             {nextLesson ? (
               <button
-                onClick={() => { setActiveLessonId(nextLesson.id); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+                onClick={() => {
+                  setActiveLessonId(nextLesson.id);
+                  window.scrollTo({ top: 0, behavior: "smooth" });
+                }}
                 className="flex items-center gap-1 text-sm text-t1-blue hover:text-t1-blue-light transition-colors"
               >
                 {nextLesson.title} <ArrowRight className="w-4 h-4" />
               </button>
             ) : (
-              <button onClick={handleBack} className="flex items-center gap-1 text-sm text-t1-blue hover:text-t1-blue-light transition-colors">
+              <button
+                onClick={handleBack}
+                className="flex items-center gap-1 text-sm text-t1-blue hover:text-t1-blue-light transition-colors"
+              >
                 Back to Module <ArrowRight className="w-4 h-4" />
               </button>
             )}
@@ -225,14 +302,19 @@ export default function Onboarding() {
   if (activeModule) {
     const Icon = iconMap[activeModule.icon] || BookOpen;
     const modComplete = isModuleComplete(activeModule.id);
-    const completedInModule = activeModule.lessons.filter(l => isLessonComplete(l.id)).length;
+    const completedInModule = activeModule.lessons.filter(l =>
+      isLessonComplete(l.id)
+    ).length;
 
     return (
       <div className="min-h-screen bg-t1-bg transition-colors duration-200">
         <div className="max-w-4xl mx-auto px-4 py-8">
           {/* Breadcrumb */}
           <div className="flex items-center gap-2 text-sm text-t1-muted mb-6">
-            <button onClick={() => setActiveModuleId(null)} className="hover:text-t1-blue transition-colors">
+            <button
+              onClick={() => setActiveModuleId(null)}
+              className="hover:text-t1-blue transition-colors"
+            >
               Onboarding
             </button>
             <ChevronRight className="w-3 h-3" />
@@ -241,8 +323,12 @@ export default function Onboarding() {
 
           {/* Module Header */}
           <div className="flex items-start gap-4 mb-8">
-            <div className={`w-14 h-14 rounded-xl flex items-center justify-center flex-shrink-0 ${modComplete ? 'bg-emerald-500/20' : 'bg-t1-blue/20'}`}>
-              <Icon className={`w-7 h-7 ${modComplete ? 'text-emerald-400' : 'text-t1-blue'}`} />
+            <div
+              className={`w-14 h-14 rounded-xl flex items-center justify-center flex-shrink-0 ${modComplete ? "bg-emerald-500/20" : "bg-t1-blue/20"}`}
+            >
+              <Icon
+                className={`w-7 h-7 ${modComplete ? "text-emerald-400" : "text-t1-blue"}`}
+              />
             </div>
             <div>
               <div className="flex items-center gap-3 mb-1">
@@ -272,8 +358,10 @@ export default function Onboarding() {
             </div>
             <div className="h-2 bg-t1-bg rounded-full overflow-hidden">
               <div
-                className={`h-full rounded-full transition-all duration-500 ${modComplete ? 'bg-emerald-500' : 'bg-t1-blue'}`}
-                style={{ width: `${(completedInModule / activeModule.lessons.length) * 100}%` }}
+                className={`h-full rounded-full transition-all duration-500 ${modComplete ? "bg-emerald-500" : "bg-t1-blue"}`}
+                style={{
+                  width: `${(completedInModule / activeModule.lessons.length) * 100}%`,
+                }}
               />
             </div>
           </div>
@@ -289,11 +377,15 @@ export default function Onboarding() {
                   className="w-full text-left bg-t1-surface hover:bg-secondary border border-t1-border rounded-xl p-5 transition-colors group"
                 >
                   <div className="flex items-center gap-4">
-                    <div className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${done ? 'bg-emerald-500/20' : 'bg-t1-bg'}`}>
+                    <div
+                      className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${done ? "bg-emerald-500/20" : "bg-t1-bg"}`}
+                    >
                       {done ? (
                         <CheckCircle2 className="w-5 h-5 text-emerald-400" />
                       ) : (
-                        <span className="text-sm font-bold text-t1-muted">{idx + 1}</span>
+                        <span className="text-sm font-bold text-t1-muted">
+                          {idx + 1}
+                        </span>
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
@@ -336,19 +428,79 @@ export default function Onboarding() {
             </h1>
           </div>
           <p className="text-t1-muted max-w-2xl">
-            Complete all 6 modules to learn about Tier 1 culture, the development pathway, session structure, drills, coaching standards, and advancement. Then pass the quiz with {PASS_THRESHOLD}% or higher.
+            Start here if you are new to Tier 1. Work the modules in order, mark
+            lessons complete as you go, then take the quiz once you have the
+            coaching language and standards in your head.
           </p>
         </div>
 
+        <div className="coach-tip mb-8 p-5">
+          <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+            <div className="max-w-2xl">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-blue">
+                Recommended Flow
+              </p>
+              <h2 className="mt-2 font-display text-xl font-bold uppercase tracking-wide text-t1-text">
+                Use onboarding like pre-court prep
+              </h2>
+              <p className="mt-2 text-sm leading-relaxed text-t1-muted">
+                The goal is not speed-running modules. Learn the culture,
+                session shape, and player-development standard first, then use
+                the quiz to confirm you can coach inside the Tier 1 system
+                without guessing.
+              </p>
+            </div>
+            <div className="rounded-2xl border border-t1-border bg-t1-bg/55 px-4 py-3 text-xs text-t1-muted">
+              Quiz unlock: after all {onboardingModules.length} modules are
+              complete.
+            </div>
+          </div>
+
+          <div className="mt-4 grid gap-3 md:grid-cols-3">
+            {[
+              {
+                title: "Go in order",
+                body: "Each module builds the vocabulary and expectations for the next one.",
+              },
+              {
+                title: "Use short reps",
+                body: "Ten focused minutes between classes is better than half-reading everything once.",
+              },
+              {
+                title: "Bring it on court",
+                body: "After each module, apply one takeaway in your next class or private.",
+              },
+            ].map(item => (
+              <div
+                key={item.title}
+                className="rounded-2xl border border-t1-border bg-t1-bg/55 p-4"
+              >
+                <p className="text-xs font-semibold uppercase tracking-wide text-t1-text">
+                  {item.title}
+                </p>
+                <p className="mt-1 text-xs leading-relaxed text-t1-muted">
+                  {item.body}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+
         {/* Overall Progress Card */}
-        <div className="bg-t1-surface border border-t1-border rounded-xl p-6 mb-8">
+        <div className="panel-surface p-6 mb-8">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
             {/* Progress */}
             <div>
-              <div className="text-sm text-t1-muted mb-2">Learning Progress</div>
+              <div className="text-sm text-t1-muted mb-2">
+                Learning Progress
+              </div>
               <div className="flex items-end gap-2 mb-3">
-                <span className="text-3xl font-bold text-t1-text">{progressPercent}%</span>
-                <span className="text-sm text-t1-muted mb-1">{completedCount}/{totalLessons} lessons</span>
+                <span className="text-3xl font-bold text-t1-text">
+                  {progressPercent}%
+                </span>
+                <span className="text-sm text-t1-muted mb-1">
+                  {completedCount}/{totalLessons} lessons
+                </span>
               </div>
               <div className="h-2 bg-t1-bg rounded-full overflow-hidden">
                 <div
@@ -365,7 +517,9 @@ export default function Onboarding() {
                 <span className="text-3xl font-bold text-t1-text">
                   {progress.completedModules.length}
                 </span>
-                <span className="text-sm text-t1-muted mb-1">/ {onboardingModules.length}</span>
+                <span className="text-sm text-t1-muted mb-1">
+                  / {onboardingModules.length}
+                </span>
               </div>
             </div>
 
@@ -376,17 +530,27 @@ export default function Onboarding() {
                 <div className="flex items-center gap-2">
                   <CheckCircle2 className="w-6 h-6 text-emerald-400" />
                   <div>
-                    <div className="text-lg font-bold text-emerald-400">PASSED</div>
-                    <div className="text-xs text-t1-muted">Best: {bestQuizResult?.percentage}%</div>
+                    <div className="text-lg font-bold text-emerald-400">
+                      PASSED
+                    </div>
+                    <div className="text-xs text-t1-muted">
+                      Best: {bestQuizResult?.percentage}%
+                    </div>
                   </div>
                 </div>
               ) : bestQuizResult ? (
                 <div>
-                  <div className="text-lg font-bold text-amber-400">Not Yet Passed</div>
-                  <div className="text-xs text-t1-muted">Best: {bestQuizResult.percentage}% (need {PASS_THRESHOLD}%)</div>
+                  <div className="text-lg font-bold text-amber-400">
+                    Not Yet Passed
+                  </div>
+                  <div className="text-xs text-t1-muted">
+                    Best: {bestQuizResult.percentage}% (need {PASS_THRESHOLD}%)
+                  </div>
                 </div>
               ) : (
-                <div className="text-lg font-bold text-t1-muted">Not Started</div>
+                <div className="text-lg font-bold text-t1-muted">
+                  Not Started
+                </div>
               )}
             </div>
           </div>
@@ -394,21 +558,29 @@ export default function Onboarding() {
 
         {/* Module Cards */}
         <div className="space-y-3 mb-8">
-          {onboardingModules.map((mod) => {
+          {onboardingModules.map(mod => {
             const Icon = iconMap[mod.icon] || BookOpen;
             const modComplete = isModuleComplete(mod.id);
-            const completedInModule = mod.lessons.filter(l => isLessonComplete(l.id)).length;
-            const modPercent = Math.round((completedInModule / mod.lessons.length) * 100);
+            const completedInModule = mod.lessons.filter(l =>
+              isLessonComplete(l.id)
+            ).length;
+            const modPercent = Math.round(
+              (completedInModule / mod.lessons.length) * 100
+            );
 
             return (
               <button
                 key={mod.id}
                 onClick={() => setActiveModuleId(mod.id)}
-                className="w-full text-left bg-t1-surface hover:bg-secondary border border-t1-border rounded-xl p-5 transition-colors group"
+                className="panel-muted w-full text-left p-5 transition-colors group hover:border-t1-blue/25"
               >
                 <div className="flex items-center gap-4">
-                  <div className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 ${modComplete ? 'bg-emerald-500/20' : 'bg-t1-blue/20'}`}>
-                    <Icon className={`w-6 h-6 ${modComplete ? 'text-emerald-400' : 'text-t1-blue'}`} />
+                  <div
+                    className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 ${modComplete ? "bg-emerald-500/20" : "bg-t1-blue/20"}`}
+                  >
+                    <Icon
+                      className={`w-6 h-6 ${modComplete ? "text-emerald-400" : "text-t1-blue"}`}
+                    />
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-0.5">
@@ -422,12 +594,14 @@ export default function Onboarding() {
                     <h3 className="font-display font-bold text-lg text-t1-text uppercase tracking-wide group-hover:text-t1-blue transition-colors">
                       {mod.title}
                     </h3>
-                    <p className="text-sm text-t1-muted mt-0.5">{mod.subtitle}</p>
+                    <p className="text-sm text-t1-muted mt-0.5">
+                      {mod.subtitle}
+                    </p>
                     {/* Mini progress bar */}
                     <div className="mt-3 flex items-center gap-3">
                       <div className="flex-1 h-1.5 bg-t1-bg rounded-full overflow-hidden">
                         <div
-                          className={`h-full rounded-full transition-all duration-500 ${modComplete ? 'bg-emerald-500' : 'bg-t1-blue'}`}
+                          className={`h-full rounded-full transition-all duration-500 ${modComplete ? "bg-emerald-500" : "bg-t1-blue"}`}
                           style={{ width: `${modPercent}%` }}
                         />
                       </div>
@@ -444,9 +618,13 @@ export default function Onboarding() {
         </div>
 
         {/* Quiz CTA */}
-        <div className={`rounded-xl p-6 border ${allModulesComplete ? 'bg-t1-navy border-t1-blue/30' : 'bg-t1-surface border-t1-border'}`}>
+        <div
+          className={`${allModulesComplete ? "coach-tip" : "panel-muted"} rounded-xl p-6`}
+        >
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-            <div className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 ${allModulesComplete ? 'bg-t1-blue/20' : 'bg-t1-bg'}`}>
+            <div
+              className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 ${allModulesComplete ? "bg-t1-blue/20" : "bg-t1-bg"}`}
+            >
               {allModulesComplete ? (
                 <GraduationCap className="w-6 h-6 text-t1-blue" />
               ) : (
@@ -460,12 +638,12 @@ export default function Onboarding() {
               <p className="text-sm text-t1-muted mt-1">
                 {allModulesComplete
                   ? `30 questions across all modules. You need ${PASS_THRESHOLD}% or higher to pass.`
-                  : `Complete all ${onboardingModules.length} modules to unlock the quiz.`
-                }
+                  : `Complete all ${onboardingModules.length} modules to unlock the quiz.`}
               </p>
               {hasPassed && (
                 <p className="text-sm text-emerald-400 mt-1">
-                  You passed with {bestQuizResult?.percentage}%. You can retake the quiz anytime.
+                  You passed with {bestQuizResult?.percentage}%. You can retake
+                  the quiz anytime.
                 </p>
               )}
             </div>
@@ -473,13 +651,15 @@ export default function Onboarding() {
               href="/onboarding/quiz"
               className={`flex items-center gap-2 font-semibold py-3 px-6 rounded-lg transition-colors whitespace-nowrap ${
                 allModulesComplete
-                  ? 'bg-t1-blue hover:bg-t1-blue-light text-white'
-                  : 'bg-t1-bg text-t1-muted cursor-not-allowed pointer-events-none'
+                  ? "bg-t1-blue hover:bg-t1-blue-light text-white"
+                  : "bg-t1-bg text-t1-muted cursor-not-allowed pointer-events-none"
               }`}
-              onClick={(e) => { if (!allModulesComplete) e.preventDefault(); }}
+              onClick={e => {
+                if (!allModulesComplete) e.preventDefault();
+              }}
             >
               <GraduationCap className="w-5 h-5" />
-              {hasPassed ? 'Retake Quiz' : 'Take Quiz'}
+              {hasPassed ? "Retake Quiz" : "Take Quiz"}
             </Link>
           </div>
         </div>
@@ -488,9 +668,7 @@ export default function Onboarding() {
         <div className="mt-8 flex justify-end">
           <AlertDialog>
             <AlertDialogTrigger asChild>
-              <button
-                className="flex items-center gap-2 text-xs text-t1-muted hover:text-red-400 transition-colors"
-              >
+              <button className="flex items-center gap-2 text-xs text-t1-muted hover:text-red-400 transition-colors">
                 <RotateCcw className="w-3.5 h-3.5" />
                 Reset Progress
               </button>
@@ -506,8 +684,10 @@ export default function Onboarding() {
                   </AlertDialogTitle>
                 </div>
                 <AlertDialogDescription className="text-sm text-t1-muted">
-                  This will permanently erase all lesson progress, module completions, and quiz results.
-                  You will need to complete all {totalLessons} lessons again and retake the quiz. This action cannot be undone.
+                  This will permanently erase all lesson progress, module
+                  completions, and quiz results. You will need to complete all{" "}
+                  {totalLessons} lessons again and retake the quiz. This action
+                  cannot be undone.
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
