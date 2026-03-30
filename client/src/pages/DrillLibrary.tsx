@@ -1,22 +1,23 @@
-/*
-  DRILL LIBRARY: Tier 1 Performance — Cold Dark Brand
-  MOBILE-FIRST: Always-visible level filters above the grid, star/preview buttons,
-  large touch targets, recently viewed, favorites tab.
-  PAGINATION: 24 drills per page with load-more.
-  LEVEL COLORS: Left-border accent on each card for instant visual grouping.
-*/
-import { useEffect, useMemo, useState } from "react";
-import { Link } from "wouter";
+import {
+  useDeferredValue,
+  useEffect,
+  useMemo,
+  useState,
+  type ComponentType,
+} from "react";
+import { Link, useLocation } from "wouter";
 import {
   BookOpen,
+  PlayCircle,
+  Route,
   Search,
-  X,
-  Clock,
-  Star,
-  Eye,
-  Video,
   SlidersHorizontal,
-  ChevronDown,
+  Star,
+  Target,
+  Trophy,
+  Users,
+  X,
+  Zap,
 } from "lucide-react";
 import {
   drills,
@@ -39,15 +40,15 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/components/ui/empty";
+import {
+  createOnCourtSessionFromDrills,
+  saveOnCourtSession,
+} from "@/lib/onCourtMode";
+import { getStageBrand } from "@/lib/stageBranding";
 
 const DRILLS_PER_PAGE = 24;
 
-function readDrillLibraryTab() {
-  if (typeof window === "undefined") return "all" as const;
-  return new URLSearchParams(window.location.search).get("tab") === "favorites"
-    ? "favorites"
-    : "all";
-}
+type DrillTab = "all" | "favorites";
 
 type DrillSkillFilterId =
   | "baseline"
@@ -58,6 +59,21 @@ type DrillSkillFilterId =
   | "tactical"
   | "mental";
 
+type DrillProblemFilterId =
+  | "consistency"
+  | "footwork"
+  | "serve-return"
+  | "transition"
+  | "decision-making"
+  | "pressure";
+
+type DrillIntentFilterId =
+  | "install"
+  | "pattern"
+  | "live"
+  | "compete"
+  | "private";
+
 const drillSkillFilters: { id: DrillSkillFilterId; name: string }[] = [
   { id: "baseline", name: "Baseline" },
   { id: "transition", name: "Transition & Net" },
@@ -67,6 +83,116 @@ const drillSkillFilters: { id: DrillSkillFilterId; name: string }[] = [
   { id: "tactical", name: "Tactical & Point Play" },
   { id: "mental", name: "Mental & Match Prep" },
 ];
+
+const drillProblemFilters: {
+  id: DrillProblemFilterId;
+  name: string;
+  description: string;
+}[] = [
+  {
+    id: "consistency",
+    name: "Consistency",
+    description:
+      "Players are leaking shape, rally tolerance, or contact quality.",
+  },
+  {
+    id: "footwork",
+    name: "Footwork",
+    description: "Spacing is late, recovery is soft, and contact is crowded.",
+  },
+  {
+    id: "serve-return",
+    name: "Serve + Return",
+    description: "The first two balls are unstable or rushed.",
+  },
+  {
+    id: "transition",
+    name: "Transition",
+    description: "Players hesitate moving forward or finishing at net.",
+  },
+  {
+    id: "decision-making",
+    name: "Decision-Making",
+    description: "You need targets, direction, and cleaner tactical choices.",
+  },
+  {
+    id: "pressure",
+    name: "Competitive Pressure",
+    description: "You need intensity, scoring, and accountability built in.",
+  },
+];
+
+const drillIntentFilters: {
+  id: DrillIntentFilterId;
+  name: string;
+  description: string;
+  icon: ComponentType<{ className?: string }>;
+}[] = [
+  {
+    id: "install",
+    name: "Install technique",
+    description: "Use cleaner feeds and repeatable reps to build feel first.",
+    icon: Target,
+  },
+  {
+    id: "pattern",
+    name: "Train patterns",
+    description: "Sequence the court so players understand the next ball.",
+    icon: Route,
+  },
+  {
+    id: "live",
+    name: "Go live early",
+    description: "Bias toward live-ball reps and problem-solving.",
+    icon: PlayCircle,
+  },
+  {
+    id: "compete",
+    name: "Finish under pressure",
+    description: "Scoring, accountability, and point consequences matter.",
+    icon: Trophy,
+  },
+  {
+    id: "private",
+    name: "1:1 or small group",
+    description: "Works cleanly in a private or mixed small-group setting.",
+    icon: Users,
+  },
+];
+
+function readDrillStateFromUrl(): {
+  tab: DrillTab;
+  level: PathwayStageId | "";
+  problem: DrillProblemFilterId | "";
+  intent: DrillIntentFilterId | "";
+} {
+  if (typeof window === "undefined") {
+    return {
+      tab: "all" as DrillTab,
+      level: "" as PathwayStageId | "",
+      problem: "" as DrillProblemFilterId | "",
+      intent: "" as DrillIntentFilterId | "",
+    };
+  }
+
+  const params = new URLSearchParams(window.location.search);
+  const rawLevel = params.get("level");
+  const rawProblem = params.get("problem");
+  const rawIntent = params.get("intent");
+
+  return {
+    tab: params.get("tab") === "favorites" ? "favorites" : "all",
+    level: pathwayStages.some(stage => stage.id === rawLevel)
+      ? (rawLevel as PathwayStageId)
+      : "",
+    problem: drillProblemFilters.some(filter => filter.id === rawProblem)
+      ? (rawProblem as DrillProblemFilterId)
+      : "",
+    intent: drillIntentFilters.some(filter => filter.id === rawIntent)
+      ? (rawIntent as DrillIntentFilterId)
+      : "",
+  };
+}
 
 function getDrillSkillFilters(drill: Drill): DrillSkillFilterId[] {
   const filters = new Set<DrillSkillFilterId>();
@@ -114,7 +240,7 @@ function getDrillSkillFilters(drill: Drill): DrillSkillFilterId[] {
       } else if (drill.sessionBlock === "movement") {
         filters.add("movement");
       } else if (
-        /volley|approach|net|transition/.test(name + " " + objective)
+        /volley|approach|net|transition/.test(`${name} ${objective}`)
       ) {
         filters.add("transition");
       } else {
@@ -127,45 +253,153 @@ function getDrillSkillFilters(drill: Drill): DrillSkillFilterId[] {
   return Array.from(filters);
 }
 
-/* Level-specific left border colors for drill cards */
-const levelBorderMap: Record<string, string> = {
-  foundations: "border-l-red-500",
-  prep: "border-l-green-500",
-  jasa: "border-l-yellow-500",
-  hs: "border-l-purple-500",
-  asa: "border-l-blue-500",
-  fta: "border-l-orange-500",
-};
+function getDrillProblems(drill: Drill): DrillProblemFilterId[] {
+  const tags = new Set<DrillProblemFilterId>();
+  const text = `${drill.name} ${drill.objective} ${drill.setup}`.toLowerCase();
 
-function getCardBorderColor(levels: string[]): string {
-  if (levels.length === 0) return "border-l-gray-500";
-  return levelBorderMap[levels[0]] || "border-l-gray-500";
+  if (
+    drill.sessionBlock === "movement" ||
+    drill.skillCategory === "movement" ||
+    /footwork|spacing|balance|recovery|movement/.test(text)
+  ) {
+    tags.add("footwork");
+  }
+
+  if (
+    drill.sessionBlock === "serve-return" ||
+    /serve|return|toss|plus one/.test(text)
+  ) {
+    tags.add("serve-return");
+  }
+
+  if (
+    drill.skillCategory === "transition" ||
+    /volley|approach|transition|net/.test(text)
+  ) {
+    tags.add("transition");
+  }
+
+  if (
+    drill.type === "competitive" ||
+    drill.skillCategory === "pressure-match-prep" ||
+    /pressure|score|compete|match/.test(text)
+  ) {
+    tags.add("pressure");
+  }
+
+  if (
+    drill.skillCategory === "tactical" ||
+    drill.skillCategory === "point-play" ||
+    /pattern|target|direction|decision|open court/.test(text)
+  ) {
+    tags.add("decision-making");
+  }
+
+  if (
+    drill.type === "technical" ||
+    drill.type === "cooperative" ||
+    /consisten|shape|control|contact|rally/.test(text)
+  ) {
+    tags.add("consistency");
+  }
+
+  if (tags.size === 0) tags.add("consistency");
+  return Array.from(tags);
+}
+
+function getDrillIntentTags(drill: Drill): DrillIntentFilterId[] {
+  const tags = new Set<DrillIntentFilterId>();
+
+  if (drill.feedingStyle === "feeding" || drill.type === "technical") {
+    tags.add("install");
+  }
+
+  if (
+    drill.type === "tactical" ||
+    drill.skillCategory === "baseline-pattern" ||
+    drill.skillCategory === "point-play" ||
+    drill.skillCategory === "attacking" ||
+    drill.skillCategory === "defense"
+  ) {
+    tags.add("pattern");
+  }
+
+  if (
+    drill.feedingStyle === "live-ball" ||
+    drill.feedingStyle === "both" ||
+    drill.skillCategory === "point-play"
+  ) {
+    tags.add("live");
+  }
+
+  if (
+    drill.type === "competitive" ||
+    drill.skillCategory === "pressure-match-prep"
+  ) {
+    tags.add("compete");
+  }
+
+  if (
+    drill.format === "private" ||
+    drill.format === "group-or-private" ||
+    drill.skillCategory === "private-lesson"
+  ) {
+    tags.add("private");
+  }
+
+  if (tags.size === 0) tags.add("install");
+  return Array.from(tags);
+}
+
+function getPrimaryStage(
+  drill: Drill,
+  activeLevel: PathwayStageId | ""
+): PathwayStageId {
+  return activeLevel && drill.level.includes(activeLevel)
+    ? activeLevel
+    : drill.level[0];
 }
 
 export default function DrillLibrary() {
+  const initialState = readDrillStateFromUrl();
+  const [, navigate] = useLocation();
   const [searchQuery, setSearchQuery] = useState("");
-  const [levelFilter, setLevelFilter] = useState<PathwayStageId | "">("");
+  const [levelFilter, setLevelFilter] = useState<PathwayStageId | "">(
+    initialState.level
+  );
   const [utrFilter, setUtrFilter] = useState("");
   const [blockFilter, setBlockFilter] = useState<SessionBlockId | "">("");
   const [categoryFilter, setCategoryFilter] = useState<DrillSkillFilterId | "">(
     ""
   );
+  const [problemFilter, setProblemFilter] = useState<DrillProblemFilterId | "">(
+    initialState.problem
+  );
+  const [intentFilter, setIntentFilter] = useState<DrillIntentFilterId | "">(
+    initialState.intent
+  );
   const [typeFilter, setTypeFilter] = useState("");
   const [feedingFilter, setFeedingFilter] = useState("");
   const [formatFilter, setFormatFilter] = useState("");
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
-  const [activeTab, setActiveTab] = useState<"all" | "favorites">(
-    readDrillLibraryTab
-  );
+  const [activeTab, setActiveTab] = useState<DrillTab>(initialState.tab);
   const [previewDrillId, setPreviewDrillId] = useState<string | null>(null);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [visibleCount, setVisibleCount] = useState(DRILLS_PER_PAGE);
 
+  const deferredSearchQuery = useDeferredValue(searchQuery);
   const { favorites, isFavorite, toggleFavorite } = useFavorites();
   const { recentIds } = useRecentDrills();
 
   useEffect(() => {
-    const syncFromUrl = () => setActiveTab(readDrillLibraryTab());
+    const syncFromUrl = () => {
+      const nextState = readDrillStateFromUrl();
+      setActiveTab(nextState.tab);
+      setLevelFilter(nextState.level);
+      setProblemFilter(nextState.problem);
+      setIntentFilter(nextState.intent);
+    };
+
     window.addEventListener("popstate", syncFromUrl);
     return () => window.removeEventListener("popstate", syncFromUrl);
   }, []);
@@ -174,32 +408,27 @@ export default function DrillLibrary() {
     const params = new URLSearchParams(window.location.search);
     if (activeTab === "favorites") params.set("tab", "favorites");
     else params.delete("tab");
+    if (levelFilter) params.set("level", levelFilter);
+    else params.delete("level");
+    if (problemFilter) params.set("problem", problemFilter);
+    else params.delete("problem");
+    if (intentFilter) params.set("intent", intentFilter);
+    else params.delete("intent");
+
     const next = params.toString();
     const nextUrl = `${window.location.pathname}${next ? `?${next}` : ""}${window.location.hash}`;
     const currentUrl = `${window.location.pathname}${window.location.search}${window.location.hash}`;
     if (nextUrl !== currentUrl) {
       window.history.replaceState(window.history.state, "", nextUrl);
     }
-  }, [activeTab]);
+  }, [activeTab, levelFilter, problemFilter, intentFilter]);
 
   const recentDrills = useMemo(() => {
     return recentIds
-      .map((id: string) => drills.find(d => d.id === id))
+      .map(id => drills.find(drill => drill.id === id))
       .filter(Boolean)
-      .slice(0, 5) as typeof drills;
+      .slice(0, 5) as Drill[];
   }, [recentIds]);
-
-  const advancedFilterCount = [
-    utrFilter,
-    blockFilter,
-    categoryFilter,
-    typeFilter,
-    feedingFilter,
-    formatFilter,
-  ].filter(Boolean).length;
-  const hasActiveFilters = Boolean(
-    searchQuery.trim() || levelFilter || advancedFilterCount
-  );
 
   const availableUtrBands = useMemo(() => {
     const bands = new Set<string>();
@@ -209,829 +438,1048 @@ export default function DrillLibrary() {
       });
     });
 
-    return Array.from(bands).sort((a, b) => {
+    return Array.from(bands).sort((left, right) => {
       const extractMin = (value: string) => {
         const match = value.match(/UTR\s*(\d+)/i);
         return match ? Number(match[1]) : Number.MAX_SAFE_INTEGER;
       };
 
-      return extractMin(a) - extractMin(b) || a.localeCompare(b);
+      return extractMin(left) - extractMin(right) || left.localeCompare(right);
     });
   }, []);
 
   const filteredDrills = useMemo(() => {
     let result = [...drills];
-    if (activeTab === "favorites")
-      result = result.filter(d => favorites.includes(d.id));
-    if (levelFilter) result = result.filter(d => d.level.includes(levelFilter));
-    if (utrFilter) result = result.filter(d => d.subBand?.includes(utrFilter));
-    if (blockFilter)
-      result = result.filter(d => d.sessionBlock === blockFilter);
-    if (categoryFilter)
-      result = result.filter(d =>
-        getDrillSkillFilters(d).includes(categoryFilter)
-      );
-    if (typeFilter) result = result.filter(d => d.type === typeFilter);
-    if (feedingFilter)
-      result = result.filter(d => d.feedingStyle === feedingFilter);
-    if (formatFilter) {
-      if (formatFilter === "doubles")
-        result = result.filter(d => d.skillCategory === "doubles");
-      else if (formatFilter === "private")
-        result = result.filter(
-          d => d.format === "private" || d.format === "group-or-private"
-        );
-      else result = result.filter(d => d.skillCategory !== "doubles");
+
+    if (activeTab === "favorites") {
+      result = result.filter(drill => favorites.includes(drill.id));
     }
-    if (searchQuery.trim()) {
+
+    if (levelFilter) {
+      result = result.filter(drill => drill.level.includes(levelFilter));
+    }
+
+    if (problemFilter) {
+      result = result.filter(drill =>
+        getDrillProblems(drill).includes(problemFilter)
+      );
+    }
+
+    if (intentFilter) {
+      result = result.filter(drill =>
+        getDrillIntentTags(drill).includes(intentFilter)
+      );
+    }
+
+    if (utrFilter) {
+      result = result.filter(drill => drill.subBand?.includes(utrFilter));
+    }
+
+    if (blockFilter) {
+      result = result.filter(drill => drill.sessionBlock === blockFilter);
+    }
+
+    if (categoryFilter) {
+      result = result.filter(drill =>
+        getDrillSkillFilters(drill).includes(categoryFilter)
+      );
+    }
+
+    if (typeFilter) {
+      result = result.filter(drill => drill.type === typeFilter);
+    }
+
+    if (feedingFilter) {
+      result = result.filter(drill => drill.feedingStyle === feedingFilter);
+    }
+
+    if (formatFilter) {
+      if (formatFilter === "doubles") {
+        result = result.filter(drill => drill.skillCategory === "doubles");
+      } else if (formatFilter === "private") {
+        result = result.filter(
+          drill =>
+            drill.format === "private" || drill.format === "group-or-private"
+        );
+      } else {
+        result = result.filter(drill => drill.skillCategory !== "doubles");
+      }
+    }
+
+    if (deferredSearchQuery.trim()) {
       result = result
-        .map(d => ({ drill: d, score: scoreDrillSearch(d, searchQuery) }))
+        .map(drill => ({
+          drill,
+          score: scoreDrillSearch(drill, deferredSearchQuery),
+        }))
         .filter(item => item.score > 0)
         .sort(
-          (a, b) =>
-            b.score - a.score || a.drill.name.localeCompare(b.drill.name)
+          (left, right) =>
+            right.score - left.score ||
+            left.drill.name.localeCompare(right.drill.name)
         )
         .map(item => item.drill);
     }
+
     return result;
   }, [
-    searchQuery,
+    activeTab,
+    categoryFilter,
+    deferredSearchQuery,
+    favorites,
+    feedingFilter,
+    formatFilter,
+    intentFilter,
     levelFilter,
+    problemFilter,
+    typeFilter,
+    utrFilter,
+    blockFilter,
+  ]);
+
+  const visibleDrills = useMemo(
+    () => filteredDrills.slice(0, visibleCount),
+    [filteredDrills, visibleCount]
+  );
+  const hasMore = visibleCount < filteredDrills.length;
+  const advancedFilterCount = [
     utrFilter,
     blockFilter,
     categoryFilter,
     typeFilter,
     feedingFilter,
     formatFilter,
-    activeTab,
-    favorites,
-  ]);
+  ].filter(Boolean).length;
+  const hasActiveFilters = Boolean(
+    deferredSearchQuery.trim() ||
+      levelFilter ||
+      problemFilter ||
+      intentFilter ||
+      advancedFilterCount
+  );
+  const selectedStage = levelFilter
+    ? pathwayStages.find(stage => stage.id === levelFilter)
+    : undefined;
+  const selectedBrand = levelFilter ? getStageBrand(levelFilter) : undefined;
 
-  // Reset visible count when filters change
-  const visibleDrills = useMemo(() => {
-    return filteredDrills.slice(0, visibleCount);
-  }, [filteredDrills, visibleCount]);
-
-  const hasMore = visibleCount < filteredDrills.length;
-
-  const clearFilters = () => {
-    setLevelFilter("");
-    setBlockFilter("");
-    setCategoryFilter("");
-    setTypeFilter("");
-    setFeedingFilter("");
-    setFormatFilter("");
-    setUtrFilter("");
-    setSearchQuery("");
-    setVisibleCount(DRILLS_PER_PAGE);
-  };
-
-  const applyClassPreset = (stageId: PathwayStageId | "") => {
-    setActiveTab("all");
-    setSearchQuery("");
-    setUtrFilter("");
-    setBlockFilter("");
-    setCategoryFilter("");
-    setTypeFilter("");
-    setFeedingFilter("");
-    setFormatFilter("");
-    setShowAdvancedFilters(false);
-    setLevelFilter(stageId);
-    setVisibleCount(DRILLS_PER_PAGE);
-  };
-
-  const handleLevelFilter = (stageId: PathwayStageId) => {
-    setLevelFilter(levelFilter === stageId ? "" : stageId);
-    setVisibleCount(DRILLS_PER_PAGE);
-  };
-
-  const openPreview = (drillId: string) => {
-    setPreviewDrillId(drillId);
-    setPreviewOpen(true);
-  };
-
-  /* Level filter pill counts */
   const levelCounts = useMemo(() => {
-    const base =
+    const source =
       activeTab === "favorites"
-        ? drills.filter(d => favorites.includes(d.id))
+        ? drills.filter(drill => favorites.includes(drill.id))
         : drills;
+
     const counts: Record<string, number> = {};
-    pathwayStages.forEach(s => {
-      counts[s.id] = base.filter(d => d.level.includes(s.id)).length;
+    pathwayStages.forEach(stage => {
+      counts[stage.id] = source.filter(drill =>
+        drill.level.includes(stage.id)
+      ).length;
     });
     return counts;
   }, [activeTab, favorites]);
 
+  const filteredBenchDrills = filteredDrills.slice(0, 6);
+
+  const clearFilters = () => {
+    setSearchQuery("");
+    setLevelFilter("");
+    setProblemFilter("");
+    setIntentFilter("");
+    setUtrFilter("");
+    setBlockFilter("");
+    setCategoryFilter("");
+    setTypeFilter("");
+    setFeedingFilter("");
+    setFormatFilter("");
+    setVisibleCount(DRILLS_PER_PAGE);
+  };
+
+  const launchBench = (drillsForBench: Drill[], sourceLabel: string) => {
+    if (drillsForBench.length === 0) return;
+
+    const benchLevel = levelFilter || getPrimaryStage(drillsForBench[0], "");
+    const stage = pathwayStages.find(item => item.id === benchLevel)!;
+    const problem = problemFilter
+      ? drillProblemFilters.find(filter => filter.id === problemFilter)?.name
+      : null;
+    const intent = intentFilter
+      ? drillIntentFilters.find(filter => filter.id === intentFilter)?.name
+      : null;
+
+    saveOnCourtSession(
+      createOnCourtSessionFromDrills({
+        level: benchLevel,
+        drills: drillsForBench,
+        title: `${stage.shortName} live drill bench`,
+        subtitle: `${drillsForBench.length} drills ready for live use`,
+        sourceLabel,
+        objective:
+          problem != null
+            ? `Coach the current problem first: ${problem}.`
+            : "Move from filtered discovery to live reps without reopening the library.",
+        emphasis:
+          intent != null
+            ? `Training intent: ${intent}. Keep the next cue visible.`
+            : "Coach the next rep, not the whole library.",
+      })
+    );
+
+    navigate("/on-court");
+  };
+
+  const launchSingleDrill = (drill: Drill) => {
+    const stageId = getPrimaryStage(drill, levelFilter);
+    const stage = pathwayStages.find(item => item.id === stageId)!;
+
+    saveOnCourtSession(
+      createOnCourtSessionFromDrills({
+        level: stageId,
+        drills: [drill],
+        title: drill.name,
+        subtitle: `${stage.shortName} single-drill focus`,
+        sourceLabel: "Single drill launch",
+        objective: drill.objective,
+        emphasis:
+          drill.coachingCues[0] ??
+          "Keep the cue short and repeatable on court.",
+      })
+    );
+
+    navigate("/on-court");
+  };
+
   return (
     <div>
-      {/* Header — compact on mobile */}
       <section className="page-hero">
-        <div className="container py-4 sm:py-6">
-          <h1 className="font-display text-xl sm:text-4xl font-bold text-t1-text dark:text-white uppercase tracking-wide">
-            Drill Library
-          </h1>
-          <p className="mt-1 text-t1-muted text-xs sm:text-sm">
-            {drills.length} drills with quick preview, class presets, and
-            favorites for repeat-use sessions.
-          </p>
+        <div className="container py-5 sm:py-8">
+          <div className="grid gap-4 xl:grid-cols-[minmax(0,1.4fr)_minmax(320px,0.85fr)]">
+            <section className="premium-card rounded-[2rem] p-5 sm:p-7">
+              <p className="section-kicker">Drill discovery</p>
+              <h1 className="mt-3 font-display text-3xl font-semibold uppercase tracking-[0.12em] text-t1-text sm:text-5xl">
+                Find the right rep for this class.
+              </h1>
+              <p className="mt-4 max-w-2xl text-sm leading-7 text-t1-muted sm:text-base">
+                Start with class mode, narrow by coaching problem, then decide
+                whether you need install reps, live ball, or competitive finish.
+              </p>
+
+              <div className="mt-6 flex flex-col gap-2 sm:flex-row">
+                <button
+                  onClick={() =>
+                    launchBench(filteredBenchDrills, "Filtered drill library")
+                  }
+                  disabled={filteredBenchDrills.length === 0}
+                  className="inline-flex min-h-[52px] items-center justify-center gap-2 rounded-full bg-t1-blue px-5 text-sm font-semibold text-white disabled:opacity-40"
+                >
+                  <PlayCircle className="h-4 w-4" />
+                  Launch filtered bench
+                </button>
+                <button
+                  onClick={() => {
+                    setActiveTab(previous =>
+                      previous === "favorites" ? "all" : "favorites"
+                    );
+                    setVisibleCount(DRILLS_PER_PAGE);
+                  }}
+                  className="inline-flex min-h-[52px] items-center justify-center gap-2 rounded-full border border-t1-border bg-t1-surface px-5 text-sm font-semibold text-t1-text"
+                >
+                  <Star className="h-4 w-4 text-amber-400" />
+                  {activeTab === "favorites"
+                    ? "View all drills"
+                    : "Open My Drills"}
+                </button>
+              </div>
+
+              <div className="mt-6 grid gap-2 sm:grid-cols-[auto_minmax(0,1fr)]">
+                <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
+                  <button
+                    onClick={() => {
+                      setActiveTab("all");
+                      setVisibleCount(DRILLS_PER_PAGE);
+                    }}
+                    className={`inline-flex min-h-[42px] items-center rounded-full px-4 text-xs font-semibold uppercase tracking-[0.24em] ${
+                      activeTab === "all"
+                        ? "bg-t1-blue text-white"
+                        : "border border-t1-border bg-t1-surface text-t1-muted"
+                    }`}
+                  >
+                    All drills
+                  </button>
+                  <button
+                    onClick={() => {
+                      setActiveTab("favorites");
+                      setVisibleCount(DRILLS_PER_PAGE);
+                    }}
+                    className={`inline-flex min-h-[42px] items-center gap-2 rounded-full px-4 text-xs font-semibold uppercase tracking-[0.24em] ${
+                      activeTab === "favorites"
+                        ? "bg-amber-500/15 text-amber-600 dark:text-amber-300"
+                        : "border border-t1-border bg-t1-surface text-t1-muted"
+                    }`}
+                  >
+                    <Star
+                      className={`h-3.5 w-3.5 ${activeTab === "favorites" ? "fill-current" : ""}`}
+                    />
+                    My drills
+                    {favorites.length > 0 && (
+                      <span className="rounded-full bg-white/20 px-2 py-0.5 text-[10px]">
+                        {favorites.length}
+                      </span>
+                    )}
+                  </button>
+                </div>
+
+                <label className="relative block">
+                  <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-t1-muted" />
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={event => {
+                      setSearchQuery(event.target.value);
+                      setVisibleCount(DRILLS_PER_PAGE);
+                    }}
+                    placeholder="Search drills by cue, objective, setup, or session need..."
+                    className="h-[52px] w-full rounded-full border border-t1-border bg-t1-surface pl-11 pr-10 text-sm text-t1-text placeholder:text-t1-muted/55 focus:border-t1-blue/35 focus:outline-none"
+                  />
+                  {searchQuery && (
+                    <button
+                      onClick={() => setSearchQuery("")}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-t1-muted"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  )}
+                </label>
+              </div>
+            </section>
+
+            <section className="premium-card rounded-[2rem] p-5 sm:p-6">
+              <p className="section-kicker">Current lens</p>
+              <h2 className="mt-3 font-display text-2xl font-semibold uppercase tracking-[0.12em] text-t1-text">
+                Coach the situation, not the menu.
+              </h2>
+              <div className="mt-5 space-y-3">
+                <div className="rounded-[1.5rem] border border-t1-border bg-t1-bg p-4">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-muted">
+                    Class mode
+                  </p>
+                  <p className="mt-2 text-sm font-semibold text-t1-text">
+                    {selectedStage
+                      ? `${selectedStage.shortName} selected`
+                      : "No class preset yet"}
+                  </p>
+                  <p className="mt-2 text-sm leading-6 text-t1-muted">
+                    {selectedBrand
+                      ? selectedBrand.summary
+                      : "Pick a class first when you need a faster decision path."}
+                  </p>
+                </div>
+                <div className="rounded-[1.5rem] border border-t1-border bg-t1-bg p-4">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-muted">
+                    Problem + intent
+                  </p>
+                  <p className="mt-2 text-sm font-semibold text-t1-text">
+                    {problemFilter
+                      ? drillProblemFilters.find(
+                          filter => filter.id === problemFilter
+                        )?.name
+                      : "No problem selected"}
+                    {intentFilter &&
+                      ` • ${drillIntentFilters.find(filter => filter.id === intentFilter)?.name}`}
+                  </p>
+                  <p className="mt-2 text-sm leading-6 text-t1-muted">
+                    {problemFilter
+                      ? drillProblemFilters.find(
+                          filter => filter.id === problemFilter
+                        )?.description
+                      : "Use one of the coaching problems below when you know what is breaking down."}
+                  </p>
+                </div>
+                <div className="rounded-[1.5rem] border border-t1-border bg-t1-bg p-4">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-muted">
+                    Library status
+                  </p>
+                  <p className="mt-2 text-2xl font-semibold text-t1-text">
+                    {filteredDrills.length}
+                  </p>
+                  <p className="mt-1 text-sm text-t1-muted">
+                    drills ready
+                    {deferredSearchQuery.trim() &&
+                      ` for "${deferredSearchQuery}"`}
+                  </p>
+                </div>
+              </div>
+            </section>
+          </div>
         </div>
       </section>
 
-      <div className="container mt-3 sm:mt-4">
-        <div className="coach-tip mb-3 p-4">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+      <div className="container space-y-5 py-5 sm:py-7">
+        <section className="space-y-3">
+          <div className="flex items-end justify-between gap-3">
             <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-blue">
-                Coach Workflow
-              </p>
-              <h2 className="mt-1 font-display text-sm sm:text-base font-bold uppercase tracking-wide text-t1-text">
-                Start with class mode, then save your go-to reps
+              <p className="section-kicker">Class mode</p>
+              <h2 className="mt-2 font-display text-2xl font-semibold uppercase tracking-[0.12em] text-t1-text">
+                Pick the class first
               </h2>
-              <p className="mt-1 text-xs leading-relaxed text-t1-muted">
-                Pick the class you are about to coach, quick-preview drills
-                before opening full details, and star the ones you want
-                available during live session planning.
-              </p>
-            </div>
-            <div className="rounded-xl border border-t1-border bg-t1-bg/55 px-3 py-2 text-[11px] leading-relaxed text-t1-muted sm:max-w-[220px]">
-              Tip: "My Drills" works best once you have 8 to 10 trusted options
-              saved by level.
-            </div>
-          </div>
-        </div>
-
-        {/* Tabs + Search row */}
-        <div className="flex flex-col gap-2 mb-3">
-          <div className="flex items-center gap-2 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-hide">
-            <button
-              onClick={() => {
-                setActiveTab("all");
-                setVisibleCount(DRILLS_PER_PAGE);
-              }}
-              className={`flex-shrink-0 px-3 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-colors min-h-[40px] ${
-                activeTab === "all"
-                  ? "bg-t1-blue text-white"
-                  : "bg-t1-surface/80 border border-t1-border text-t1-muted"
-              }`}
-            >
-              All Drills
-            </button>
-            <button
-              onClick={() => {
-                setActiveTab("favorites");
-                setVisibleCount(DRILLS_PER_PAGE);
-              }}
-              className={`flex-shrink-0 px-3 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-colors flex items-center gap-1.5 min-h-[40px] ${
-                activeTab === "favorites"
-                  ? "bg-yellow-500/15 text-yellow-400 border border-yellow-500/30"
-                  : "bg-t1-surface/80 border border-t1-border text-t1-muted"
-              }`}
-            >
-              <Star
-                className={`w-3.5 h-3.5 ${activeTab === "favorites" ? "fill-yellow-400" : ""}`}
-              />
-              My Drills
-              {favorites.length > 0 && (
-                <span className="ml-0.5 text-[10px] bg-t1-blue/20 text-t1-blue px-1.5 py-0.5 rounded-full font-bold">
-                  {favorites.length}
-                </span>
-              )}
-            </button>
-          </div>
-
-          {/* Search row */}
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-t1-muted pointer-events-none" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={e => {
-                setSearchQuery(e.target.value);
-                setVisibleCount(DRILLS_PER_PAGE);
-              }}
-              placeholder="Search drills by name, coaching cue, objective, or setup..."
-              className="w-full pl-9 pr-3 py-2.5 bg-t1-surface/80 border border-t1-border rounded-xl text-sm text-t1-text placeholder:text-t1-muted/50 focus:outline-none focus:ring-2 focus:ring-t1-blue/30 min-h-[42px]"
-            />
-            {searchQuery && (
-              <button
-                onClick={() => setSearchQuery("")}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-t1-muted hover:text-t1-text"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            )}
-          </div>
-        </div>
-
-        {/* ALWAYS-VISIBLE Level Filter Pills */}
-        <div className="panel-surface mb-3 p-3">
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <p className="text-[10px] font-semibold uppercase tracking-wider text-t1-muted">
-                Quick Class Mode
-              </p>
-              <p className="text-xs text-t1-muted mt-0.5">
-                One tap to tailor the library for the class you’re walking out
-                to coach.
-              </p>
             </div>
             {levelFilter && (
-              <button
-                onClick={() => applyClassPreset("")}
-                className="text-xs text-t1-blue font-medium hover:underline self-start sm:self-auto"
-              >
-                Clear class preset
-              </button>
-            )}
-          </div>
-
-          <div className="mt-3 flex gap-2 overflow-x-auto pb-1 scrollbar-hide sm:flex-wrap sm:overflow-visible">
-            {pathwayStages.map(stage => (
-              <button
-                key={`preset-${stage.id}`}
-                onClick={() =>
-                  applyClassPreset(levelFilter === stage.id ? "" : stage.id)
-                }
-                className={`flex-shrink-0 px-3 py-2 rounded-xl text-xs font-bold uppercase tracking-wider border transition-colors min-h-[40px] ${
-                  levelFilter === stage.id
-                    ? "bg-t1-blue text-white border-t1-blue"
-                    : "bg-t1-bg/70 border-t1-border text-t1-muted hover:bg-t1-blue/10"
-                }`}
-              >
-                {stage.shortName}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div className="mb-3">
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-hide sm:flex-wrap sm:overflow-visible">
               <button
                 onClick={() => {
                   setLevelFilter("");
                   setVisibleCount(DRILLS_PER_PAGE);
                 }}
-                className={`flex-shrink-0 px-3 py-2 rounded-xl text-xs font-semibold border transition-colors min-h-[36px] ${
-                  !levelFilter
-                    ? "bg-t1-blue text-white border-t1-blue"
-                    : "bg-t1-bg/70 border-t1-border text-t1-muted active:bg-t1-blue/10"
-                }`}
+                className="text-sm font-semibold text-t1-blue"
               >
-                All Levels
+                Clear class mode
               </button>
-              {pathwayStages.map(stage => (
+            )}
+          </div>
+
+          <div className="grid gap-3 lg:grid-cols-3 xl:grid-cols-6">
+            {pathwayStages.map(stage => {
+              const brand = getStageBrand(stage.id);
+              const active = levelFilter === stage.id;
+              return (
                 <button
                   key={stage.id}
-                  onClick={() => handleLevelFilter(stage.id)}
-                  className={`flex-shrink-0 px-3 py-2 rounded-xl text-xs font-semibold border transition-colors min-h-[36px] ${
-                    levelFilter === stage.id
-                      ? "bg-t1-blue text-white border-t1-blue"
-                      : "bg-t1-bg/70 border-t1-border text-t1-muted active:bg-t1-blue/10"
+                  onClick={() => {
+                    setLevelFilter(previous =>
+                      previous === stage.id ? "" : stage.id
+                    );
+                    setVisibleCount(DRILLS_PER_PAGE);
+                    setActiveTab("all");
+                  }}
+                  className={`premium-card rounded-[1.7rem] p-4 text-left transition-transform ${
+                    active ? "ring-2 ring-t1-blue/25" : ""
                   }`}
                 >
-                  {stage.shortName}
-                  <span className="ml-1 opacity-60">
-                    ({levelCounts[stage.id] || 0})
-                  </span>
+                  <div
+                    className={`rounded-[1.35rem] bg-gradient-to-br ${brand.surfaceClassName} p-4`}
+                  >
+                    <div className="flex items-center justify-between gap-3">
+                      <span
+                        className={`inline-flex items-center gap-2 rounded-full border px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] ${brand.badgeClassName}`}
+                      >
+                        <span
+                          className={`h-2.5 w-2.5 rounded-full ${brand.dotClassName}`}
+                        />
+                        {stage.shortName}
+                      </span>
+                      <span className="text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-muted">
+                        {levelCounts[stage.id] || 0}
+                      </span>
+                    </div>
+                    <p className="mt-3 text-sm font-semibold text-t1-text">
+                      {stage.subtitle}
+                    </p>
+                    <p className="mt-2 text-sm leading-6 text-t1-muted">
+                      {brand.tempo}
+                    </p>
+                  </div>
                 </button>
-              ))}
-            </div>
+              );
+            })}
+          </div>
+        </section>
 
-            {/* Advanced filters toggle */}
+        <section className="space-y-3">
+          <div>
+            <p className="section-kicker">Coaching problem</p>
+            <h2 className="mt-2 font-display text-2xl font-semibold uppercase tracking-[0.12em] text-t1-text">
+              What needs fixing right now?
+            </h2>
+          </div>
+          <div className="grid gap-3 lg:grid-cols-3">
+            {drillProblemFilters.map(problem => {
+              const active = problemFilter === problem.id;
+              return (
+                <button
+                  key={problem.id}
+                  onClick={() => {
+                    setProblemFilter(previous =>
+                      previous === problem.id ? "" : problem.id
+                    );
+                    setVisibleCount(DRILLS_PER_PAGE);
+                  }}
+                  className={`premium-card rounded-[1.7rem] p-5 text-left transition-transform ${
+                    active ? "ring-2 ring-t1-blue/25" : ""
+                  }`}
+                >
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="text-sm font-semibold uppercase tracking-[0.16em] text-t1-text">
+                      {problem.name}
+                    </span>
+                    {active && (
+                      <span className="rounded-full bg-t1-blue px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.22em] text-white">
+                        Live
+                      </span>
+                    )}
+                  </div>
+                  <p className="mt-3 text-sm leading-6 text-t1-muted">
+                    {problem.description}
+                  </p>
+                </button>
+              );
+            })}
+          </div>
+        </section>
+
+        <section className="space-y-3">
+          <div>
+            <p className="section-kicker">Training intent</p>
+            <h2 className="mt-2 font-display text-2xl font-semibold uppercase tracking-[0.12em] text-t1-text">
+              How should the rep feel?
+            </h2>
+          </div>
+          <div className="grid gap-3 lg:grid-cols-5">
+            {drillIntentFilters.map(intent => {
+              const active = intentFilter === intent.id;
+              return (
+                <button
+                  key={intent.id}
+                  onClick={() => {
+                    setIntentFilter(previous =>
+                      previous === intent.id ? "" : intent.id
+                    );
+                    setVisibleCount(DRILLS_PER_PAGE);
+                  }}
+                  className={`premium-card rounded-[1.7rem] p-5 text-left transition-transform ${
+                    active ? "ring-2 ring-t1-blue/25" : ""
+                  }`}
+                >
+                  <intent.icon className="h-5 w-5 text-t1-blue" />
+                  <p className="mt-4 text-sm font-semibold uppercase tracking-[0.16em] text-t1-text">
+                    {intent.name}
+                  </p>
+                  <p className="mt-3 text-sm leading-6 text-t1-muted">
+                    {intent.description}
+                  </p>
+                </button>
+              );
+            })}
+          </div>
+        </section>
+
+        <section className="panel-surface space-y-4 p-4 sm:p-5">
+          <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+            <div>
+              <p className="section-kicker">Advanced filters</p>
+              <h2 className="mt-2 font-display text-xl font-semibold uppercase tracking-[0.12em] text-t1-text">
+                Tighten the library only when needed
+              </h2>
+            </div>
             <button
-              onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
-              className={`inline-flex w-full items-center justify-center gap-1.5 px-3 py-2 rounded-xl border text-xs font-semibold transition-colors min-h-[38px] sm:w-auto ${
+              onClick={() => setShowAdvancedFilters(previous => !previous)}
+              className={`inline-flex min-h-[42px] items-center justify-center gap-2 rounded-full border px-4 text-xs font-semibold uppercase tracking-[0.24em] ${
                 showAdvancedFilters || advancedFilterCount > 0
-                  ? "bg-t1-blue/10 border-t1-blue/30 text-t1-blue"
-                  : "bg-t1-surface/80 border-t1-border text-t1-muted"
+                  ? "border-t1-blue/25 bg-t1-blue/10 text-t1-blue"
+                  : "border-t1-border bg-t1-surface text-t1-muted"
               }`}
             >
-              <SlidersHorizontal className="w-3.5 h-3.5" />
-              <span>More Filters</span>
+              <SlidersHorizontal className="h-3.5 w-3.5" />
+              Filters
               {advancedFilterCount > 0 && (
-                <span className="w-5 h-5 rounded-full bg-t1-blue text-white text-[10px] font-bold flex items-center justify-center">
+                <span className="rounded-full bg-t1-blue px-2 py-0.5 text-[10px] text-white">
                   {advancedFilterCount}
                 </span>
               )}
             </button>
           </div>
-        </div>
 
-        {/* Advanced Filters Panel */}
-        {showAdvancedFilters && (
-          <div className="panel-muted p-3 sm:p-4 mb-3 space-y-3">
-            {/* Block */}
-            <div>
-              <label className="text-[10px] font-semibold uppercase tracking-wider text-t1-muted mb-1.5 block">
-                UTR
-              </label>
-              <div className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-hide sm:flex-wrap sm:overflow-visible">
-                {availableUtrBands.map(band => (
-                  <button
-                    key={band}
-                    onClick={() => {
-                      setUtrFilter(utrFilter === band ? "" : band);
-                      setVisibleCount(DRILLS_PER_PAGE);
-                    }}
-                    className={`flex-shrink-0 px-2.5 py-1.5 rounded-full text-xs font-medium border transition-colors min-h-[32px] ${
-                      utrFilter === band
-                        ? "bg-t1-blue text-white border-t1-blue"
-                        : "bg-t1-bg/70 border-t1-border text-t1-muted active:bg-t1-blue/10"
-                    }`}
-                  >
-                    {band.replace(/\s+to\s+/gi, "-")}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Block */}
-            <div>
-              <label className="text-[10px] font-semibold uppercase tracking-wider text-t1-muted mb-1.5 block">
-                Block
-              </label>
-              <div className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-hide sm:flex-wrap sm:overflow-visible">
-                {sessionBlocks.map(block => (
-                  <button
-                    key={block.id}
-                    onClick={() => {
-                      setBlockFilter(blockFilter === block.id ? "" : block.id);
-                      setVisibleCount(DRILLS_PER_PAGE);
-                    }}
-                    className={`flex-shrink-0 px-2.5 py-1.5 rounded-full text-xs font-medium border transition-colors min-h-[32px] ${
-                      blockFilter === block.id
-                        ? "bg-t1-blue text-white border-t1-blue"
-                        : "bg-t1-bg/70 border-t1-border text-t1-muted active:bg-t1-blue/10"
-                    }`}
-                  >
-                    {block.shortName}
-                  </button>
-                ))}
-              </div>
-            </div>
-            {/* Skill + Type + Feeding + Format */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-              <div>
-                <label className="text-[10px] font-semibold uppercase tracking-wider text-t1-muted mb-1.5 block">
-                  Skill
-                </label>
-                <div className="flex flex-wrap gap-1.5">
-                  {drillSkillFilters.map(cat => (
-                    <button
-                      key={cat.id}
-                      onClick={() => {
-                        setCategoryFilter(
-                          categoryFilter === cat.id ? "" : cat.id
-                        );
-                        setVisibleCount(DRILLS_PER_PAGE);
-                      }}
-                      className={`px-2.5 py-1.5 rounded-full text-xs font-medium border transition-colors min-h-[32px] ${
-                        categoryFilter === cat.id
-                          ? "bg-t1-blue text-white border-t1-blue"
-                          : "bg-t1-bg/70 border-t1-border text-t1-muted active:bg-t1-blue/10"
-                      }`}
-                    >
-                      {cat.name}
-                    </button>
-                  ))}
-                </div>
-              </div>
-              <div>
-                <label className="text-[10px] font-semibold uppercase tracking-wider text-t1-muted mb-1.5 block">
-                  Type
-                </label>
-                <div className="flex flex-wrap gap-1.5">
-                  {["technical", "tactical", "competitive", "cooperative"].map(
-                    t => (
+          {showAdvancedFilters && (
+            <div className="grid gap-4 lg:grid-cols-2">
+              <div className="space-y-3">
+                <div>
+                  <label className="text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-muted">
+                    UTR
+                  </label>
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {availableUtrBands.map(band => (
                       <button
-                        key={t}
+                        key={band}
                         onClick={() => {
-                          setTypeFilter(typeFilter === t ? "" : t);
+                          setUtrFilter(previous =>
+                            previous === band ? "" : band
+                          );
                           setVisibleCount(DRILLS_PER_PAGE);
                         }}
-                        className={`px-2.5 py-1.5 rounded-full text-xs font-medium border transition-colors capitalize min-h-[32px] ${
-                          typeFilter === t
-                            ? "bg-t1-blue text-white border-t1-blue"
-                            : "bg-t1-bg/70 border-t1-border text-t1-muted active:bg-t1-blue/10"
+                        className={`rounded-full px-3 py-2 text-xs font-semibold uppercase tracking-[0.18em] ${
+                          utrFilter === band
+                            ? "bg-t1-blue text-white"
+                            : "border border-t1-border bg-t1-bg text-t1-muted"
                         }`}
                       >
-                        {t}
+                        {band.replace(/\s+to\s+/gi, "-")}
                       </button>
-                    )
-                  )}
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-muted">
+                    Block
+                  </label>
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {sessionBlocks.map(block => (
+                      <button
+                        key={block.id}
+                        onClick={() => {
+                          setBlockFilter(previous =>
+                            previous === block.id ? "" : block.id
+                          );
+                          setVisibleCount(DRILLS_PER_PAGE);
+                        }}
+                        className={`rounded-full px-3 py-2 text-xs font-semibold uppercase tracking-[0.18em] ${
+                          blockFilter === block.id
+                            ? "bg-t1-blue text-white"
+                            : "border border-t1-border bg-t1-bg text-t1-muted"
+                        }`}
+                      >
+                        {block.shortName}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-muted">
+                    Skill
+                  </label>
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {drillSkillFilters.map(skill => (
+                      <button
+                        key={skill.id}
+                        onClick={() => {
+                          setCategoryFilter(previous =>
+                            previous === skill.id ? "" : skill.id
+                          );
+                          setVisibleCount(DRILLS_PER_PAGE);
+                        }}
+                        className={`rounded-full px-3 py-2 text-xs font-semibold uppercase tracking-[0.18em] ${
+                          categoryFilter === skill.id
+                            ? "bg-t1-blue text-white"
+                            : "border border-t1-border bg-t1-bg text-t1-muted"
+                        }`}
+                      >
+                        {skill.name}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </div>
-              <div>
-                <label className="text-[10px] font-semibold uppercase tracking-wider text-t1-muted mb-1.5 block">
-                  Ball Feed
-                </label>
-                <div className="flex flex-wrap gap-1.5">
-                  {[
-                    { id: "feeding", label: "Feeding" },
-                    { id: "live-ball", label: "Live Ball" },
-                    { id: "both", label: "Both" },
-                  ].map(f => (
-                    <button
-                      key={f.id}
-                      onClick={() => {
-                        setFeedingFilter(feedingFilter === f.id ? "" : f.id);
-                        setVisibleCount(DRILLS_PER_PAGE);
-                      }}
-                      className={`px-2.5 py-1.5 rounded-full text-xs font-medium border transition-colors min-h-[32px] ${
-                        feedingFilter === f.id
-                          ? "bg-t1-blue text-white border-t1-blue"
-                          : "bg-t1-bg/70 border-t1-border text-t1-muted active:bg-t1-blue/10"
-                      }`}
-                    >
-                      {f.label}
-                    </button>
-                  ))}
+
+              <div className="space-y-3">
+                <div>
+                  <label className="text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-muted">
+                    Type
+                  </label>
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {[
+                      "technical",
+                      "tactical",
+                      "competitive",
+                      "cooperative",
+                    ].map(type => (
+                      <button
+                        key={type}
+                        onClick={() => {
+                          setTypeFilter(previous =>
+                            previous === type ? "" : type
+                          );
+                          setVisibleCount(DRILLS_PER_PAGE);
+                        }}
+                        className={`rounded-full px-3 py-2 text-xs font-semibold uppercase tracking-[0.18em] ${
+                          typeFilter === type
+                            ? "bg-t1-blue text-white"
+                            : "border border-t1-border bg-t1-bg text-t1-muted"
+                        }`}
+                      >
+                        {type}
+                      </button>
+                    ))}
+                  </div>
                 </div>
-              </div>
-              <div>
-                <label className="text-[10px] font-semibold uppercase tracking-wider text-t1-muted mb-1.5 block">
-                  Format
-                </label>
-                <div className="flex flex-wrap gap-1.5">
-                  {[
-                    { id: "singles", label: "Singles" },
-                    { id: "doubles", label: "Doubles" },
-                    { id: "private", label: "Private" },
-                  ].map(f => (
-                    <button
-                      key={f.id}
-                      onClick={() => {
-                        setFormatFilter(formatFilter === f.id ? "" : f.id);
-                        setVisibleCount(DRILLS_PER_PAGE);
-                      }}
-                      className={`px-2.5 py-1.5 rounded-full text-xs font-medium border transition-colors min-h-[32px] ${
-                        formatFilter === f.id
-                          ? "bg-t1-blue text-white border-t1-blue"
-                          : "bg-t1-bg/70 border-t1-border text-t1-muted active:bg-t1-blue/10"
-                      }`}
-                    >
-                      {f.label}
-                    </button>
-                  ))}
+
+                <div>
+                  <label className="text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-muted">
+                    Ball feed
+                  </label>
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {[
+                      { id: "feeding", label: "Feeding" },
+                      { id: "live-ball", label: "Live ball" },
+                      { id: "both", label: "Both" },
+                    ].map(item => (
+                      <button
+                        key={item.id}
+                        onClick={() => {
+                          setFeedingFilter(previous =>
+                            previous === item.id ? "" : item.id
+                          );
+                          setVisibleCount(DRILLS_PER_PAGE);
+                        }}
+                        className={`rounded-full px-3 py-2 text-xs font-semibold uppercase tracking-[0.18em] ${
+                          feedingFilter === item.id
+                            ? "bg-t1-blue text-white"
+                            : "border border-t1-border bg-t1-bg text-t1-muted"
+                        }`}
+                      >
+                        {item.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-muted">
+                    Format
+                  </label>
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {[
+                      { id: "singles", label: "Singles" },
+                      { id: "doubles", label: "Doubles" },
+                      { id: "private", label: "Private" },
+                    ].map(item => (
+                      <button
+                        key={item.id}
+                        onClick={() => {
+                          setFormatFilter(previous =>
+                            previous === item.id ? "" : item.id
+                          );
+                          setVisibleCount(DRILLS_PER_PAGE);
+                        }}
+                        className={`rounded-full px-3 py-2 text-xs font-semibold uppercase tracking-[0.18em] ${
+                          formatFilter === item.id
+                            ? "bg-t1-blue text-white"
+                            : "border border-t1-border bg-t1-bg text-t1-muted"
+                        }`}
+                      >
+                        {item.label}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>
+          )}
 
-            {advancedFilterCount > 0 && (
-              <button
-                onClick={() => {
-                  setBlockFilter("");
-                  setCategoryFilter("");
-                  setTypeFilter("");
-                  setFeedingFilter("");
-                  setFormatFilter("");
-                  setVisibleCount(DRILLS_PER_PAGE);
-                }}
-                className="text-xs text-t1-blue font-medium hover:underline min-h-[32px]"
-              >
-                Clear advanced filters
-              </button>
-            )}
-          </div>
-        )}
-
-        {/* Active filter pills (shown when advanced filters are collapsed) */}
-        {!showAdvancedFilters && advancedFilterCount > 0 && (
-          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 mb-3 scrollbar-hide">
-            {blockFilter && (
-              <span className="inline-flex flex-shrink-0 items-center gap-1 px-2 py-1 bg-t1-blue/10 text-t1-blue text-[10px] font-medium rounded-full min-h-[28px]">
-                {sessionBlocks.find(b => b.id === blockFilter)?.shortName}
-                <button onClick={() => setBlockFilter("")} className="ml-0.5">
-                  <X className="w-3 h-3" />
-                </button>
-              </span>
-            )}
-            {categoryFilter && (
-              <span className="inline-flex flex-shrink-0 items-center gap-1 px-2 py-1 bg-t1-blue/10 text-t1-blue text-[10px] font-medium rounded-full min-h-[28px]">
-                {drillSkillFilters.find(c => c.id === categoryFilter)?.name}
-                <button
-                  onClick={() => setCategoryFilter("")}
-                  className="ml-0.5"
-                >
-                  <X className="w-3 h-3" />
-                </button>
-              </span>
-            )}
-            {typeFilter && (
-              <span className="inline-flex flex-shrink-0 items-center gap-1 px-2 py-1 bg-t1-blue/10 text-t1-blue text-[10px] font-medium rounded-full capitalize min-h-[28px]">
-                {typeFilter}
-                <button onClick={() => setTypeFilter("")} className="ml-0.5">
-                  <X className="w-3 h-3" />
-                </button>
-              </span>
-            )}
-            {feedingFilter && (
-              <span className="inline-flex flex-shrink-0 items-center gap-1 px-2 py-1 bg-t1-blue/10 text-t1-blue text-[10px] font-medium rounded-full min-h-[28px]">
-                {feedingFilter === "live-ball"
-                  ? "Live Ball"
-                  : feedingFilter === "both"
-                    ? "Both"
-                    : "Feeding"}
-                <button onClick={() => setFeedingFilter("")} className="ml-0.5">
-                  <X className="w-3 h-3" />
-                </button>
-              </span>
-            )}
-            {formatFilter && (
-              <span className="inline-flex flex-shrink-0 items-center gap-1 px-2 py-1 bg-purple-500/10 text-purple-400 text-[10px] font-medium rounded-full capitalize min-h-[28px]">
-                {formatFilter}
-                <button onClick={() => setFormatFilter("")} className="ml-0.5">
-                  <X className="w-3 h-3" />
-                </button>
-              </span>
-            )}
+          {advancedFilterCount > 0 && (
             <button
               onClick={() => {
+                setUtrFilter("");
                 setBlockFilter("");
                 setCategoryFilter("");
                 setTypeFilter("");
                 setFeedingFilter("");
                 setFormatFilter("");
+                setVisibleCount(DRILLS_PER_PAGE);
               }}
-              className="text-[10px] text-t1-muted hover:text-t1-blue font-medium min-h-[28px]"
+              className="text-sm font-semibold text-t1-blue"
             >
-              Clear all
+              Clear advanced filters
             </button>
-          </div>
-        )}
+          )}
+        </section>
 
-        {/* Recently Viewed — horizontal scroll, only on All tab with no filters */}
         {activeTab === "all" &&
           !levelFilter &&
+          !problemFilter &&
+          !intentFilter &&
           advancedFilterCount === 0 &&
-          !searchQuery &&
+          !deferredSearchQuery &&
           recentDrills.length > 0 && (
-            <div className="mb-4">
-              <h2 className="text-[10px] font-semibold uppercase tracking-wider text-t1-muted mb-2 flex items-center gap-1.5">
-                <Clock className="w-3 h-3" /> Recently Viewed
-              </h2>
-              <div className="flex gap-2 overflow-x-auto pb-2 -mx-1 px-1 scrollbar-hide">
-                {recentDrills.map(drill => (
-                  <button
-                    key={drill.id}
-                    onClick={() => openPreview(drill.id)}
-                    className="flex-shrink-0 bg-t1-surface border border-t1-border rounded-lg px-3 py-2.5 active:bg-t1-blue/5 transition-colors text-left max-w-[180px] min-h-[44px]"
-                  >
-                    <p className="text-xs font-semibold text-t1-text truncate">
-                      {drill.name}
-                    </p>
-                    <p className="text-[10px] text-t1-muted mt-0.5 flex items-center gap-1">
-                      {drill.level
-                        .map(
-                          l => pathwayStages.find(s => s.id === l)?.shortName
-                        )
-                        .join(", ")}
-                      <span>&middot;</span>
-                      {drill.recommendedTime}
-                    </p>
-                  </button>
-                ))}
+            <section>
+              <div className="mb-3 flex items-end justify-between gap-3">
+                <div>
+                  <p className="section-kicker">Recently viewed</p>
+                  <h2 className="mt-2 font-display text-2xl font-semibold uppercase tracking-[0.12em] text-t1-text">
+                    Jump back in
+                  </h2>
+                </div>
               </div>
-            </div>
-          )}
 
-        {/* Results count */}
-        <div className="mb-3 flex flex-wrap items-center justify-between gap-2 text-xs text-t1-muted">
-          <p>
-            {filteredDrills.length} drill
-            {filteredDrills.length !== 1 ? "s" : ""} found
-            {activeTab === "favorites" &&
-              favorites.length === 0 &&
-              " — start starring drills to build My Drills"}
-            {hasMore &&
-              ` · Showing ${visibleCount} of ${filteredDrills.length}`}
-          </p>
-          {hasActiveFilters && (
-            <button
-              onClick={clearFilters}
-              className="text-xs font-medium text-t1-blue hover:underline"
-            >
-              Reset filters
-            </button>
-          )}
-        </div>
-
-        {/* Drill Cards — single column on mobile, with level-colored left border */}
-        <div className="space-y-2 sm:space-y-0 sm:grid sm:grid-cols-2 lg:grid-cols-3 sm:gap-3 mb-4">
-          {visibleDrills.map(drill => {
-            const favorited = isFavorite(drill.id);
-            const borderColor = getCardBorderColor(drill.level);
-            return (
-              <div
-                key={drill.id}
-                className={`group panel-muted active:bg-t1-blue/5 transition-all relative border-l-[3px] ${borderColor}`}
-              >
-                {/* Quick Preview button — ALWAYS visible on mobile */}
-                <button
-                  onClick={e => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    openPreview(drill.id);
-                  }}
-                  className="absolute top-3 right-12 z-10 w-8 h-8 rounded-full flex items-center justify-center transition-all bg-t1-bg/80 text-t1-muted sm:opacity-0 sm:group-hover:opacity-100 hover:text-t1-blue hover:bg-t1-blue/10 active:bg-t1-blue/20"
-                  aria-label={`Quick preview: ${drill.name}`}
-                >
-                  <Eye className="w-4 h-4" />
-                </button>
-
-                {/* Favorite toggle — ALWAYS visible on mobile */}
-                <button
-                  onClick={e => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    toggleFavorite(drill.id);
-                  }}
-                  className={`absolute top-3 right-3 z-10 w-8 h-8 rounded-full flex items-center justify-center transition-all ${
-                    favorited
-                      ? "bg-yellow-500/15 text-yellow-400"
-                      : "bg-t1-bg/80 text-t1-muted/60 sm:opacity-0 sm:group-hover:opacity-100 hover:text-yellow-400 active:bg-yellow-500/10"
-                  }`}
-                  aria-label={
-                    favorited
-                      ? `Remove ${drill.name} from My Drills`
-                      : `Add ${drill.name} to My Drills`
-                  }
-                >
-                  <Star
-                    className={`w-4 h-4 ${favorited ? "fill-yellow-400" : ""}`}
-                  />
-                </button>
-
-                <Link
-                  href={`/drills/${drill.id}`}
-                  className="block p-3 sm:p-4 no-underline"
-                >
-                  <div className="pr-16 sm:pr-14 mb-1.5">
-                    <h3 className="font-display text-sm font-bold uppercase tracking-wide text-t1-text group-hover:text-t1-blue transition-colors">
-                      {drill.name}
-                    </h3>
-                  </div>
-                  <p className="text-xs text-t1-muted line-clamp-2 mb-2">
-                    {drill.objective}
-                  </p>
-                  <div className="flex flex-wrap gap-1.5 items-center">
-                    {drill.level.map(l => (
-                      <span
-                        key={l}
-                        className="text-[10px] bg-t1-blue/10 text-t1-blue px-1.5 py-0.5 rounded font-medium uppercase tracking-wider"
+              <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
+                {recentDrills.map(drill => {
+                  const stageId = getPrimaryStage(drill, "");
+                  const brand = getStageBrand(stageId);
+                  return (
+                    <button
+                      key={drill.id}
+                      onClick={() => {
+                        setPreviewDrillId(drill.id);
+                        setPreviewOpen(true);
+                      }}
+                      className="premium-card min-w-[240px] rounded-[1.7rem] p-4 text-left"
+                    >
+                      <div
+                        className={`rounded-[1.3rem] bg-gradient-to-br ${brand.surfaceClassName} p-4`}
                       >
-                        {pathwayStages.find(s => s.id === l)?.shortName}
-                      </span>
-                    ))}
-                    <span className="text-[10px] bg-secondary text-t1-muted px-1.5 py-0.5 rounded font-medium uppercase tracking-wider">
-                      {drill.sessionBlock.replace("-", " ")}
-                    </span>
-                    <span className="text-[10px] text-t1-muted">
-                      {drill.recommendedTime}
-                    </span>
-                    {drill.subBand && (
-                      <span className="text-[10px] bg-amber-500/10 text-amber-400 px-1.5 py-0.5 rounded font-medium uppercase tracking-wider">
-                        {formatSubBand(drill.subBand)}
-                      </span>
-                    )}
-                    {drill.skillCategory === "doubles" && (
-                      <span className="text-[10px] bg-purple-500/10 text-purple-400 px-1.5 py-0.5 rounded font-medium uppercase tracking-wider">
-                        Doubles
-                      </span>
-                    )}
-                    {drill.videoUrl && (
-                      <span className="flex items-center gap-0.5 text-[10px] text-t1-blue">
-                        <Video className="w-3 h-3" /> Video
-                      </span>
-                    )}
-                  </div>
-                </Link>
+                        <span
+                          className={`inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] ${brand.tintClassName}`}
+                        >
+                          {
+                            pathwayStages.find(stage => stage.id === stageId)
+                              ?.shortName
+                          }
+                        </span>
+                        <p className="mt-3 text-sm font-semibold text-t1-text">
+                          {drill.name}
+                        </p>
+                        <p className="mt-2 text-sm leading-6 text-t1-muted">
+                          {drill.recommendedTime}
+                        </p>
+                      </div>
+                    </button>
+                  );
+                })}
               </div>
-            );
-          })}
-        </div>
+            </section>
+          )}
 
-        {/* Load More button */}
-        {hasMore && (
-          <div className="flex justify-center mb-8">
-            <button
-              onClick={() => setVisibleCount(prev => prev + DRILLS_PER_PAGE)}
-              className="inline-flex items-center gap-2 rounded-xl border border-t1-border bg-t1-surface/80 px-6 py-3 text-sm font-semibold text-t1-text hover:bg-t1-bg hover:border-t1-blue/30 transition-colors min-h-[44px]"
-            >
-              <ChevronDown className="w-4 h-4" />
-              Show More Drills
-              <span className="text-t1-muted text-xs">
-                (
-                {Math.min(
-                  DRILLS_PER_PAGE,
-                  filteredDrills.length - visibleCount
-                )}{" "}
-                more)
-              </span>
-            </button>
-          </div>
-        )}
-
-        {/* All loaded indicator */}
-        {!hasMore && filteredDrills.length > DRILLS_PER_PAGE && (
-          <div className="text-center mb-8">
-            <p className="text-xs text-t1-muted/60">
-              All {filteredDrills.length} drills loaded
-            </p>
-          </div>
-        )}
-
-        {/* Empty states */}
-        {filteredDrills.length === 0 && activeTab === "all" && (
-          <Empty className="coach-empty p-6 sm:p-8">
-            <EmptyHeader className="gap-3">
-              <EmptyMedia variant="icon" className="bg-t1-blue/10 text-t1-blue">
-                <BookOpen className="size-5" />
-              </EmptyMedia>
-              <EmptyTitle className="font-display text-base font-bold uppercase tracking-wide text-t1-text">
-                No drills match this setup
-              </EmptyTitle>
-              <EmptyDescription className="text-xs sm:text-sm text-t1-muted">
-                Try clearing a few filters or switching class mode. This is
-                usually a sign that the class preset and advanced filters are
-                narrowing the library too aggressively.
-              </EmptyDescription>
-            </EmptyHeader>
-            <EmptyContent>
+        <section>
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <p className="section-kicker">Results</p>
+              <p className="mt-2 text-sm text-t1-muted">
+                {filteredDrills.length} drill
+                {filteredDrills.length !== 1 ? "s" : ""} ready
+                {hasMore && ` • showing ${visibleCount}`}
+              </p>
+            </div>
+            {hasActiveFilters && (
               <button
                 onClick={clearFilters}
-                className="inline-flex min-h-[44px] items-center justify-center rounded-xl bg-t1-blue px-4 py-2 text-sm font-semibold text-white"
+                className="text-sm font-semibold text-t1-blue"
               >
-                Clear filters
+                Reset all filters
               </button>
-            </EmptyContent>
-          </Empty>
-        )}
+            )}
+          </div>
 
-        {filteredDrills.length === 0 &&
-          activeTab === "favorites" &&
-          favorites.length === 0 && (
-            <Empty className="coach-empty p-6 sm:p-8">
-              <EmptyHeader className="gap-3">
-                <EmptyMedia
-                  variant="icon"
-                  className="bg-yellow-500/10 text-yellow-400"
-                >
-                  <Star className="size-5 fill-yellow-400" />
-                </EmptyMedia>
-                <EmptyTitle className="font-display text-base font-bold uppercase tracking-wide text-t1-text">
-                  My Drills is empty
-                </EmptyTitle>
-                <EmptyDescription className="text-xs sm:text-sm text-t1-muted">
-                  Save drills as you find strong reps. Most coaches build this
-                  tab first so session planning gets faster on busy days.
-                </EmptyDescription>
-              </EmptyHeader>
-              <EmptyContent>
-                <button
-                  onClick={() => setActiveTab("all")}
-                  className="inline-flex min-h-[44px] items-center justify-center rounded-xl bg-t1-blue px-4 py-2 text-sm font-semibold text-white"
-                >
-                  Browse all drills
-                </button>
-              </EmptyContent>
-            </Empty>
-          )}
-
-        {filteredDrills.length === 0 &&
-          activeTab === "favorites" &&
-          favorites.length > 0 && (
-            <Empty className="coach-empty p-6 sm:p-8">
+          {filteredDrills.length === 0 ? (
+            <Empty className="coach-empty p-8">
               <EmptyHeader className="gap-3">
                 <EmptyMedia
                   variant="icon"
                   className="bg-t1-blue/10 text-t1-blue"
                 >
-                  <SlidersHorizontal className="size-5" />
+                  <BookOpen className="size-5" />
                 </EmptyMedia>
-                <EmptyTitle className="font-display text-base font-bold uppercase tracking-wide text-t1-text">
-                  No saved drills match these filters
+                <EmptyTitle className="font-display text-xl font-semibold uppercase tracking-[0.12em] text-t1-text">
+                  No drills match this lens
                 </EmptyTitle>
-                <EmptyDescription className="text-xs sm:text-sm text-t1-muted">
-                  Your saved drills are still there. Clear the current filters
-                  or search to see the full saved list again.
+                <EmptyDescription className="max-w-lg text-sm leading-6 text-t1-muted">
+                  Clear the coaching problem, widen the class mode, or remove
+                  advanced filters to bring more drills back into view.
                 </EmptyDescription>
               </EmptyHeader>
               <EmptyContent>
                 <button
                   onClick={clearFilters}
-                  className="inline-flex min-h-[44px] items-center justify-center rounded-xl bg-t1-blue px-4 py-2 text-sm font-semibold text-white"
+                  className="inline-flex min-h-[48px] items-center justify-center rounded-full bg-t1-blue px-5 text-sm font-semibold text-white"
                 >
-                  Clear filters
+                  Reset filters
                 </button>
               </EmptyContent>
             </Empty>
+          ) : (
+            <>
+              <div className="grid gap-3 xl:grid-cols-3">
+                {visibleDrills.map(drill => {
+                  const primaryStageId = getPrimaryStage(drill, levelFilter);
+                  const stage = pathwayStages.find(
+                    item => item.id === primaryStageId
+                  )!;
+                  const brand = getStageBrand(primaryStageId);
+                  const problemTags = getDrillProblems(drill);
+                  const intentTags = getDrillIntentTags(drill);
+                  const leadProblem = drillProblemFilters.find(
+                    filter => filter.id === problemTags[0]
+                  );
+                  const leadIntent = drillIntentFilters.find(
+                    filter => filter.id === intentTags[0]
+                  );
+                  const favorited = isFavorite(drill.id);
+
+                  return (
+                    <article
+                      key={drill.id}
+                      className="premium-card rounded-[1.8rem] p-4"
+                    >
+                      <div
+                        className={`rounded-[1.5rem] bg-gradient-to-br ${brand.surfaceClassName} p-4`}
+                      >
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="min-w-0 pr-16">
+                            <div className="flex flex-wrap items-center gap-2">
+                              <span
+                                className={`inline-flex items-center gap-2 rounded-full border px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] ${brand.badgeClassName}`}
+                              >
+                                <span
+                                  className={`h-2.5 w-2.5 rounded-full ${brand.dotClassName}`}
+                                />
+                                {stage.shortName}
+                              </span>
+                              <span className="rounded-full border border-t1-border bg-t1-surface/80 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-muted">
+                                {
+                                  sessionBlocks.find(
+                                    block => block.id === drill.sessionBlock
+                                  )?.shortName
+                                }
+                              </span>
+                              <span className="rounded-full border border-t1-border bg-t1-surface/80 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-muted">
+                                {drill.recommendedTime}
+                              </span>
+                            </div>
+                            <h3 className="mt-4 font-display text-2xl font-semibold uppercase tracking-[0.1em] text-t1-text">
+                              {drill.name}
+                            </h3>
+                            <p className="mt-3 text-sm leading-6 text-t1-muted">
+                              {drill.objective}
+                            </p>
+                          </div>
+
+                          <div className="absolute right-6 top-6 flex gap-2">
+                            <button
+                              onClick={() => {
+                                setPreviewDrillId(drill.id);
+                                setPreviewOpen(true);
+                              }}
+                              className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-t1-border bg-t1-surface/90 text-t1-muted"
+                              aria-label={`Preview ${drill.name}`}
+                            >
+                              <BookOpen className="h-4 w-4" />
+                            </button>
+                            <button
+                              onClick={() => toggleFavorite(drill.id)}
+                              className={`inline-flex h-10 w-10 items-center justify-center rounded-full border ${
+                                favorited
+                                  ? "border-amber-500/30 bg-amber-500/12 text-amber-500"
+                                  : "border-t1-border bg-t1-surface/90 text-t1-muted"
+                              }`}
+                              aria-label={
+                                favorited
+                                  ? `Remove ${drill.name} from My Drills`
+                                  : `Add ${drill.name} to My Drills`
+                              }
+                            >
+                              <Star
+                                className={`h-4 w-4 ${favorited ? "fill-current" : ""}`}
+                              />
+                            </button>
+                          </div>
+                        </div>
+
+                        <div className="mt-4 grid gap-2 sm:grid-cols-2">
+                          <div className="rounded-[1.25rem] border border-t1-border bg-t1-surface/85 p-3">
+                            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-muted">
+                              Best for
+                            </p>
+                            <p className="mt-2 text-sm font-semibold text-t1-text">
+                              {leadProblem?.name ?? "Coaching problem"}
+                            </p>
+                            <p className="mt-1 text-sm leading-6 text-t1-muted">
+                              {leadProblem?.description ??
+                                "Use the first cue that matters most right now."}
+                            </p>
+                          </div>
+                          <div className="rounded-[1.25rem] border border-t1-border bg-t1-surface/85 p-3">
+                            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-muted">
+                              Intent
+                            </p>
+                            <p className="mt-2 text-sm font-semibold text-t1-text">
+                              {leadIntent?.name ?? "Session intent"}
+                            </p>
+                            <p className="mt-1 text-sm leading-6 text-t1-muted">
+                              {leadIntent?.description ??
+                                "Keep the rep style clear for the group."}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="mt-4 flex flex-wrap gap-2">
+                        {problemTags.slice(0, 3).map(problem => (
+                          <span
+                            key={problem}
+                            className="inline-flex items-center rounded-full border border-t1-border bg-t1-bg px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-muted"
+                          >
+                            {
+                              drillProblemFilters.find(
+                                filter => filter.id === problem
+                              )?.name
+                            }
+                          </span>
+                        ))}
+                        {drill.subBand && (
+                          <span className="inline-flex items-center rounded-full border border-amber-500/20 bg-amber-500/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-amber-700 dark:text-amber-300">
+                            {formatSubBand(drill.subBand)}
+                          </span>
+                        )}
+                        {drill.skillCategory === "doubles" && (
+                          <span className="inline-flex items-center rounded-full border border-t1-border bg-t1-bg px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-muted">
+                            Doubles
+                          </span>
+                        )}
+                      </div>
+
+                      {drill.coachingCues[0] && (
+                        <div className="mt-4 rounded-[1.35rem] border border-t1-border bg-t1-bg px-4 py-3">
+                          <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-muted">
+                            First cue to hold
+                          </p>
+                          <p className="mt-2 text-sm leading-6 text-t1-text">
+                            {drill.coachingCues[0]}
+                          </p>
+                        </div>
+                      )}
+
+                      <div className="mt-4 grid gap-2 sm:grid-cols-3">
+                        <button
+                          onClick={() => {
+                            setPreviewDrillId(drill.id);
+                            setPreviewOpen(true);
+                          }}
+                          className="inline-flex min-h-[46px] items-center justify-center gap-2 rounded-full border border-t1-border bg-t1-bg px-4 text-sm font-semibold text-t1-text"
+                        >
+                          Preview
+                        </button>
+                        <button
+                          onClick={() => launchSingleDrill(drill)}
+                          className="inline-flex min-h-[46px] items-center justify-center gap-2 rounded-full bg-t1-blue px-4 text-sm font-semibold text-white"
+                        >
+                          <PlayCircle className="h-4 w-4" />
+                          Court
+                        </button>
+                        <Link
+                          href={`/drills/${drill.id}`}
+                          className="inline-flex min-h-[46px] items-center justify-center gap-2 rounded-full border border-t1-border bg-t1-surface px-4 text-sm font-semibold text-t1-text no-underline"
+                        >
+                          Full detail
+                        </Link>
+                      </div>
+                    </article>
+                  );
+                })}
+              </div>
+
+              {hasMore && (
+                <div className="mt-5 flex justify-center">
+                  <button
+                    onClick={() =>
+                      setVisibleCount(previous => previous + DRILLS_PER_PAGE)
+                    }
+                    className="inline-flex min-h-[48px] items-center justify-center gap-2 rounded-full border border-t1-border bg-t1-surface px-5 text-sm font-semibold text-t1-text"
+                  >
+                    <Zap className="h-4 w-4 text-t1-blue" />
+                    Load more drills
+                  </button>
+                </div>
+              )}
+            </>
           )}
+        </section>
       </div>
 
-      {/* Quick Preview Panel */}
       <DrillQuickPreview
         drillId={previewDrillId}
         open={previewOpen}

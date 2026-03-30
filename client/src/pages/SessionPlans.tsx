@@ -1,31 +1,23 @@
-/*
-  SESSION PLANS: Tier 1 Performance — Cold Dark Brand
-  MOBILE-FIRST: stock plans, saved custom plans, and shared plans.
-  Includes: search, favorites, recently viewed, compare link, and editable custom-plan flow.
-*/
-import { useEffect, useMemo, useState } from "react";
+import { useDeferredValue, useEffect, useMemo, useState } from "react";
 import { Link, useLocation } from "wouter";
 import {
-  Clock,
-  ChevronDown,
-  ChevronUp,
-  Target,
   AlertTriangle,
-  Zap,
-  ArrowRight,
-  ClipboardList,
-  Copy,
-  Check,
-  Printer,
-  Star,
-  History,
-  Search,
   ArrowLeftRight,
-  X,
+  Check,
+  ClipboardList,
+  Clock3,
+  Copy,
   Edit3,
-  Users,
+  History,
   Lock,
+  PlayCircle,
+  Printer,
+  Search,
+  Star,
   Trash2,
+  Users,
+  X,
+  Zap,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -52,63 +44,67 @@ import { sessionPlans, sessionPlanLevelGroups } from "@/lib/sessionPlans";
 import { useSessionPlanFavorites } from "@/hooks/useSessionPlanFavorites";
 import { useAuth } from "@/contexts/AuthContext";
 import {
+  customRecordToDraft,
+  deleteCustomPlan,
   fetchSharedCustomPlans,
   fetchUserCustomPlans,
   persistCustomPlanDraft,
   recordToCardPlan,
   stockPlanToCardPlan,
   stockPlanToDraft,
-  customRecordToDraft,
-  deleteCustomPlan,
   type SessionPlanCardData,
 } from "@/lib/customPlans";
-
-const levelColors: Record<PathwayStageId, string> = {
-  foundations: "bg-red-500/15 text-red-400 border-red-500/20",
-  prep: "bg-green-500/15 text-green-400 border-green-500/20",
-  jasa: "bg-yellow-500/15 text-yellow-400 border-yellow-500/20",
-  hs: "bg-purple-500/15 text-purple-400 border-purple-500/20",
-  asa: "bg-blue-500/15 text-blue-400 border-blue-500/20",
-  fta: "bg-orange-500/15 text-orange-400 border-orange-500/20",
-};
-
-const levelBgColors: Record<PathwayStageId, string> = {
-  foundations: "border-l-red-500",
-  prep: "border-l-green-500",
-  jasa: "border-l-yellow-500",
-  hs: "border-l-purple-500",
-  asa: "border-l-blue-500",
-  fta: "border-l-orange-500",
-};
+import {
+  createOnCourtSessionFromPlan,
+  loadOnCourtSession,
+  saveOnCourtSession,
+} from "@/lib/onCourtMode";
+import { getStageBrand } from "@/lib/stageBranding";
 
 type PlansTab = "all" | "favorites" | "recent" | "custom" | "shared";
 
-function readSessionPlansTab(): PlansTab {
-  if (typeof window === "undefined") return "all";
-  const raw = new URLSearchParams(window.location.search).get("tab");
-  return raw === "favorites" ||
-    raw === "recent" ||
-    raw === "custom" ||
-    raw === "shared"
-    ? raw
-    : "all";
+function readSessionPlansState(): {
+  tab: PlansTab;
+  level: PathwayStageId | "all";
+} {
+  if (typeof window === "undefined") {
+    return { tab: "all" as PlansTab, level: "all" as PathwayStageId | "all" };
+  }
+
+  const params = new URLSearchParams(window.location.search);
+  const rawTab = params.get("tab");
+  const rawLevel = params.get("level");
+
+  return {
+    tab:
+      rawTab === "favorites" ||
+      rawTab === "recent" ||
+      rawTab === "custom" ||
+      rawTab === "shared"
+        ? rawTab
+        : "all",
+    level: pathwayStages.some(stage => stage.id === rawLevel)
+      ? (rawLevel as PathwayStageId)
+      : "all",
+  };
 }
 
 function matchesSearch(plan: SessionPlanCardData, query: string) {
   if (!query.trim()) return true;
-  const q = query.toLowerCase();
+  const normalized = query.toLowerCase();
+
   return (
-    plan.name.toLowerCase().includes(q) ||
-    plan.objective.toLowerCase().includes(q) ||
-    plan.levelTag.toLowerCase().includes(q) ||
-    plan.coachingEmphasis.toLowerCase().includes(q) ||
-    plan.matchPlayTransfer.toLowerCase().includes(q) ||
-    plan.standards.some(item => item.toLowerCase().includes(q)) ||
-    plan.commonMistakes.some(item => item.toLowerCase().includes(q)) ||
+    plan.name.toLowerCase().includes(normalized) ||
+    plan.objective.toLowerCase().includes(normalized) ||
+    plan.levelTag.toLowerCase().includes(normalized) ||
+    plan.coachingEmphasis.toLowerCase().includes(normalized) ||
+    plan.matchPlayTransfer.toLowerCase().includes(normalized) ||
+    plan.standards.some(item => item.toLowerCase().includes(normalized)) ||
+    plan.commonMistakes.some(item => item.toLowerCase().includes(normalized)) ||
     plan.blocks.some(
       block =>
-        block.label.toLowerCase().includes(q) ||
-        block.content.toLowerCase().includes(q)
+        block.label.toLowerCase().includes(normalized) ||
+        block.content.toLowerCase().includes(normalized)
     )
   );
 }
@@ -119,6 +115,7 @@ interface PlanCardProps {
   onToggle: () => void;
   isFavorite?: boolean;
   onToggleFavorite?: () => void;
+  onLaunchOnCourt: () => void;
   onPrimaryAction: () => void;
   primaryActionLabel?: string;
   onDelete?: () => void;
@@ -130,325 +127,383 @@ function PlanCard({
   onToggle,
   isFavorite = false,
   onToggleFavorite,
+  onLaunchOnCourt,
   onPrimaryAction,
   primaryActionLabel,
   onDelete,
 }: PlanCardProps) {
-  const [copiedBlock, setCopiedBlock] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
+  const brand = getStageBrand(plan.level);
   const draft = Boolean(plan.isDraft);
-  const custom = plan.planType === "custom";
+  const isCustom = plan.planType === "custom";
 
   const copyPlanText = () => {
     const text = [
-      `SESSION PLAN: ${plan.name}`,
+      `SESSION PLAYBOOK: ${plan.name}`,
       `Level: ${plan.levelTag}`,
       `Time: ${plan.totalTime} min`,
       `Objective: ${plan.objective}`,
       "",
-      "BLOCKS:",
-      ...plan.blocks.map(b => `  ${b.label}: ${b.content}`),
+      "BLOCK FLOW",
+      ...plan.blocks.map(block => `- ${block.label}: ${block.content}`),
       "",
-      `Coaching Emphasis: ${plan.coachingEmphasis}`,
+      `Game Model: ${plan.coachingEmphasis}`,
       `Standards: ${plan.standards.join(", ")}`,
-      `Common Mistakes: ${plan.commonMistakes.join(", ")}`,
-      `Match Play Transfer: ${plan.matchPlayTransfer}`,
+      `Avoid: ${plan.commonMistakes.join(", ")}`,
+      `Transfer: ${plan.matchPlayTransfer}`,
     ].join("\n");
 
     navigator.clipboard.writeText(text).then(() => {
-      setCopiedBlock("all");
-      setTimeout(() => setCopiedBlock(null), 2000);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1800);
     });
   };
 
   const handlePrint = () => {
-    const draftBanner = draft
-      ? '<div style="background:#fef3c7;color:#92400e;padding:6px 14px;border-radius:6px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:12px;">Draft — Content to be refined</div>'
-      : "";
     const html = `<!DOCTYPE html>
 <html><head>
-<title>${plan.name} — Tier 1 Session Plan</title>
-<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<title>${plan.name} — Tier 1 Playbook</title>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Sora:wght@500;600;700;800&display=swap" rel="stylesheet">
 <style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { font-family: 'Inter', sans-serif; color: #1a1d21; padding: 24px; max-width: 800px; margin: 0 auto; }
-  h1 { font-family: 'Oswald', sans-serif; font-weight: 700; text-transform: uppercase; font-size: 22px; letter-spacing: 0.05em; margin-bottom: 4px; }
-  h2 { font-family: 'Oswald', sans-serif; font-weight: 600; text-transform: uppercase; font-size: 14px; letter-spacing: 0.05em; margin: 16px 0 8px; color: #3b82f6; }
-  .meta { font-size: 12px; color: #666; margin-bottom: 12px; }
-  .objective { font-size: 13px; background: #f0f4f8; padding: 10px 14px; border-radius: 6px; margin-bottom: 16px; border-left: 3px solid #3b82f6; }
-  table { width: 100%; border-collapse: collapse; margin-bottom: 16px; font-size: 12px; }
-  th { text-align: left; padding: 6px 10px; background: #1a1d21; color: white; font-family: 'Oswald', sans-serif; text-transform: uppercase; font-size: 10px; letter-spacing: 0.08em; }
-  td { padding: 6px 10px; border-bottom: 1px solid #e5e7eb; }
-  tr:nth-child(even) td { background: #f9fafb; }
-  .emphasis { background: #eff6ff; padding: 10px 14px; border-radius: 6px; margin-bottom: 12px; border-left: 3px solid #3b82f6; }
-  .emphasis strong { font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: #3b82f6; display: block; margin-bottom: 4px; }
-  .section { margin-bottom: 12px; }
-  .section-title { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: #666; margin-bottom: 4px; }
-  .section ul { list-style: none; padding: 0; }
-  .section li { font-size: 12px; padding: 2px 0; padding-left: 14px; position: relative; }
-  .section li::before { content: '\\2022'; position: absolute; left: 0; color: #3b82f6; }
-  .footer { margin-top: 20px; padding-top: 12px; border-top: 1px solid #e5e7eb; font-size: 10px; color: #999; text-align: center; font-family: 'Oswald', sans-serif; text-transform: uppercase; letter-spacing: 0.1em; }
+  * { box-sizing: border-box; }
+  body { font-family: 'Manrope', sans-serif; color: #12161d; padding: 32px; max-width: 900px; margin: 0 auto; }
+  h1, h2 { font-family: 'Sora', sans-serif; text-transform: uppercase; letter-spacing: 0.08em; }
+  h1 { font-size: 28px; margin: 0 0 8px; }
+  h2 { font-size: 13px; margin: 24px 0 10px; color: #155eef; }
+  .meta { color: #667085; font-size: 12px; margin-bottom: 16px; }
+  .panel { border: 1px solid #d8dee7; border-radius: 14px; padding: 16px; margin-bottom: 16px; background: #f8fafc; }
+  .grid { display: grid; grid-template-columns: 1.4fr 0.9fr; gap: 16px; }
+  .block { border: 1px solid #d8dee7; border-radius: 14px; padding: 12px 14px; margin-bottom: 10px; background: #ffffff; }
+  .label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: #667085; font-weight: 700; }
+  .value { margin-top: 8px; font-size: 13px; line-height: 1.6; }
+  ul { margin: 8px 0 0; padding-left: 18px; }
+  li { margin-bottom: 6px; font-size: 13px; line-height: 1.5; }
+  .footer { margin-top: 22px; padding-top: 14px; border-top: 1px solid #d8dee7; font-size: 10px; text-transform: uppercase; letter-spacing: 0.12em; color: #98a2b3; text-align: center; }
 </style>
 </head><body>
-${draftBanner}
 <h1>${plan.name}</h1>
-<div class="meta">${plan.levelTag} &middot; ${plan.totalTime} min</div>
-<div class="objective"><strong style="font-size:11px;text-transform:uppercase;letter-spacing:0.05em;color:#3b82f6;display:block;margin-bottom:4px;">Session Objective</strong>${plan.objective}</div>
-<h2>Session Blocks</h2>
-<table>
-<thead><tr><th>Block</th><th>Content</th></tr></thead>
-<tbody>${plan.blocks.map(b => `<tr><td style="font-weight:600;white-space:nowrap;width:120px;">${b.label}</td><td>${b.content}</td></tr>`).join("")}</tbody>
-</table>
-<div class="emphasis"><strong>Coaching Emphasis</strong><p>${plan.coachingEmphasis}</p></div>
-<div class="section"><div class="section-title">Standards to Hold</div><ul>${plan.standards.map(s => `<li>${s}</li>`).join("")}</ul></div>
-<div class="section"><div class="section-title">Common Session Mistakes</div><ul>${plan.commonMistakes.map(m => `<li>${m}</li>`).join("")}</ul></div>
-<div class="section"><div class="section-title">Match Play Transfer</div><p style="font-size:12px;padding-left:14px;">${plan.matchPlayTransfer}</p></div>
-<div class="footer">Tier 1 Performance &middot; The Standard Is The Standard.</div>
+<div class="meta">${plan.levelTag} • ${plan.totalTime} min</div>
+<div class="panel">
+  <div class="label">Objective</div>
+  <div class="value">${plan.objective}</div>
+</div>
+<div class="grid">
+  <div>
+    <h2>Block Flow</h2>
+    ${plan.blocks
+      .map(
+        block =>
+          `<div class="block"><div class="label">${block.label}</div><div class="value">${block.content}</div></div>`
+      )
+      .join("")}
+  </div>
+  <div>
+    <h2>Game Model</h2>
+    <div class="panel"><div class="value">${plan.coachingEmphasis}</div></div>
+    <h2>Standards</h2>
+    <div class="panel"><ul>${plan.standards.map(item => `<li>${item}</li>`).join("")}</ul></div>
+    <h2>Avoid</h2>
+    <div class="panel"><ul>${plan.commonMistakes.map(item => `<li>${item}</li>`).join("")}</ul></div>
+    <h2>Transfer</h2>
+    <div class="panel"><div class="value">${plan.matchPlayTransfer}</div></div>
+  </div>
+</div>
+<div class="footer">Tier 1 Coaches App • Playbook export</div>
 <script>window.print();</script>
 </body></html>`;
-    const w = window.open("", "_blank");
-    if (w) {
-      w.document.write(html);
-      w.document.close();
+
+    const popup = window.open("", "_blank");
+    if (popup) {
+      popup.document.write(html);
+      popup.document.close();
     }
   };
 
   return (
-    <div
-      className={`panel-muted overflow-hidden border-l-4 ${levelBgColors[plan.level]}`}
-    >
-      <div className="flex items-start">
-        <button
-          onClick={onToggle}
-          className="flex-1 text-left p-3 sm:p-4 flex items-start gap-3 active:bg-t1-bg/50 transition-colors min-w-0"
-        >
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 flex-wrap mb-1">
+    <article className="premium-card rounded-[1.9rem] p-4 sm:p-5">
+      <div
+        className={`rounded-[1.5rem] bg-gradient-to-br ${brand.surfaceClassName} p-4 sm:p-5`}
+      >
+        <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
+          <div className="min-w-0 flex-1">
+            <div className="flex flex-wrap items-center gap-2">
               <span
-                className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${levelColors[plan.level]}`}
+                className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] ${brand.badgeClassName}`}
               >
+                <span
+                  className={`h-2.5 w-2.5 rounded-full ${brand.dotClassName}`}
+                />
                 {plan.levelTag}
               </span>
-              <span className="text-[10px] text-t1-muted flex items-center gap-1">
-                <Clock className="w-3 h-3" />
+              <span className="inline-flex items-center gap-2 rounded-full border border-t1-border bg-t1-surface/85 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-muted">
+                <Clock3 className="h-3.5 w-3.5" />
                 {plan.totalTime} min
               </span>
-              {custom && plan.visibility && (
-                <span
-                  className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border flex items-center gap-1 ${
-                    plan.visibility === "shared"
-                      ? "bg-green-500/15 text-green-400 border-green-500/20"
-                      : "bg-t1-bg text-t1-muted border-t1-border"
-                  }`}
-                >
+              {isCustom && plan.visibility && (
+                <span className="inline-flex items-center gap-2 rounded-full border border-t1-border bg-t1-surface/85 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-muted">
                   {plan.visibility === "shared" ? (
-                    <Users className="w-3 h-3" />
+                    <Users className="h-3.5 w-3.5" />
                   ) : (
-                    <Lock className="w-3 h-3" />
+                    <Lock className="h-3.5 w-3.5" />
                   )}
                   {plan.visibility === "shared" ? "Team Shared" : "Private"}
                 </span>
               )}
-              {custom && (
-                <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full border bg-t1-bg text-t1-muted border-t1-border">
-                  My Plan
+              {isCustom && (
+                <span className="inline-flex items-center rounded-full border border-t1-border bg-t1-surface/85 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-muted">
+                  My plan
                 </span>
               )}
               {draft && (
-                <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-yellow-500/15 text-yellow-400 border border-yellow-500/20">
+                <span className="inline-flex items-center rounded-full border border-amber-500/20 bg-amber-500/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-amber-700 dark:text-amber-300">
                   Draft
                 </span>
               )}
             </div>
-            <h3 className="font-display text-sm sm:text-base font-bold text-t1-text uppercase tracking-wide leading-tight">
-              {plan.name}
-            </h3>
-            <p className="text-xs text-t1-muted mt-1 line-clamp-2">
-              {plan.objective}
-            </p>
+
+            <button onClick={onToggle} className="mt-4 block w-full text-left">
+              <h3 className="font-display text-2xl font-semibold uppercase tracking-[0.1em] text-t1-text">
+                {plan.name}
+              </h3>
+              <p className="mt-3 max-w-3xl text-sm leading-6 text-t1-muted">
+                {plan.objective}
+              </p>
+            </button>
+
+            <div className="mt-4 grid gap-2 lg:grid-cols-2">
+              <div className="rounded-[1.3rem] border border-t1-border bg-t1-surface/85 p-3">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-muted">
+                  Game model
+                </p>
+                <p className="mt-2 text-sm font-semibold leading-6 text-t1-text">
+                  {plan.coachingEmphasis}
+                </p>
+              </div>
+
+              <div className="rounded-[1.3rem] border border-t1-border bg-t1-surface/85 p-3">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-muted">
+                  Block flow
+                </p>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {plan.blocks.slice(0, 4).map(block => (
+                    <span
+                      key={`${plan.id}-${block.label}`}
+                      className="inline-flex items-center rounded-full border border-t1-border bg-t1-bg px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-t1-muted"
+                    >
+                      {block.label}
+                    </span>
+                  ))}
+                  {plan.blocks.length > 4 && (
+                    <span className="inline-flex items-center rounded-full border border-t1-border bg-t1-bg px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-t1-muted">
+                      +{plan.blocks.length - 4}
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
           </div>
-          <div className="flex-shrink-0 mt-1">
-            {isExpanded ? (
-              <ChevronUp className="w-5 h-5 text-t1-muted" />
-            ) : (
-              <ChevronDown className="w-5 h-5 text-t1-muted" />
+
+          <div className="flex gap-2 xl:flex-col">
+            {plan.planType === "stock" && onToggleFavorite && (
+              <button
+                onClick={onToggleFavorite}
+                className={`inline-flex h-11 w-11 items-center justify-center rounded-full border ${
+                  isFavorite
+                    ? "border-amber-500/30 bg-amber-500/12 text-amber-500"
+                    : "border-t1-border bg-t1-surface/90 text-t1-muted"
+                }`}
+                aria-label={isFavorite ? "Remove favorite" : "Add favorite"}
+              >
+                <Star
+                  className={`h-4 w-4 ${isFavorite ? "fill-current" : ""}`}
+                />
+              </button>
             )}
+            <button
+              onClick={onLaunchOnCourt}
+              className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-full bg-t1-blue px-4 text-sm font-semibold text-white"
+            >
+              <PlayCircle className="h-4 w-4" />
+              Court
+            </button>
           </div>
-        </button>
-        {plan.planType === "stock" && onToggleFavorite && (
-          <button
-            onClick={e => {
-              e.stopPropagation();
-              onToggleFavorite();
-            }}
-            className="flex-shrink-0 p-3 sm:p-4 active:scale-90 transition-transform"
-            aria-label={
-              isFavorite ? "Remove from favorites" : "Add to favorites"
-            }
-          >
-            <Star
-              className={`w-5 h-5 ${isFavorite ? "text-yellow-400 fill-yellow-400" : "text-t1-muted/40"}`}
-            />
-          </button>
-        )}
+        </div>
       </div>
 
       {isExpanded && (
-        <div className="border-t border-t1-border px-3 sm:px-4 pb-3 sm:pb-4 pt-3 space-y-3">
-          <div>
-            <h4 className="text-[10px] font-semibold uppercase tracking-wider text-t1-blue mb-2 flex items-center gap-1.5">
-              <ClipboardList className="w-3.5 h-3.5" />
-              Session Blocks
-            </h4>
-            <div className="space-y-1.5">
-              {plan.blocks.map((block, i) => (
-                <div key={i} className="flex gap-2 text-xs">
-                  <span className="font-semibold text-t1-text w-28 sm:w-32 flex-shrink-0">
-                    {block.label}
+        <div className="mt-4 grid gap-4 xl:grid-cols-[minmax(0,1.3fr)_minmax(0,0.85fr)]">
+          <div className="space-y-3">
+            {plan.blocks.map((block, index) => (
+              <div
+                key={`${plan.id}-${block.label}-${index}`}
+                className="rounded-[1.45rem] border border-t1-border bg-t1-bg px-4 py-4"
+              >
+                <div className="flex items-center gap-3">
+                  <span className="inline-flex h-8 min-w-8 items-center justify-center rounded-full bg-t1-blue text-[11px] font-semibold text-white">
+                    {index + 1}
                   </span>
-                  <span className="text-t1-muted">{block.content}</span>
+                  <p className="text-sm font-semibold uppercase tracking-[0.16em] text-t1-text">
+                    {block.label}
+                  </p>
                 </div>
-              ))}
+                <p className="mt-3 text-sm leading-6 text-t1-muted">
+                  {block.content}
+                </p>
+              </div>
+            ))}
+          </div>
+
+          <div className="space-y-3">
+            <div className="rounded-[1.45rem] border border-t1-border bg-t1-bg p-4">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-muted">
+                Standards to hold
+              </p>
+              <div className="mt-3 space-y-2">
+                {plan.standards.map(item => (
+                  <div
+                    key={item}
+                    className="inline-flex items-start gap-2 rounded-[1.15rem] border border-t1-border bg-t1-surface px-4 py-3 text-sm text-t1-text"
+                  >
+                    <Zap className="mt-0.5 h-4 w-4 flex-shrink-0 text-t1-blue" />
+                    <span>{item}</span>
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
 
-          <div className="rounded-xl border border-t1-blue/15 bg-t1-blue/5 p-3">
-            <h4 className="text-[10px] font-semibold uppercase tracking-wider text-t1-blue mb-1 flex items-center gap-1.5">
-              <Zap className="w-3.5 h-3.5" />
-              Coaching Emphasis
-            </h4>
-            <p className="text-sm text-t1-text font-medium">
-              {plan.coachingEmphasis}
-            </p>
-          </div>
-
-          <div>
-            <h4 className="text-[10px] font-semibold uppercase tracking-wider text-t1-muted mb-1.5 flex items-center gap-1.5">
-              <Target className="w-3.5 h-3.5" />
-              Standards to Hold
-            </h4>
-            <div className="flex flex-wrap gap-1.5">
-              {plan.standards.map((item, i) => (
-                <span
-                  key={i}
-                  className="text-[11px] px-2.5 py-1 bg-t1-bg border border-t1-border rounded-full text-t1-muted"
-                >
-                  {item}
-                </span>
-              ))}
+            <div className="rounded-[1.45rem] border border-t1-border bg-t1-bg p-4">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-muted">
+                Avoid
+              </p>
+              <div className="mt-3 space-y-2">
+                {plan.commonMistakes.map(item => (
+                  <div
+                    key={item}
+                    className="inline-flex items-start gap-2 rounded-[1.15rem] border border-red-500/18 bg-red-500/8 px-4 py-3 text-sm text-t1-text"
+                  >
+                    <AlertTriangle className="mt-0.5 h-4 w-4 flex-shrink-0 text-red-500" />
+                    <span>{item}</span>
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
 
-          <div>
-            <h4 className="text-[10px] font-semibold uppercase tracking-wider text-red-400/80 mb-1.5 flex items-center gap-1.5">
-              <AlertTriangle className="w-3.5 h-3.5" />
-              Common Session Mistakes
-            </h4>
-            <ul className="space-y-1">
-              {plan.commonMistakes.map((item, i) => (
-                <li
-                  key={i}
-                  className="text-xs text-red-400/70 flex items-start gap-1.5"
-                >
-                  <span className="text-red-400 mt-0.5">•</span>
-                  {item}
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <div>
-            <h4 className="text-[10px] font-semibold uppercase tracking-wider text-t1-muted mb-1 flex items-center gap-1.5">
-              <ArrowRight className="w-3.5 h-3.5" />
-              Match Play Transfer
-            </h4>
-            <p className="text-xs text-t1-text">{plan.matchPlayTransfer}</p>
-          </div>
-
-          <div className="flex flex-col gap-2 border-t border-t1-border/50 pt-2 sm:flex-row sm:flex-wrap sm:items-center">
-            <button
-              onClick={copyPlanText}
-              className="inline-flex min-h-[40px] items-center justify-center gap-1.5 rounded-xl border border-t1-border bg-t1-bg px-3 py-2 text-xs font-medium text-t1-muted transition-colors hover:text-t1-text sm:min-h-[36px]"
-            >
-              {copiedBlock === "all" ? (
-                <Check className="w-3.5 h-3.5 text-green-400" />
-              ) : (
-                <Copy className="w-3.5 h-3.5" />
-              )}
-              {copiedBlock === "all" ? "Copied!" : "Copy Plan"}
-            </button>
-            <button
-              onClick={handlePrint}
-              className="inline-flex min-h-[40px] items-center justify-center gap-1.5 rounded-xl border border-t1-border bg-t1-bg px-3 py-2 text-xs font-medium text-t1-muted transition-colors hover:text-t1-text sm:min-h-[36px]"
-            >
-              <Printer className="w-3.5 h-3.5" />
-              Print
-            </button>
-            <button
-              onClick={onPrimaryAction}
-              className="inline-flex w-full min-h-[42px] items-center justify-center gap-1.5 rounded-xl bg-t1-blue px-3 py-2 text-xs font-semibold text-white transition-colors hover:bg-t1-blue/90 sm:ml-auto sm:min-h-[36px] sm:w-auto"
-            >
-              <Edit3 className="w-3.5 h-3.5" />
-              {primaryActionLabel ||
-                (plan.planType === "stock"
-                  ? "Customize Copy"
-                  : "Edit in Builder")}
-            </button>
-            {onDelete && (
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <button className="inline-flex min-h-[40px] items-center justify-center gap-1.5 rounded-xl border border-t1-border bg-t1-bg px-3 py-2 text-xs font-semibold text-red-400 transition-colors hover:bg-red-500/10 sm:min-h-[36px]">
-                    <Trash2 className="w-3.5 h-3.5" />
-                    Delete
-                  </button>
-                </AlertDialogTrigger>
-                <AlertDialogContent className="bg-t1-surface border-t1-border">
-                  <AlertDialogHeader>
-                    <AlertDialogTitle className="font-display text-lg uppercase tracking-wide text-t1-text">
-                      Delete this custom plan?
-                    </AlertDialogTitle>
-                    <AlertDialogDescription className="text-sm text-t1-muted">
-                      This removes the plan from your library. Shared coaches
-                      will lose access to this version too.
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel className="bg-t1-bg border-t1-border text-t1-text hover:bg-t1-surface">
-                      Cancel
-                    </AlertDialogCancel>
-                    <AlertDialogAction
-                      className="bg-red-500 text-white hover:bg-red-500/90"
-                      onClick={onDelete}
-                    >
-                      Delete Plan
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
-            )}
+            <div className="rounded-[1.45rem] border border-t1-border bg-t1-bg p-4">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-muted">
+                Match transfer
+              </p>
+              <p className="mt-3 text-sm leading-6 text-t1-text">
+                {plan.matchPlayTransfer}
+              </p>
+            </div>
           </div>
         </div>
       )}
-    </div>
+
+      {isExpanded && (
+        <div className="mt-4 flex flex-col gap-2 border-t border-t1-border pt-4 sm:flex-row sm:flex-wrap">
+          <button
+            onClick={onLaunchOnCourt}
+            className="inline-flex min-h-[46px] items-center justify-center gap-2 rounded-full bg-t1-blue px-4 text-sm font-semibold text-white"
+          >
+            <PlayCircle className="h-4 w-4" />
+            Launch On-Court
+          </button>
+          <button
+            onClick={copyPlanText}
+            className="inline-flex min-h-[46px] items-center justify-center gap-2 rounded-full border border-t1-border bg-t1-bg px-4 text-sm font-semibold text-t1-text"
+          >
+            {copied ? (
+              <Check className="h-4 w-4 text-emerald-500" />
+            ) : (
+              <Copy className="h-4 w-4" />
+            )}
+            {copied ? "Copied" : "Copy"}
+          </button>
+          <button
+            onClick={handlePrint}
+            className="inline-flex min-h-[46px] items-center justify-center gap-2 rounded-full border border-t1-border bg-t1-bg px-4 text-sm font-semibold text-t1-text"
+          >
+            <Printer className="h-4 w-4" />
+            Print
+          </button>
+          <button
+            onClick={onPrimaryAction}
+            className="inline-flex min-h-[46px] items-center justify-center gap-2 rounded-full border border-t1-border bg-t1-surface px-4 text-sm font-semibold text-t1-text"
+          >
+            <Edit3 className="h-4 w-4 text-t1-blue" />
+            {primaryActionLabel ??
+              (plan.planType === "stock"
+                ? "Customize copy"
+                : "Edit in builder")}
+          </button>
+          {onDelete && (
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <button className="inline-flex min-h-[46px] items-center justify-center gap-2 rounded-full border border-red-500/20 bg-red-500/8 px-4 text-sm font-semibold text-red-500">
+                  <Trash2 className="h-4 w-4" />
+                  Delete
+                </button>
+              </AlertDialogTrigger>
+              <AlertDialogContent className="border-t1-border bg-t1-surface">
+                <AlertDialogHeader>
+                  <AlertDialogTitle className="font-display text-lg uppercase tracking-[0.14em] text-t1-text">
+                    Delete this custom plan?
+                  </AlertDialogTitle>
+                  <AlertDialogDescription className="text-sm text-t1-muted">
+                    This removes the plan from your library. If it was team
+                    shared, coaches lose access to this version.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel className="border-t1-border bg-t1-bg text-t1-text hover:bg-t1-surface">
+                    Cancel
+                  </AlertDialogCancel>
+                  <AlertDialogAction
+                    className="bg-red-500 text-white hover:bg-red-500/90"
+                    onClick={onDelete}
+                  >
+                    Delete plan
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          )}
+        </div>
+      )}
+    </article>
   );
 }
 
 export default function SessionPlans() {
-  const [activeLevel, setActiveLevel] = useState<PathwayStageId | "all">("all");
+  const initialState = readSessionPlansState();
+  const [activeLevel, setActiveLevel] = useState<PathwayStageId | "all">(
+    initialState.level
+  );
   const [activeSubBand, setActiveSubBand] = useState<string | null>(null);
   const [expandedPlan, setExpandedPlan] = useState<string | null>(null);
   const [durationFilter, setDurationFilter] = useState<number | null>(null);
-  const [activeTab, setActiveTab] = useState<PlansTab>(readSessionPlansTab);
+  const [activeTab, setActiveTab] = useState<PlansTab>(initialState.tab);
   const [searchQuery, setSearchQuery] = useState("");
   const [customPlans, setCustomPlans] = useState<SessionPlanCardData[]>([]);
   const [sharedPlans, setSharedPlans] = useState<SessionPlanCardData[]>([]);
   const [loadingCustomPlans, setLoadingCustomPlans] = useState(false);
+  const deferredSearchQuery = useDeferredValue(searchQuery);
   const [, navigate] = useLocation();
   const { favorites, recentIds, toggleFavorite, isFavorite, addRecent } =
     useSessionPlanFavorites();
   const { user, authEnabled } = useAuth();
+  const onCourtSession = useMemo(() => loadOnCourtSession(), []);
 
   useEffect(() => {
-    const syncFromUrl = () => setActiveTab(readSessionPlansTab());
+    const syncFromUrl = () => {
+      const nextState = readSessionPlansState();
+      setActiveTab(nextState.tab);
+      setActiveLevel(nextState.level);
+      setActiveSubBand(null);
+      setExpandedPlan(null);
+    };
+
     window.addEventListener("popstate", syncFromUrl);
     return () => window.removeEventListener("popstate", syncFromUrl);
   }, []);
@@ -457,13 +512,16 @@ export default function SessionPlans() {
     const params = new URLSearchParams(window.location.search);
     if (activeTab === "all") params.delete("tab");
     else params.set("tab", activeTab);
+    if (activeLevel === "all") params.delete("level");
+    else params.set("level", activeLevel);
+
     const next = params.toString();
     const nextUrl = `${window.location.pathname}${next ? `?${next}` : ""}${window.location.hash}`;
     const currentUrl = `${window.location.pathname}${window.location.search}${window.location.hash}`;
     if (nextUrl !== currentUrl) {
       window.history.replaceState(window.history.state, "", nextUrl);
     }
-  }, [activeTab]);
+  }, [activeLevel, activeTab]);
 
   useEffect(() => {
     if (!authEnabled || !user) {
@@ -486,7 +544,7 @@ export default function SessionPlans() {
         setSharedPlans(shared.map(recordToCardPlan));
       } catch (error) {
         console.error("Failed to load custom plans", error);
-        toast.error("Could not load your saved/shared plans.");
+        toast.error("Could not load your saved or shared playbooks.");
       } finally {
         if (mounted) setLoadingCustomPlans(false);
       }
@@ -528,6 +586,11 @@ export default function SessionPlans() {
     }
   };
 
+  const launchPlanOnCourt = (plan: SessionPlanCardData) => {
+    saveOnCourtSession(createOnCourtSessionFromPlan(plan));
+    navigate("/on-court");
+  };
+
   const openPlanInBuilder = (plan: SessionPlanCardData) => {
     const draft =
       plan.planType === "stock"
@@ -552,7 +615,7 @@ export default function SessionPlans() {
             updated_at: plan.updatedAt ?? new Date().toISOString(),
           });
 
-    persistCustomPlanDraft(plan.planType === "stock" ? draft : draft);
+    persistCustomPlanDraft(draft);
     navigate("/session-builder");
   };
 
@@ -592,8 +655,8 @@ export default function SessionPlans() {
 
     try {
       await deleteCustomPlan(plan.id, user.id);
-      setCustomPlans(prev => prev.filter(item => item.id !== plan.id));
-      setSharedPlans(prev => prev.filter(item => item.id !== plan.id));
+      setCustomPlans(previous => previous.filter(item => item.id !== plan.id));
+      setSharedPlans(previous => previous.filter(item => item.id !== plan.id));
       toast.success("Custom plan deleted.");
     } catch (error) {
       const message =
@@ -616,68 +679,86 @@ export default function SessionPlans() {
 
   const availableDurations = useMemo(() => {
     const durations = new Set(sessionPlans.map(plan => plan.totalTime));
-    return Array.from(durations).sort((a, b) => a - b);
+    return Array.from(durations).sort((left, right) => left - right);
   }, []);
 
-  const favoritePlans = useMemo(() => {
-    return stockPlanCards.filter(plan => favorites.includes(plan.id));
-  }, [favorites, stockPlanCards]);
-
-  const recentPlans = useMemo(() => {
-    return recentIds
-      .map(id => stockPlanCards.find(plan => plan.id === id))
-      .filter((plan): plan is SessionPlanCardData => Boolean(plan));
-  }, [recentIds, stockPlanCards]);
+  const favoritePlans = useMemo(
+    () => stockPlanCards.filter(plan => favorites.includes(plan.id)),
+    [favorites, stockPlanCards]
+  );
+  const recentPlans = useMemo(
+    () =>
+      recentIds
+        .map(id => stockPlanCards.find(plan => plan.id === id))
+        .filter((plan): plan is SessionPlanCardData => Boolean(plan)),
+    [recentIds, stockPlanCards]
+  );
 
   const filteredStockPlans = useMemo(() => {
     let result = [...stockPlanCards];
-    if (activeLevel !== "all")
+
+    if (activeLevel !== "all") {
       result = result.filter(plan => plan.level === activeLevel);
-    if (activeSubBand)
+    }
+
+    if (activeSubBand) {
       result = result.filter(plan => plan.subBand === activeSubBand);
-    if (durationFilter)
+    }
+
+    if (durationFilter != null) {
       result = result.filter(plan => plan.totalTime === durationFilter);
-    if (searchQuery.trim())
-      result = result.filter(plan => matchesSearch(plan, searchQuery));
+    }
+
+    if (deferredSearchQuery.trim()) {
+      result = result.filter(plan => matchesSearch(plan, deferredSearchQuery));
+    }
+
     return result;
-  }, [activeLevel, activeSubBand, durationFilter, searchQuery, stockPlanCards]);
+  }, [
+    activeLevel,
+    activeSubBand,
+    deferredSearchQuery,
+    durationFilter,
+    stockPlanCards,
+  ]);
 
   const groupedPlans = useMemo(() => {
-    const groups: { label: string; plans: SessionPlanCardData[] }[] = [];
+    const groups: {
+      label: string;
+      level: PathwayStageId;
+      plans: SessionPlanCardData[];
+    }[] = [];
     let currentLabel = "";
+
     for (const plan of filteredStockPlans) {
       if (plan.levelTag !== currentLabel) {
         currentLabel = plan.levelTag;
-        groups.push({ label: currentLabel, plans: [plan] });
+        groups.push({ label: currentLabel, level: plan.level, plans: [plan] });
       } else {
         groups[groups.length - 1].plans.push(plan);
       }
     }
+
     return groups;
   }, [filteredStockPlans]);
 
   const filteredFavorites = useMemo(
-    () => favoritePlans.filter(plan => matchesSearch(plan, searchQuery)),
-    [favoritePlans, searchQuery]
+    () =>
+      favoritePlans.filter(plan => matchesSearch(plan, deferredSearchQuery)),
+    [deferredSearchQuery, favoritePlans]
   );
   const filteredRecent = useMemo(
-    () => recentPlans.filter(plan => matchesSearch(plan, searchQuery)),
-    [recentPlans, searchQuery]
+    () => recentPlans.filter(plan => matchesSearch(plan, deferredSearchQuery)),
+    [deferredSearchQuery, recentPlans]
   );
   const filteredCustom = useMemo(
-    () => customPlans.filter(plan => matchesSearch(plan, searchQuery)),
-    [customPlans, searchQuery]
+    () => customPlans.filter(plan => matchesSearch(plan, deferredSearchQuery)),
+    [customPlans, deferredSearchQuery]
   );
   const filteredShared = useMemo(
-    () => sharedPlans.filter(plan => matchesSearch(plan, searchQuery)),
-    [sharedPlans, searchQuery]
+    () => sharedPlans.filter(plan => matchesSearch(plan, deferredSearchQuery)),
+    [deferredSearchQuery, sharedPlans]
   );
-
-  const handleLevelChange = (level: PathwayStageId | "all") => {
-    setActiveLevel(level);
-    setActiveSubBand(null);
-    setExpandedPlan(null);
-  };
 
   const clearStockFilters = () => {
     setActiveLevel("all");
@@ -690,30 +771,24 @@ export default function SessionPlans() {
   const renderTabEmptyState = () => {
     if (activeTab === "custom") {
       return (
-        <Empty className="coach-empty p-6 sm:p-8">
+        <Empty className="coach-empty p-8">
           <EmptyHeader className="gap-3">
             <EmptyMedia variant="icon" className="bg-t1-blue/10 text-t1-blue">
               <Edit3 className="size-5" />
             </EmptyMedia>
-            <EmptyTitle className="font-display text-base font-bold uppercase tracking-wide text-t1-text">
-              {authEnabled ? "My Plans is empty" : "Cloud plan sync is off"}
+            <EmptyTitle className="font-display text-xl font-semibold uppercase tracking-[0.12em] text-t1-text">
+              {authEnabled ? "My playbooks are empty" : "Cloud sync is off"}
             </EmptyTitle>
-            <EmptyDescription className="text-xs sm:text-sm text-t1-muted">
+            <EmptyDescription className="max-w-lg text-sm leading-6 text-t1-muted">
               {authEnabled
-                ? "Save any customized session from the builder and it will appear here for fast reuse."
-                : "Connect Supabase and sign in when you want saved plans to sync between devices and coaches."}
+                ? "Save a customized session from the builder and it will land here for quick reuse."
+                : "Connect Supabase and sign in when you want custom playbooks to sync across devices."}
             </EmptyDescription>
           </EmptyHeader>
-          <EmptyContent className="sm:max-w-md">
-            <button
-              onClick={() => setActiveTab("all")}
-              className="inline-flex min-h-[44px] items-center justify-center rounded-xl bg-t1-blue px-4 py-2 text-sm font-semibold text-white"
-            >
-              Browse stock plans
-            </button>
+          <EmptyContent>
             <Link
               href="/session-builder"
-              className="inline-flex min-h-[44px] items-center justify-center rounded-xl border border-t1-border bg-t1-bg px-4 py-2 text-sm font-semibold text-t1-text no-underline"
+              className="inline-flex min-h-[48px] items-center justify-center rounded-full bg-t1-blue px-5 text-sm font-semibold text-white no-underline"
             >
               Open builder
             </Link>
@@ -724,38 +799,29 @@ export default function SessionPlans() {
 
     if (activeTab === "shared") {
       return (
-        <Empty className="coach-empty p-6 sm:p-8">
+        <Empty className="coach-empty p-8">
           <EmptyHeader className="gap-3">
             <EmptyMedia variant="icon" className="bg-t1-blue/10 text-t1-blue">
               <Users className="size-5" />
             </EmptyMedia>
-            <EmptyTitle className="font-display text-base font-bold uppercase tracking-wide text-t1-text">
+            <EmptyTitle className="font-display text-xl font-semibold uppercase tracking-[0.12em] text-t1-text">
               {authEnabled
-                ? "No team-shared plans yet"
-                : "Sign in to view Team Shared"}
+                ? "No shared playbooks yet"
+                : "Sign in for team shared"}
             </EmptyTitle>
-            <EmptyDescription className="text-xs sm:text-sm text-t1-muted">
+            <EmptyDescription className="max-w-lg text-sm leading-6 text-t1-muted">
               {authEnabled
-                ? "Shared plans show up here after a coach saves a custom plan as Team Shared. Coaches can then copy and adapt it without changing the original."
-                : "Team Shared is the lightweight staff library for reusable plans. It only appears for signed-in coaches."}
+                ? "Shared plans appear here after a coach saves a custom playbook as Team Shared."
+                : "Team Shared is available only for signed-in coaches."}
             </EmptyDescription>
           </EmptyHeader>
-          <EmptyContent className="sm:max-w-md">
-            {authEnabled ? (
-              <Link
-                href="/session-builder"
-                className="inline-flex min-h-[44px] items-center justify-center rounded-xl bg-t1-blue px-4 py-2 text-sm font-semibold text-white no-underline"
-              >
-                Create a shared plan
-              </Link>
-            ) : (
-              <button
-                onClick={() => setActiveTab("all")}
-                className="inline-flex min-h-[44px] items-center justify-center rounded-xl bg-t1-blue px-4 py-2 text-sm font-semibold text-white"
-              >
-                Browse stock plans
-              </button>
-            )}
+          <EmptyContent>
+            <Link
+              href="/session-builder"
+              className="inline-flex min-h-[48px] items-center justify-center rounded-full bg-t1-blue px-5 text-sm font-semibold text-white no-underline"
+            >
+              Create a shared playbook
+            </Link>
           </EmptyContent>
         </Empty>
       );
@@ -763,28 +829,28 @@ export default function SessionPlans() {
 
     if (activeTab === "favorites") {
       return (
-        <Empty className="coach-empty p-6 sm:p-8">
+        <Empty className="coach-empty p-8">
           <EmptyHeader className="gap-3">
             <EmptyMedia
               variant="icon"
-              className="bg-yellow-500/10 text-yellow-400"
+              className="bg-amber-500/10 text-amber-400"
             >
-              <Star className="size-5 fill-yellow-400" />
+              <Star className="size-5 fill-current" />
             </EmptyMedia>
-            <EmptyTitle className="font-display text-base font-bold uppercase tracking-wide text-t1-text">
-              Favorite plans show up here
+            <EmptyTitle className="font-display text-xl font-semibold uppercase tracking-[0.12em] text-t1-text">
+              Favorite playbooks show up here
             </EmptyTitle>
-            <EmptyDescription className="text-xs sm:text-sm text-t1-muted">
-              Star stock plans you want close by for repeat sessions,
-              substitutions, or quick compare work.
+            <EmptyDescription className="max-w-lg text-sm leading-6 text-t1-muted">
+              Star stock plans you want close by for recurring sessions,
+              substitutions, or compare work.
             </EmptyDescription>
           </EmptyHeader>
           <EmptyContent>
             <button
               onClick={() => setActiveTab("all")}
-              className="inline-flex min-h-[44px] items-center justify-center rounded-xl bg-t1-blue px-4 py-2 text-sm font-semibold text-white"
+              className="inline-flex min-h-[48px] items-center justify-center rounded-full bg-t1-blue px-5 text-sm font-semibold text-white"
             >
-              Browse stock plans
+              Browse stock playbooks
             </button>
           </EmptyContent>
         </Empty>
@@ -792,25 +858,25 @@ export default function SessionPlans() {
     }
 
     return (
-      <Empty className="coach-empty p-6 sm:p-8">
+      <Empty className="coach-empty p-8">
         <EmptyHeader className="gap-3">
           <EmptyMedia variant="icon" className="bg-t1-blue/10 text-t1-blue">
             <History className="size-5" />
           </EmptyMedia>
-          <EmptyTitle className="font-display text-base font-bold uppercase tracking-wide text-t1-text">
-            No recent plans yet
+          <EmptyTitle className="font-display text-xl font-semibold uppercase tracking-[0.12em] text-t1-text">
+            No recent playbooks yet
           </EmptyTitle>
-          <EmptyDescription className="text-xs sm:text-sm text-t1-muted">
-            Open a few plans and they will collect here so you can get back to
-            the same coaching lane quickly.
+          <EmptyDescription className="max-w-lg text-sm leading-6 text-t1-muted">
+            Open a few stock plans and they will collect here so coaches can get
+            back to the same lane quickly.
           </EmptyDescription>
         </EmptyHeader>
         <EmptyContent>
           <button
             onClick={() => setActiveTab("all")}
-            className="inline-flex min-h-[44px] items-center justify-center rounded-xl bg-t1-blue px-4 py-2 text-sm font-semibold text-white"
+            className="inline-flex min-h-[48px] items-center justify-center rounded-full bg-t1-blue px-5 text-sm font-semibold text-white"
           >
-            Browse stock plans
+            Browse stock playbooks
           </button>
         </EmptyContent>
       </Empty>
@@ -820,189 +886,265 @@ export default function SessionPlans() {
   return (
     <div>
       <section className="page-hero">
-        <div className="container py-4 sm:py-6">
-          <div className="flex items-start justify-between">
-            <div>
-              <h1 className="font-display text-xl sm:text-4xl font-bold text-t1-text dark:text-white uppercase tracking-wide">
-                Session Plans
+        <div className="container py-5 sm:py-8">
+          <div className="grid gap-4 xl:grid-cols-[minmax(0,1.35fr)_minmax(320px,0.85fr)]">
+            <section className="premium-card rounded-[2rem] p-5 sm:p-7">
+              <p className="section-kicker">Session playbooks</p>
+              <h1 className="mt-3 font-display text-3xl font-semibold uppercase tracking-[0.12em] text-t1-text sm:text-5xl">
+                Plans should read like playbooks.
               </h1>
-              <p className="mt-1 text-t1-muted text-xs sm:text-sm">
-                Start from stock plans, save your own versions in My Plans, and
-                use Team Shared for staff-ready copies.
+              <p className="mt-4 max-w-2xl text-sm leading-7 text-t1-muted sm:text-base">
+                Start from stock structure, customize where you need to, and
+                keep shared versions clean enough to hand to another coach.
               </p>
-            </div>
-            <Link
-              href="/compare-plans"
-              className="hidden sm:flex items-center gap-1.5 rounded-xl border border-t1-border bg-t1-surface/80 px-3 py-2 text-xs font-semibold text-t1-muted hover:text-t1-text hover:bg-t1-bg transition-colors no-underline flex-shrink-0"
-            >
-              <ArrowLeftRight className="w-3.5 h-3.5" />
-              Compare Plans
-            </Link>
+
+              <div className="mt-6 grid gap-2 sm:grid-cols-3">
+                <Link
+                  href="/session-builder"
+                  className="inline-flex min-h-[52px] items-center justify-center gap-2 rounded-full bg-t1-blue px-5 text-sm font-semibold text-white no-underline"
+                >
+                  <Edit3 className="h-4 w-4" />
+                  Open builder
+                </Link>
+                <Link
+                  href="/compare-plans"
+                  className="inline-flex min-h-[52px] items-center justify-center gap-2 rounded-full border border-t1-border bg-t1-surface px-5 text-sm font-semibold text-t1-text no-underline"
+                >
+                  <ArrowLeftRight className="h-4 w-4 text-t1-blue" />
+                  Compare
+                </Link>
+                {onCourtSession ? (
+                  <Link
+                    href="/on-court"
+                    className="inline-flex min-h-[52px] items-center justify-center gap-2 rounded-full border border-t1-border bg-t1-surface px-5 text-sm font-semibold text-t1-text no-underline"
+                  >
+                    <PlayCircle className="h-4 w-4 text-t1-blue" />
+                    Resume court mode
+                  </Link>
+                ) : (
+                  <button
+                    onClick={() =>
+                      filteredStockPlans[0] &&
+                      launchPlanOnCourt(filteredStockPlans[0])
+                    }
+                    disabled={filteredStockPlans.length === 0}
+                    className="inline-flex min-h-[52px] items-center justify-center gap-2 rounded-full border border-t1-border bg-t1-surface px-5 text-sm font-semibold text-t1-text disabled:opacity-40"
+                  >
+                    <PlayCircle className="h-4 w-4 text-t1-blue" />
+                    Launch top playbook
+                  </button>
+                )}
+              </div>
+            </section>
+
+            <section className="premium-card rounded-[2rem] p-5 sm:p-6">
+              <p className="section-kicker">Library status</p>
+              <h2 className="mt-3 font-display text-2xl font-semibold uppercase tracking-[0.12em] text-t1-text">
+                Stock, custom, shared
+              </h2>
+              <div className="mt-5 grid gap-3 sm:grid-cols-3">
+                <div className="rounded-[1.45rem] border border-t1-border bg-t1-bg p-4">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-muted">
+                    Stock
+                  </p>
+                  <p className="mt-2 text-3xl font-semibold text-t1-text">
+                    {stockPlanCards.length}
+                  </p>
+                </div>
+                <div className="rounded-[1.45rem] border border-t1-border bg-t1-bg p-4">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-muted">
+                    My plans
+                  </p>
+                  <p className="mt-2 text-3xl font-semibold text-t1-text">
+                    {customPlans.length}
+                  </p>
+                </div>
+                <div className="rounded-[1.45rem] border border-t1-border bg-t1-bg p-4">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-muted">
+                    Team shared
+                  </p>
+                  <p className="mt-2 text-3xl font-semibold text-t1-text">
+                    {sharedPlans.length}
+                  </p>
+                </div>
+              </div>
+
+              <div className="mt-4 rounded-[1.45rem] border border-t1-border bg-t1-bg p-4">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-muted">
+                  Beta workflow
+                </p>
+                <p className="mt-3 text-sm leading-6 text-t1-muted">
+                  Stock first. Customize second. Share only when the version is
+                  solid enough for another coach to run without extra context.
+                </p>
+              </div>
+            </section>
           </div>
         </div>
       </section>
 
-      <div className="container mt-3 sm:mt-4 space-y-3 sm:space-y-4">
-        <div className="coach-tip p-4">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-            <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-blue">
-                Plan Flow
-              </p>
-              <h2 className="mt-1 font-display text-sm sm:text-base font-bold uppercase tracking-wide text-t1-text">
-                Stock first, custom second, shared last
-              </h2>
-              <p className="mt-1 text-xs leading-relaxed text-t1-muted">
-                The cleanest beta workflow is to start from stock plans, save
-                your version into My Plans, and only mark a plan Team Shared
-                once you would be comfortable handing it to another coach.
-              </p>
-            </div>
-            <div className="rounded-xl border border-t1-border bg-t1-bg/55 px-3 py-2 text-[11px] leading-relaxed text-t1-muted sm:max-w-[240px]">
-              On mobile, keep this page as the library and do your actual
-              editing in the builder.
-            </div>
-          </div>
-        </div>
-
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-t1-muted" />
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={e => setSearchQuery(e.target.value)}
-            placeholder="Search plans by name, emphasis, block, or keyword..."
-            className="w-full rounded-xl border border-t1-border bg-t1-surface/80 py-3 pl-10 pr-10 text-sm text-t1-text placeholder:text-t1-muted/50 transition-colors focus:border-t1-blue/50 focus:outline-none"
-          />
-          {searchQuery && (
-            <button
-              onClick={() => setSearchQuery("")}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-t1-muted hover:text-t1-text"
-            >
-              <X className="w-4 h-4" />
-            </button>
-          )}
-        </div>
-
-        <Link
-          href="/compare-plans"
-          className="sm:hidden flex items-center justify-center gap-1.5 rounded-xl border border-t1-border bg-t1-surface/80 px-3 py-2.5 text-xs font-semibold text-t1-muted hover:text-t1-text transition-colors no-underline"
-        >
-          <ArrowLeftRight className="w-3.5 h-3.5" />
-          Compare Two Plans Side by Side
-        </Link>
-
-        <div className="flex gap-1 overflow-x-auto rounded-xl border border-t1-border bg-t1-surface/80 p-1 scrollbar-hide sm:grid sm:grid-cols-5 sm:overflow-visible">
-          {[
-            {
-              key: "all" as const,
-              label: "All Plans",
-              icon: ClipboardList,
-              count: stockPlanCards.length,
-            },
-            {
-              key: "favorites" as const,
-              label: "Favorites",
-              icon: Star,
-              count: favoritePlans.length,
-            },
-            {
-              key: "recent" as const,
-              label: "Recent",
-              icon: History,
-              count: recentPlans.length,
-            },
-            {
-              key: "custom" as const,
-              label: "My Plans",
-              icon: Edit3,
-              count: customPlans.length,
-            },
-            {
-              key: "shared" as const,
-              label: "Team Shared",
-              icon: Users,
-              count: sharedPlans.length,
-            },
-          ].map(tab => (
-            <button
-              key={tab.key}
-              onClick={() => setActiveTab(tab.key)}
-              className={`flex min-w-[132px] flex-shrink-0 items-center justify-center gap-1.5 rounded-lg px-3 py-2.5 text-xs font-semibold uppercase tracking-wider transition-colors min-h-[40px] sm:min-w-0 ${
-                activeTab === tab.key
-                  ? "bg-t1-blue text-white"
-                  : "text-t1-muted hover:text-t1-text active:bg-t1-bg"
-              }`}
-            >
-              <tab.icon
-                className={`w-3.5 h-3.5 ${activeTab === tab.key && tab.key === "favorites" ? "fill-white" : ""}`}
-              />
-              <span className="hidden sm:inline">{tab.label}</span>
-              <span className="sm:hidden">{tab.label}</span>
-              {tab.count > 0 && (
-                <span
-                  className={`text-[10px] px-1.5 py-0.5 rounded-full ${activeTab === tab.key ? "bg-white/20" : "bg-t1-bg"}`}
-                >
+      <div className="container space-y-5 py-5 sm:py-7">
+        <section className="space-y-3">
+          <div className="grid gap-3 lg:grid-cols-2 xl:grid-cols-5">
+            {[
+              {
+                key: "all" as const,
+                label: "All playbooks",
+                icon: ClipboardList,
+                count: stockPlanCards.length,
+              },
+              {
+                key: "favorites" as const,
+                label: "Favorites",
+                icon: Star,
+                count: favoritePlans.length,
+              },
+              {
+                key: "recent" as const,
+                label: "Recent",
+                icon: History,
+                count: recentPlans.length,
+              },
+              {
+                key: "custom" as const,
+                label: "My plans",
+                icon: Edit3,
+                count: customPlans.length,
+              },
+              {
+                key: "shared" as const,
+                label: "Team shared",
+                icon: Users,
+                count: sharedPlans.length,
+              },
+            ].map(tab => (
+              <button
+                key={tab.key}
+                onClick={() => setActiveTab(tab.key)}
+                className={`premium-card rounded-[1.65rem] p-5 text-left ${
+                  activeTab === tab.key ? "ring-2 ring-t1-blue/25" : ""
+                }`}
+              >
+                <tab.icon className="h-5 w-5 text-t1-blue" />
+                <p className="mt-4 text-sm font-semibold uppercase tracking-[0.16em] text-t1-text">
+                  {tab.label}
+                </p>
+                <p className="mt-2 text-3xl font-semibold text-t1-text">
                   {tab.count}
-                </span>
-              )}
-            </button>
-          ))}
-        </div>
+                </p>
+              </button>
+            ))}
+          </div>
+
+          <label className="relative block">
+            <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-t1-muted" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={event => setSearchQuery(event.target.value)}
+              placeholder="Search playbooks by name, block, emphasis, or keyword..."
+              className="h-[52px] w-full rounded-full border border-t1-border bg-t1-surface pl-11 pr-10 text-sm text-t1-text placeholder:text-t1-muted/55 focus:border-t1-blue/35 focus:outline-none"
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery("")}
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-t1-muted"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            )}
+          </label>
+        </section>
 
         {activeTab === "all" && (
-          <div className="panel-surface p-3 sm:p-4 space-y-3">
-            <div>
-              <label className="text-[10px] font-semibold uppercase tracking-wider text-t1-muted mb-1.5 block">
-                Level
-              </label>
-              <div className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-hide sm:flex-wrap sm:overflow-visible">
-                <button
-                  onClick={() => handleLevelChange("all")}
-                  className={`flex-shrink-0 px-2.5 py-1.5 rounded-full text-xs font-medium border transition-colors min-h-[32px] ${
-                    activeLevel === "all"
-                      ? "bg-t1-blue text-white border-t1-blue"
-                      : "bg-t1-bg/70 border-t1-border text-t1-muted active:bg-t1-blue/10"
-                  }`}
-                >
-                  All ({stockPlanCards.length})
-                </button>
-                {availableLevels.map(stage => {
-                  const count = stockPlanCards.filter(
-                    plan => plan.level === stage.id
-                  ).length;
-                  return (
-                    <button
-                      key={stage.id}
-                      onClick={() => handleLevelChange(stage.id)}
-                      className={`flex-shrink-0 px-2.5 py-1.5 rounded-full text-xs font-medium border transition-colors min-h-[32px] ${
-                        activeLevel === stage.id
-                          ? "bg-t1-blue text-white border-t1-blue"
-                          : "bg-t1-bg/70 border-t1-border text-t1-muted active:bg-t1-blue/10"
-                      }`}
-                    >
-                      {stage.shortName} ({count})
-                    </button>
-                  );
-                })}
+          <section className="panel-surface space-y-4 p-4 sm:p-5">
+            <div className="flex items-end justify-between gap-3">
+              <div>
+                <p className="section-kicker">Class filter</p>
+                <h2 className="mt-2 font-display text-xl font-semibold uppercase tracking-[0.12em] text-t1-text">
+                  Pick the lane before the playbook
+                </h2>
               </div>
+              {(activeLevel !== "all" ||
+                activeSubBand ||
+                durationFilter != null) && (
+                <button
+                  onClick={clearStockFilters}
+                  className="text-sm font-semibold text-t1-blue"
+                >
+                  Clear filters
+                </button>
+              )}
+            </div>
+
+            <div className="grid gap-3 xl:grid-cols-6">
+              <button
+                onClick={() => {
+                  setActiveLevel("all");
+                  setActiveSubBand(null);
+                  setExpandedPlan(null);
+                }}
+                className={`premium-card rounded-[1.65rem] p-4 text-left ${
+                  activeLevel === "all" ? "ring-2 ring-t1-blue/25" : ""
+                }`}
+              >
+                <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-muted">
+                  All
+                </p>
+                <p className="mt-3 text-xl font-semibold text-t1-text">
+                  {stockPlanCards.length}
+                </p>
+              </button>
+
+              {availableLevels.map(stage => {
+                const brand = getStageBrand(stage.id);
+                const count = stockPlanCards.filter(
+                  plan => plan.level === stage.id
+                ).length;
+                return (
+                  <button
+                    key={stage.id}
+                    onClick={() => {
+                      setActiveLevel(stage.id);
+                      setActiveSubBand(null);
+                      setExpandedPlan(null);
+                    }}
+                    className={`premium-card rounded-[1.65rem] p-4 text-left ${
+                      activeLevel === stage.id ? "ring-2 ring-t1-blue/25" : ""
+                    }`}
+                  >
+                    <span
+                      className={`inline-flex items-center gap-2 rounded-full border px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] ${brand.badgeClassName}`}
+                    >
+                      <span
+                        className={`h-2.5 w-2.5 rounded-full ${brand.dotClassName}`}
+                      />
+                      {stage.shortName}
+                    </span>
+                    <p className="mt-3 text-lg font-semibold text-t1-text">
+                      {count}
+                    </p>
+                    <p className="mt-1 text-sm text-t1-muted">{brand.tempo}</p>
+                  </button>
+                );
+              })}
             </div>
 
             {availableSubBands.length > 0 && (
               <div>
-                <label className="text-[10px] font-semibold uppercase tracking-wider text-t1-muted mb-1.5 block">
-                  Sub-Band
-                </label>
-                <div className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-hide sm:flex-wrap sm:overflow-visible">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-muted">
+                  Sub-band
+                </p>
+                <div className="mt-2 flex flex-wrap gap-2">
                   <button
                     onClick={() => {
                       setActiveSubBand(null);
                       setExpandedPlan(null);
                     }}
-                    className={`flex-shrink-0 px-2.5 py-1.5 rounded-full text-xs font-medium border transition-colors min-h-[32px] ${
+                    className={`rounded-full px-3 py-2 text-xs font-semibold uppercase tracking-[0.18em] ${
                       !activeSubBand
-                        ? "bg-t1-blue text-white border-t1-blue"
-                        : "bg-t1-bg/70 border-t1-border text-t1-muted active:bg-t1-blue/10"
+                        ? "bg-t1-blue text-white"
+                        : "border border-t1-border bg-t1-bg text-t1-muted"
                     }`}
                   >
                     All
@@ -1014,10 +1156,10 @@ export default function SessionPlans() {
                         setActiveSubBand(group.subBand);
                         setExpandedPlan(null);
                       }}
-                      className={`flex-shrink-0 px-2.5 py-1.5 rounded-full text-xs font-medium border transition-colors min-h-[32px] ${
+                      className={`rounded-full px-3 py-2 text-xs font-semibold uppercase tracking-[0.18em] ${
                         activeSubBand === group.subBand
-                          ? "bg-t1-blue text-white border-t1-blue"
-                          : "bg-t1-bg/70 border-t1-border text-t1-muted active:bg-t1-blue/10"
+                          ? "bg-t1-blue text-white"
+                          : "border border-t1-border bg-t1-bg text-t1-muted"
                       }`}
                     >
                       {group.label} ({group.planCount})
@@ -1028,19 +1170,19 @@ export default function SessionPlans() {
             )}
 
             <div>
-              <label className="text-[10px] font-semibold uppercase tracking-wider text-t1-muted mb-1.5 block">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-muted">
                 Duration
-              </label>
-              <div className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-hide sm:flex-wrap sm:overflow-visible">
+              </p>
+              <div className="mt-2 flex flex-wrap gap-2">
                 <button
                   onClick={() => {
                     setDurationFilter(null);
                     setExpandedPlan(null);
                   }}
-                  className={`flex-shrink-0 px-2.5 py-1.5 rounded-full text-xs font-medium border transition-colors min-h-[32px] ${
-                    durationFilter === null
-                      ? "bg-t1-blue text-white border-t1-blue"
-                      : "bg-t1-bg/70 border-t1-border text-t1-muted active:bg-t1-blue/10"
+                  className={`rounded-full px-3 py-2 text-xs font-semibold uppercase tracking-[0.18em] ${
+                    durationFilter == null
+                      ? "bg-t1-blue text-white"
+                      : "border border-t1-border bg-t1-bg text-t1-muted"
                   }`}
                 >
                   All
@@ -1052,10 +1194,10 @@ export default function SessionPlans() {
                       setDurationFilter(duration);
                       setExpandedPlan(null);
                     }}
-                    className={`flex-shrink-0 px-2.5 py-1.5 rounded-full text-xs font-medium border transition-colors min-h-[32px] ${
+                    className={`rounded-full px-3 py-2 text-xs font-semibold uppercase tracking-[0.18em] ${
                       durationFilter === duration
-                        ? "bg-t1-blue text-white border-t1-blue"
-                        : "bg-t1-bg/70 border-t1-border text-t1-muted active:bg-t1-blue/10"
+                        ? "bg-t1-blue text-white"
+                        : "border border-t1-border bg-t1-bg text-t1-muted"
                     }`}
                   >
                     {duration} min
@@ -1063,32 +1205,13 @@ export default function SessionPlans() {
                 ))}
               </div>
             </div>
-          </div>
+          </section>
         )}
 
         {activeTab === "all" && (
           <>
-            <div className="flex items-center justify-between">
-              <p className="text-xs text-t1-muted">
-                {filteredStockPlans.length} stock plan
-                {filteredStockPlans.length !== 1 ? "s" : ""}
-                {searchQuery.trim() && ` matching "${searchQuery}"`}
-              </p>
-              {(searchQuery.trim() ||
-                activeLevel !== "all" ||
-                activeSubBand ||
-                durationFilter !== null) && (
-                <button
-                  onClick={clearStockFilters}
-                  className="text-xs text-t1-blue hover:underline"
-                >
-                  Clear filters
-                </button>
-              )}
-            </div>
-
             {groupedPlans.length === 0 ? (
-              <Empty className="coach-empty p-6 sm:p-8">
+              <Empty className="coach-empty p-8">
                 <EmptyHeader className="gap-3">
                   <EmptyMedia
                     variant="icon"
@@ -1096,51 +1219,64 @@ export default function SessionPlans() {
                   >
                     <ClipboardList className="size-5" />
                   </EmptyMedia>
-                  <EmptyTitle className="font-display text-base font-bold uppercase tracking-wide text-t1-text">
-                    No stock plans match right now
+                  <EmptyTitle className="font-display text-xl font-semibold uppercase tracking-[0.12em] text-t1-text">
+                    No stock playbooks match right now
                   </EmptyTitle>
-                  <EmptyDescription className="text-xs sm:text-sm text-t1-muted">
-                    {searchQuery.trim()
-                      ? `Nothing matched "${searchQuery}". Clear the search or widen the filters.`
-                      : "Try widening the level, sub-band, or duration filters to bring stock plans back into view."}
+                  <EmptyDescription className="max-w-lg text-sm leading-6 text-t1-muted">
+                    Clear the search or widen the class filters to bring stock
+                    playbooks back into view.
                   </EmptyDescription>
                 </EmptyHeader>
                 <EmptyContent>
                   <button
                     onClick={clearStockFilters}
-                    className="inline-flex min-h-[44px] items-center justify-center rounded-xl bg-t1-blue px-4 py-2 text-sm font-semibold text-white"
+                    className="inline-flex min-h-[48px] items-center justify-center rounded-full bg-t1-blue px-5 text-sm font-semibold text-white"
                   >
-                    Reset plan filters
+                    Reset filters
                   </button>
                 </EmptyContent>
               </Empty>
             ) : (
-              <div className="space-y-4">
-                {groupedPlans.map(group => (
-                  <div key={group.label}>
-                    <h2 className="font-display text-xs sm:text-sm font-semibold uppercase tracking-wider text-t1-muted mb-2 px-1">
-                      {group.label}
-                      <span className="text-t1-muted/50 ml-2 font-normal normal-case">
-                        {group.plans.length} plan
-                        {group.plans.length !== 1 ? "s" : ""}
-                      </span>
-                    </h2>
-                    <div className="space-y-2">
-                      {group.plans.map(plan => (
-                        <PlanCard
-                          key={plan.id}
-                          plan={plan}
-                          isExpanded={expandedPlan === plan.id}
-                          onToggle={() => handleExpand(plan.id)}
-                          isFavorite={isFavorite(plan.id)}
-                          onToggleFavorite={() => toggleFavorite(plan.id)}
-                          onPrimaryAction={() => openPlanInBuilder(plan)}
-                          primaryActionLabel="Customize Copy"
-                        />
-                      ))}
-                    </div>
-                  </div>
-                ))}
+              <div className="space-y-5">
+                {groupedPlans.map(group => {
+                  const brand = getStageBrand(group.level);
+                  return (
+                    <section key={group.label}>
+                      <div className="mb-3 flex items-end justify-between gap-3">
+                        <div>
+                          <span
+                            className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] ${brand.badgeClassName}`}
+                          >
+                            <span
+                              className={`h-2.5 w-2.5 rounded-full ${brand.dotClassName}`}
+                            />
+                            {group.label}
+                          </span>
+                          <p className="mt-2 text-sm text-t1-muted">
+                            {group.plans.length} playbook
+                            {group.plans.length !== 1 ? "s" : ""}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="space-y-3">
+                        {group.plans.map(plan => (
+                          <PlanCard
+                            key={plan.id}
+                            plan={plan}
+                            isExpanded={expandedPlan === plan.id}
+                            onToggle={() => handleExpand(plan.id)}
+                            isFavorite={isFavorite(plan.id)}
+                            onToggleFavorite={() => toggleFavorite(plan.id)}
+                            onLaunchOnCourt={() => launchPlanOnCourt(plan)}
+                            onPrimaryAction={() => openPlanInBuilder(plan)}
+                            primaryActionLabel="Customize copy"
+                          />
+                        ))}
+                      </div>
+                    </section>
+                  );
+                })}
               </div>
             )}
           </>
@@ -1150,8 +1286,8 @@ export default function SessionPlans() {
           <>
             {loadingCustomPlans &&
             (activeTab === "custom" || activeTab === "shared") ? (
-              <div className="panel-muted p-8 text-center text-sm text-t1-muted">
-                Loading synced plans…
+              <div className="panel-muted rounded-[1.6rem] p-8 text-center text-sm text-t1-muted">
+                Loading synced playbooks…
               </div>
             ) : (
               (() => {
@@ -1165,17 +1301,9 @@ export default function SessionPlans() {
                         : filteredShared;
 
                 if (plans.length === 0) {
-                  if (searchQuery.trim()) {
-                    const searchLabel =
-                      activeTab === "favorites"
-                        ? "favorite plans"
-                        : activeTab === "recent"
-                          ? "recent plans"
-                          : activeTab === "custom"
-                            ? "My Plans"
-                            : "Team Shared plans";
+                  if (deferredSearchQuery.trim()) {
                     return (
-                      <Empty className="coach-empty p-6 sm:p-8">
+                      <Empty className="coach-empty p-8">
                         <EmptyHeader className="gap-3">
                           <EmptyMedia
                             variant="icon"
@@ -1183,18 +1311,17 @@ export default function SessionPlans() {
                           >
                             <Search className="size-5" />
                           </EmptyMedia>
-                          <EmptyTitle className="font-display text-base font-bold uppercase tracking-wide text-t1-text">
-                            No {searchLabel} match this search
+                          <EmptyTitle className="font-display text-xl font-semibold uppercase tracking-[0.12em] text-t1-text">
+                            No playbooks match this search
                           </EmptyTitle>
-                          <EmptyDescription className="text-xs sm:text-sm text-t1-muted">
-                            Clear the search to see the full list for this tab
-                            again.
+                          <EmptyDescription className="max-w-lg text-sm leading-6 text-t1-muted">
+                            Clear the search to see the full tab again.
                           </EmptyDescription>
                         </EmptyHeader>
                         <EmptyContent>
                           <button
                             onClick={() => setSearchQuery("")}
-                            className="inline-flex min-h-[44px] items-center justify-center rounded-xl bg-t1-blue px-4 py-2 text-sm font-semibold text-white"
+                            className="inline-flex min-h-[48px] items-center justify-center rounded-full bg-t1-blue px-5 text-sm font-semibold text-white"
                           >
                             Clear search
                           </button>
@@ -1207,7 +1334,7 @@ export default function SessionPlans() {
                 }
 
                 return (
-                  <div className="space-y-2">
+                  <div className="space-y-3">
                     {plans.map(plan => (
                       <PlanCard
                         key={plan.id}
@@ -1224,12 +1351,10 @@ export default function SessionPlans() {
                             ? () => toggleFavorite(plan.id)
                             : undefined
                         }
+                        onLaunchOnCourt={() => launchPlanOnCourt(plan)}
                         onPrimaryAction={() => {
-                          if (activeTab === "shared") {
-                            customizeSharedPlan(plan);
-                          } else {
-                            openPlanInBuilder(plan);
-                          }
+                          if (activeTab === "shared") customizeSharedPlan(plan);
+                          else openPlanInBuilder(plan);
                         }}
                         onDelete={
                           activeTab === "custom" && plan.planType === "custom"
@@ -1238,10 +1363,10 @@ export default function SessionPlans() {
                         }
                         primaryActionLabel={
                           activeTab === "shared"
-                            ? "Customize Copy"
+                            ? "Customize copy"
                             : plan.planType === "stock"
-                              ? "Customize Copy"
-                              : "Edit in Builder"
+                              ? "Customize copy"
+                              : "Edit in builder"
                         }
                       />
                     ))}
@@ -1251,8 +1376,6 @@ export default function SessionPlans() {
             )}
           </>
         )}
-
-        <div className="h-4" />
       </div>
     </div>
   );

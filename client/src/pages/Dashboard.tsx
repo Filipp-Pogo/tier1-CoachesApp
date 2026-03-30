@@ -1,567 +1,585 @@
-/*
-  DASHBOARD: Tier 1 Performance — Cold Dark Brand
-  MOBILE-FIRST: Compact hero, 2-col quick links, large touch targets.
-  Includes My Drills (favorites) section.
-*/
-import { Link } from "wouter";
+import { useMemo } from "react";
+import { Link, useLocation } from "wouter";
 import {
-  Route,
+  ArrowRight,
   BookOpen,
-  Target,
-  ClipboardList,
-  TrendingUp,
-  Shield,
-  Dumbbell,
+  CheckCircle2,
   ChevronRight,
-  Zap,
-  Star,
-  CheckCircle,
-  History,
-  ArrowLeftRight,
+  ClipboardList,
+  Clock3,
   GraduationCap,
+  PlayCircle,
+  Shield,
+  Star,
+  Target,
+  Wrench,
 } from "lucide-react";
-import { pathwayStages, drills } from "@/lib/data";
+import { drills, pathwayStages } from "@/lib/data";
+import { sessionPlans } from "@/lib/sessionPlans";
+import { onboardingModules } from "@/lib/onboarding";
 import { useFavorites } from "@/hooks/useFavorites";
 import { useOnboardingProgress } from "@/hooks/useOnboardingProgress";
-import { onboardingModules } from "@/lib/onboarding";
+import { useSessionPlanFavorites } from "@/hooks/useSessionPlanFavorites";
+import {
+  buildStageBenchSession,
+  loadOnCourtSession,
+  saveOnCourtSession,
+} from "@/lib/onCourtMode";
+import {
+  featuredCoachingModes,
+  getStageBrand,
+  supportingCoachingModes,
+} from "@/lib/stageBranding";
 
-const HERO_IMG =
-  "https://d2xsxph8kpxj0f.cloudfront.net/310519663356767696/ELbCQXq8c7BR3Zt5VxeR2S/hero-dashboard-4kNxYGLrvc7smJFKBjje6R.webp";
-
-const quickLinks = [
-  {
-    href: "/pathway",
-    label: "Pathway",
-    icon: Route,
-    description: "Full development pathway",
-  },
-  {
-    href: "/drills",
-    label: "Drills",
-    icon: BookOpen,
-    description: "Search and filter drills",
-  },
-  {
-    href: "/session-builder",
-    label: "Builder",
-    icon: Dumbbell,
-    description: "Build a practice",
-  },
-  {
-    href: "/assessments",
-    label: "Assessments",
-    icon: Target,
-    description: "Player standards",
-  },
-  {
-    href: "/advancement",
-    label: "Advancement",
-    icon: TrendingUp,
-    description: "Progression decisions",
-  },
-  {
-    href: "/session-plans",
-    label: "Plans",
-    icon: ClipboardList,
-    description: "52 session plans by level",
-  },
-  {
-    href: "/session-history",
-    label: "History",
-    icon: History,
-    description: "Session log and tracking",
-  },
-  {
-    href: "/compare-plans",
-    label: "Compare",
-    icon: ArrowLeftRight,
-    description: "Side-by-side plan comparison",
-  },
-  {
-    href: "/coach-standards",
-    label: "Standards",
-    icon: Shield,
-    description: "Coaching expectations",
-  },
-  {
-    href: "/onboarding",
-    label: "Onboarding",
-    icon: GraduationCap,
-    description: "Learn & pass the quiz",
-  },
-];
-
-const stageColors: Record<string, string> = {
-  foundations: "bg-red-500",
-  prep: "bg-green-500",
-  jasa: "bg-yellow-500",
-  hs: "bg-blue-500",
-  asa: "bg-purple-500",
-  fta: "bg-t1-text",
-};
+function formatDate(value: string) {
+  return new Date(value).toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+}
 
 export default function Dashboard() {
-  const { favorites, isFavorite, toggleFavorite } = useFavorites();
+  const [, navigate] = useLocation();
+  const { favorites } = useFavorites();
+  const { favorites: favoritePlansIds, recentIds } = useSessionPlanFavorites();
   const { hasPassed, bestQuizResult, progress } = useOnboardingProgress();
-  const favoriteDrills = drills.filter(d => favorites.includes(d.id));
-  const recentDrills = drills.slice(0, 4);
+
+  const favoriteDrills = useMemo(
+    () => drills.filter(drill => favorites.includes(drill.id)),
+    [favorites]
+  );
+  const favoritePlans = useMemo(
+    () => sessionPlans.filter(plan => favoritePlansIds.includes(plan.id)),
+    [favoritePlansIds]
+  );
+  const recentPlans = useMemo(
+    () =>
+      recentIds
+        .map(id => sessionPlans.find(plan => plan.id === id))
+        .filter((plan): plan is (typeof sessionPlans)[number] => Boolean(plan)),
+    [recentIds]
+  );
+  const onCourtSession = useMemo(() => loadOnCourtSession(), []);
   const totalLessons = onboardingModules.reduce(
-    (sum, m) => sum + m.lessons.length,
+    (sum, module) => sum + module.lessons.length,
     0
   );
   const completedLessons = progress.completedLessons.length;
   const lessonPercent =
     totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0;
-  const needsGettingStarted = !hasPassed || favoriteDrills.length === 0;
+
+  const launchStageBoard = (stageId: (typeof pathwayStages)[number]["id"]) => {
+    const stageFavoriteIds = favoriteDrills
+      .filter(drill => drill.level.includes(stageId))
+      .map(drill => drill.id);
+    const board = buildStageBenchSession(stageId, stageFavoriteIds);
+
+    if (!board) return;
+
+    saveOnCourtSession(board);
+    navigate("/on-court");
+  };
+
+  const featuredModes = featuredCoachingModes.map(id => {
+    const stage = pathwayStages.find(item => item.id === id)!;
+    const brand = getStageBrand(id);
+    const stageDrills = drills.filter(drill => drill.level.includes(id));
+    const stagePlans = sessionPlans.filter(plan => plan.level === id);
+
+    return {
+      stage,
+      brand,
+      drillCount: stageDrills.length,
+      planCount: stagePlans.length,
+      savedCount: favoriteDrills.filter(drill => drill.level.includes(id))
+        .length,
+    };
+  });
+
+  const supportingModes = supportingCoachingModes.map(id => {
+    const stage = pathwayStages.find(item => item.id === id)!;
+    const brand = getStageBrand(id);
+
+    return {
+      stage,
+      brand,
+      drillCount: drills.filter(drill => drill.level.includes(id)).length,
+      planCount: sessionPlans.filter(plan => plan.level === id).length,
+    };
+  });
+
+  const playbookShelf = favoritePlans.length > 0 ? favoritePlans : recentPlans;
 
   return (
     <div>
-      {/* Hero Section — compact on mobile */}
-      <section className="page-hero relative h-44 sm:h-64">
-        <img
-          src={HERO_IMG}
-          alt="Tier 1 Performance training facility"
-          className="absolute inset-0 w-full h-full object-cover"
-        />
-        <div className="absolute inset-0 bg-gradient-to-r from-t1-bg/92 via-t1-bg/72 to-t1-bg/18" />
-        <div className="relative container h-full flex flex-col justify-center">
-          <h1 className="font-display text-2xl sm:text-4xl md:text-5xl font-bold text-white uppercase tracking-wide">
-            Coach Dashboard
-          </h1>
-          <p className="mt-1 sm:mt-2 text-t1-muted text-xs sm:text-sm max-w-lg leading-relaxed">
-            Move from onboarding to drills to session plans without digging
-            through the app.
-          </p>
-          <div className="mt-2 sm:mt-3 flex items-center gap-1.5 text-t1-blue text-[10px] sm:text-xs font-medium uppercase tracking-widest">
-            <Zap className="w-3 h-3" />
-            The Standard Is The Standard.
+      <section className="page-hero">
+        <div className="container py-5 sm:py-8">
+          <div className="grid gap-4 xl:grid-cols-[minmax(0,1.45fr)_minmax(320px,0.85fr)]">
+            <section className="premium-card rounded-[2rem] p-5 sm:p-7">
+              <p className="section-kicker">Coach board</p>
+              <h1 className="mt-3 max-w-3xl font-display text-3xl font-semibold uppercase tracking-[0.12em] text-t1-text sm:text-5xl">
+                What are you coaching now?
+              </h1>
+              <p className="mt-4 max-w-2xl text-sm leading-7 text-t1-muted sm:text-base">
+                Pick the class, jump straight into the right reps or playbooks,
+                and keep a live board ready for court use. Fast decisions first.
+              </p>
+
+              <div className="mt-6 grid gap-2 sm:grid-cols-3">
+                <Link
+                  href="/drills"
+                  className="inline-flex min-h-[52px] items-center justify-center gap-2 rounded-full border border-t1-border bg-t1-surface px-4 text-sm font-semibold text-t1-text no-underline"
+                >
+                  <BookOpen className="h-4 w-4 text-t1-blue" />
+                  Drill Library
+                </Link>
+                <Link
+                  href="/session-plans"
+                  className="inline-flex min-h-[52px] items-center justify-center gap-2 rounded-full border border-t1-border bg-t1-surface px-4 text-sm font-semibold text-t1-text no-underline"
+                >
+                  <ClipboardList className="h-4 w-4 text-t1-blue" />
+                  Session Playbooks
+                </Link>
+                <Link
+                  href="/session-builder"
+                  className="inline-flex min-h-[52px] items-center justify-center gap-2 rounded-full bg-t1-blue px-4 text-sm font-semibold text-white no-underline"
+                >
+                  <Wrench className="h-4 w-4" />
+                  Build a Session
+                </Link>
+              </div>
+            </section>
+
+            <section className="premium-card rounded-[2rem] p-5 sm:p-6">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <p className="section-kicker">Live use</p>
+                  <h2 className="mt-2 font-display text-2xl font-semibold uppercase tracking-[0.12em] text-t1-text">
+                    On-Court Mode
+                  </h2>
+                </div>
+                <div className="rounded-full border border-t1-border bg-t1-bg px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-muted">
+                  v1 foundation
+                </div>
+              </div>
+
+              {onCourtSession ? (
+                <>
+                  <div className="mt-4 rounded-[1.5rem] border border-t1-border bg-t1-bg p-4">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-muted">
+                      Ready to resume
+                    </p>
+                    <h3 className="mt-2 text-lg font-semibold text-t1-text">
+                      {onCourtSession.title}
+                    </h3>
+                    <p className="mt-2 text-sm leading-6 text-t1-muted">
+                      {onCourtSession.subtitle}. {onCourtSession.items.length}{" "}
+                      live blocks queued.
+                    </p>
+                  </div>
+
+                  <div className="mt-4 flex flex-col gap-2 sm:flex-row">
+                    <Link
+                      href="/on-court"
+                      className="inline-flex min-h-[48px] flex-1 items-center justify-center gap-2 rounded-full bg-t1-blue px-4 text-sm font-semibold text-white no-underline"
+                    >
+                      <PlayCircle className="h-4 w-4" />
+                      Resume live board
+                    </Link>
+                    <Link
+                      href="/session-plans"
+                      className="inline-flex min-h-[48px] flex-1 items-center justify-center gap-2 rounded-full border border-t1-border bg-t1-surface px-4 text-sm font-semibold text-t1-text no-underline"
+                    >
+                      Open playbooks
+                    </Link>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="mt-4 rounded-[1.5rem] border border-t1-border bg-t1-bg p-4">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-muted">
+                      Why it exists
+                    </p>
+                    <p className="mt-2 text-sm leading-6 text-t1-text">
+                      Large targets, cue-first blocks, and quick queue control
+                      for coaches moving between baskets, players, and courts.
+                    </p>
+                  </div>
+
+                  <div className="mt-4 grid gap-2 sm:grid-cols-2">
+                    <button
+                      onClick={() => launchStageBoard("jasa")}
+                      className="inline-flex min-h-[48px] items-center justify-center gap-2 rounded-full bg-t1-blue px-4 text-sm font-semibold text-white"
+                    >
+                      <PlayCircle className="h-4 w-4" />
+                      Launch JASA board
+                    </button>
+                    <button
+                      onClick={() => launchStageBoard("asa")}
+                      className="inline-flex min-h-[48px] items-center justify-center gap-2 rounded-full border border-t1-border bg-t1-surface px-4 text-sm font-semibold text-t1-text"
+                    >
+                      <Target className="h-4 w-4 text-t1-blue" />
+                      Launch ASA board
+                    </button>
+                  </div>
+                </>
+              )}
+            </section>
           </div>
         </div>
       </section>
 
-      <div className="container mt-4 sm:mt-8 space-y-6 sm:space-y-10">
-        {/* Coach Certification Badge */}
+      <div className="container space-y-5 py-5 sm:py-7">
         <section>
-          {hasPassed && bestQuizResult ? (
-            <Link
-              href="/onboarding"
-              className="panel-surface block border-emerald-500/25 bg-gradient-to-r from-emerald-500/10 via-emerald-500/5 to-transparent p-4 sm:p-5 no-underline hover:border-emerald-500/40 transition-all group"
-            >
-              <div className="flex items-center gap-4">
-                {/* Badge Icon */}
-                <div className="relative flex-shrink-0">
-                  <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl bg-emerald-500/15 flex items-center justify-center">
-                    <Shield className="w-7 h-7 sm:w-8 sm:h-8 text-emerald-600 dark:text-emerald-400" />
-                  </div>
-                  <div className="absolute -top-1 -right-1 w-5 h-5 bg-emerald-500 rounded-full flex items-center justify-center">
-                    <CheckCircle className="w-3.5 h-3.5 text-white" />
-                  </div>
-                </div>
-
-                {/* Badge Content */}
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <h3 className="font-display text-sm sm:text-base font-bold uppercase tracking-wide text-emerald-600 dark:text-emerald-400">
-                      Certified Coach
-                    </h3>
-                    <span className="text-[10px] sm:text-xs bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 px-2 py-0.5 rounded-full font-semibold uppercase tracking-wider">
-                      Passed
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-3 sm:gap-5 mt-1.5">
-                    <div>
-                      <span className="text-[10px] text-t1-muted uppercase tracking-wider">
-                        Score
-                      </span>
-                      <p className="text-sm sm:text-lg font-bold text-emerald-600 dark:text-emerald-400 leading-tight">
-                        {bestQuizResult.percentage}%
-                      </p>
-                    </div>
-                    <div className="w-px h-7 bg-t1-border" />
-                    <div>
-                      <span className="text-[10px] text-t1-muted uppercase tracking-wider">
-                        Result
-                      </span>
-                      <p className="text-sm sm:text-lg font-bold text-t1-text leading-tight">
-                        {bestQuizResult.score}/{bestQuizResult.total}
-                      </p>
-                    </div>
-                    <div className="w-px h-7 bg-t1-border" />
-                    <div>
-                      <span className="text-[10px] text-t1-muted uppercase tracking-wider">
-                        Passed On
-                      </span>
-                      <p className="text-xs sm:text-sm font-medium text-t1-text leading-tight mt-0.5">
-                        {new Date(bestQuizResult.date).toLocaleDateString(
-                          "en-US",
-                          { month: "short", day: "numeric", year: "numeric" }
-                        )}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                <ChevronRight className="w-5 h-5 text-t1-muted/40 group-hover:text-emerald-600 dark:text-emerald-400 transition-colors flex-shrink-0 hidden sm:block" />
-              </div>
-            </Link>
-          ) : (
-            <Link
-              href="/onboarding"
-              className="panel-surface block p-4 sm:p-5 no-underline hover:border-t1-blue/40 transition-all group"
-            >
-              <div className="flex items-center gap-4">
-                {/* Pending Icon */}
-                <div className="relative flex-shrink-0">
-                  <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl bg-t1-blue/10 flex items-center justify-center">
-                    <GraduationCap className="w-7 h-7 sm:w-8 sm:h-8 text-t1-blue" />
-                  </div>
-                </div>
-
-                {/* Content */}
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <h3 className="font-display text-sm sm:text-base font-bold uppercase tracking-wide text-t1-text">
-                      Coach Onboarding
-                    </h3>
-                    <span className="text-[10px] sm:text-xs bg-amber-500/20 text-amber-700 dark:text-amber-300 px-2 py-0.5 rounded-full font-semibold uppercase tracking-wider">
-                      {completedLessons === 0 ? "Not Started" : "In Progress"}
-                    </span>
-                  </div>
-                  <p className="text-xs text-t1-muted mt-1">
-                    {completedLessons === 0
-                      ? "Complete 6 modules and pass the quiz with 90% to get certified."
-                      : `${lessonPercent}% complete — ${completedLessons}/${totalLessons} lessons done`}
-                  </p>
-                  {completedLessons > 0 && (
-                    <div className="mt-2 h-1.5 bg-t1-bg rounded-full overflow-hidden max-w-xs">
-                      <div
-                        className="h-full bg-t1-blue rounded-full transition-all duration-500"
-                        style={{ width: `${lessonPercent}%` }}
-                      />
-                    </div>
-                  )}
-                </div>
-
-                <ChevronRight className="w-5 h-5 text-t1-muted/40 group-hover:text-t1-blue transition-colors flex-shrink-0 hidden sm:block" />
-              </div>
-            </Link>
-          )}
-        </section>
-
-        {needsGettingStarted && (
-          <section className="coach-tip p-4 sm:p-5">
-            <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-              <div className="max-w-2xl">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-blue">
-                  Start Here
-                </p>
-                <h2 className="mt-2 font-display text-lg sm:text-2xl font-bold uppercase tracking-wide text-t1-text">
-                  First-week coach flow
-                </h2>
-                <p className="mt-2 text-sm leading-relaxed text-t1-muted">
-                  The beta is strongest when you use it in this order: get the
-                  coaching standard first, save a small drill bench by class,
-                  then customize a stock plan before building your own session.
-                </p>
-              </div>
-              <div className="rounded-2xl border border-t1-border bg-t1-bg/55 px-4 py-3 text-xs text-t1-muted">
-                {completedLessons === 0
-                  ? "You have not started onboarding yet."
-                  : `${completedLessons}/${totalLessons} onboarding lessons complete.`}
-              </div>
-            </div>
-
-            <div className="mt-4 grid gap-3 md:grid-cols-3">
-              {[
-                {
-                  href: "/onboarding",
-                  icon: GraduationCap,
-                  title: "Learn the standard",
-                  body: hasPassed
-                    ? "Review modules anytime and retake the quiz if needed."
-                    : "Finish onboarding before your first full week on court.",
-                  cta: hasPassed
-                    ? "Review onboarding"
-                    : completedLessons === 0
-                      ? "Start onboarding"
-                      : "Continue onboarding",
-                },
-                {
-                  href:
-                    favoriteDrills.length > 0
-                      ? "/drills?tab=favorites"
-                      : "/drills",
-                  icon: BookOpen,
-                  title: "Build your drill bench",
-                  body:
-                    favoriteDrills.length > 0
-                      ? `${favoriteDrills.length} saved drills ready for quick access.`
-                      : "Use Quick Class Mode in drills and save the reps you rely on most.",
-                  cta:
-                    favoriteDrills.length > 0
-                      ? "Open My Drills"
-                      : "Open drill library",
-                },
-                {
-                  href: "/session-plans",
-                  icon: ClipboardList,
-                  title: "Customize one plan",
-                  body: "Open stock plans, make your version, then save it into My Plans before building from scratch.",
-                  cta: "Browse session plans",
-                },
-              ].map(item => (
-                <Link
-                  key={item.title}
-                  href={item.href}
-                  className="panel-muted group block p-4 no-underline hover:border-t1-blue/30"
-                >
-                  <item.icon className="h-5 w-5 text-t1-blue" />
-                  <h3 className="mt-3 font-display text-sm font-bold uppercase tracking-wide text-t1-text">
-                    {item.title}
-                  </h3>
-                  <p className="mt-1 text-xs leading-relaxed text-t1-muted">
-                    {item.body}
-                  </p>
-                  <span className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-t1-blue">
-                    {item.cta}
-                    <ChevronRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
-                  </span>
-                </Link>
-              ))}
-            </div>
-          </section>
-        )}
-
-        {/* Quick Links Grid — 2 col on mobile, 3 on desktop */}
-        <section>
-          <h2 className="font-display text-base sm:text-xl font-bold uppercase tracking-wide text-t1-text mb-3">
-            Quick Access
-          </h2>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-2 sm:gap-3">
-            {quickLinks.map(link => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className="group flex items-center gap-2.5 p-3 sm:p-4 bg-t1-surface border border-t1-border rounded-lg hover:border-t1-blue/40 active:bg-t1-blue/5 transition-all no-underline min-h-[52px]"
-              >
-                <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-md bg-t1-blue/10 flex items-center justify-center flex-shrink-0 group-hover:bg-t1-blue/20 transition-colors">
-                  <link.icon className="w-4 h-4 text-t1-blue" />
-                </div>
-                <div className="min-w-0">
-                  <span className="font-display text-xs sm:text-sm font-bold uppercase tracking-wide text-t1-text block truncate">
-                    {link.label}
-                  </span>
-                  <p className="text-[10px] text-t1-muted hidden sm:block truncate">
-                    {link.description}
-                  </p>
-                </div>
-              </Link>
-            ))}
-          </div>
-        </section>
-
-        {/* My Drills (Favorites) — only shown if coach has saved drills */}
-        {favoriteDrills.length > 0 && (
-          <section>
-            <div className="flex items-center justify-between mb-3">
-              <h2 className="font-display text-base sm:text-xl font-bold uppercase tracking-wide text-t1-text flex items-center gap-2">
-                <Star className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-400 fill-yellow-400" />
-                My Drills
+          <div className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <p className="section-kicker">Class modes</p>
+              <h2 className="mt-2 font-display text-2xl font-semibold uppercase tracking-[0.12em] text-t1-text">
+                Lead with the class, then the tool
               </h2>
-              <Link
-                href="/drills?tab=favorites"
-                className="text-xs sm:text-sm text-t1-blue font-medium hover:underline no-underline flex items-center gap-1"
-              >
-                View All ({favoriteDrills.length}){" "}
-                <ChevronRight className="w-3.5 h-3.5" />
-              </Link>
             </div>
-            <div className="space-y-2">
-              {favoriteDrills.slice(0, 4).map(drill => (
-                <div
-                  key={drill.id}
-                  className="group bg-t1-surface border border-t1-border rounded-lg active:bg-t1-blue/5 transition-all relative"
+            <p className="max-w-xl text-sm leading-6 text-t1-muted">
+              Prep, JASA, ASA, and FTA each carry a different coaching tempo.
+              Make that distinction visible before a coach ever opens a drill.
+            </p>
+          </div>
+
+          <div className="grid gap-3 xl:grid-cols-4">
+            {featuredModes.map(
+              ({ stage, brand, drillCount, planCount, savedCount }) => (
+                <article
+                  key={stage.id}
+                  className="premium-card rounded-[2rem] p-5"
                 >
-                  <button
-                    onClick={e => {
-                      e.preventDefault();
-                      toggleFavorite(drill.id);
-                    }}
-                    className="absolute top-3 right-3 z-10 w-8 h-8 rounded-full flex items-center justify-center bg-yellow-500/15 text-yellow-400"
-                    title="Remove from My Drills"
+                  <div
+                    className={`rounded-[1.35rem] bg-gradient-to-br ${brand.surfaceClassName} p-4`}
                   >
-                    <Star className="w-4 h-4 fill-yellow-400" />
-                  </button>
-                  <Link
-                    href={`/drills/${drill.id}`}
-                    className="block p-3 sm:p-4 no-underline"
-                  >
-                    <div className="pr-10">
-                      <h3 className="font-display text-sm font-bold uppercase tracking-wide text-t1-text">
-                        {drill.name}
-                      </h3>
-                      <p className="text-xs text-t1-muted mt-0.5 line-clamp-1">
-                        {drill.objective}
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-1.5 mt-2 flex-wrap">
-                      {drill.level.map(l => (
+                    <div className="flex items-start justify-between gap-3">
+                      <span
+                        className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] ${brand.badgeClassName}`}
+                      >
                         <span
-                          key={l}
-                          className="text-[10px] bg-t1-blue/10 text-t1-blue px-1.5 py-0.5 rounded font-medium uppercase tracking-wider"
-                        >
-                          {pathwayStages.find(s => s.id === l)?.shortName}
-                        </span>
-                      ))}
-                      <span className="text-[10px] bg-secondary text-t1-muted px-1.5 py-0.5 rounded font-medium uppercase tracking-wider">
-                        {drill.sessionBlock.replace("-", " ")}
+                          className={`h-2.5 w-2.5 rounded-full ${brand.dotClassName}`}
+                        />
+                        {stage.shortName}
+                      </span>
+                      <span className="rounded-full border border-t1-border bg-t1-surface/90 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-muted">
+                        {brand.tempo}
                       </span>
                     </div>
-                  </Link>
-                </div>
-              ))}
-            </div>
-          </section>
-        )}
 
-        {/* Pathway Overview — horizontal scroll on mobile */}
-        <section>
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="font-display text-base sm:text-xl font-bold uppercase tracking-wide text-t1-text">
-              Development Pathway
-            </h2>
-            <Link
-              href="/pathway"
-              className="text-xs sm:text-sm text-t1-blue font-medium hover:underline no-underline flex items-center gap-1"
-            >
-              View Full Pathway <ChevronRight className="w-3.5 h-3.5" />
-            </Link>
+                    <h3 className="mt-4 font-display text-2xl font-semibold uppercase tracking-[0.1em] text-t1-text">
+                      {stage.subtitle}
+                    </h3>
+                    <p className="mt-3 text-sm leading-6 text-t1-muted">
+                      {brand.summary}
+                    </p>
+                  </div>
+
+                  <div className="mt-4 grid grid-cols-3 gap-2">
+                    <div className="rounded-[1.25rem] border border-t1-border bg-t1-bg px-3 py-3">
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-muted">
+                        Drills
+                      </p>
+                      <p className="mt-2 text-2xl font-semibold text-t1-text">
+                        {drillCount}
+                      </p>
+                    </div>
+                    <div className="rounded-[1.25rem] border border-t1-border bg-t1-bg px-3 py-3">
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-muted">
+                        Playbooks
+                      </p>
+                      <p className="mt-2 text-2xl font-semibold text-t1-text">
+                        {planCount}
+                      </p>
+                    </div>
+                    <div className="rounded-[1.25rem] border border-t1-border bg-t1-bg px-3 py-3">
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-muted">
+                        Saved
+                      </p>
+                      <p className="mt-2 text-2xl font-semibold text-t1-text">
+                        {savedCount}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="mt-4 grid gap-2">
+                    <Link
+                      href={`/drills?level=${stage.id}`}
+                      className="inline-flex min-h-[48px] items-center justify-between rounded-full border border-t1-border bg-t1-surface px-4 text-sm font-semibold text-t1-text no-underline"
+                    >
+                      <span>{brand.drillPrompt}</span>
+                      <ChevronRight className="h-4 w-4 text-t1-blue" />
+                    </Link>
+                    <Link
+                      href={`/session-plans?level=${stage.id}`}
+                      className="inline-flex min-h-[48px] items-center justify-between rounded-full border border-t1-border bg-t1-surface px-4 text-sm font-semibold text-t1-text no-underline"
+                    >
+                      <span>{brand.playbookPrompt}</span>
+                      <ChevronRight className="h-4 w-4 text-t1-blue" />
+                    </Link>
+                    <button
+                      onClick={() => launchStageBoard(stage.id)}
+                      className="inline-flex min-h-[48px] items-center justify-between rounded-full bg-t1-blue px-4 text-left text-sm font-semibold text-white"
+                    >
+                      <span>{brand.onCourtPrompt}</span>
+                      <ArrowRight className="h-4 w-4" />
+                    </button>
+                  </div>
+                </article>
+              )
+            )}
           </div>
-          {/* Horizontal scroll on mobile, grid on desktop */}
-          <div className="flex gap-2 overflow-x-auto pb-2 -mx-1 px-1 lg:grid lg:grid-cols-6 lg:overflow-visible lg:mx-0 lg:px-0 scrollbar-hide">
-            {pathwayStages.map(stage => (
-              <Link
+
+          <div className="mt-3 grid gap-3 lg:grid-cols-2">
+            {supportingModes.map(({ stage, brand, drillCount, planCount }) => (
+              <article
                 key={stage.id}
-                href={`/stage/${stage.id}`}
-                className="group flex-shrink-0 w-[140px] lg:w-auto bg-t1-surface border border-t1-border rounded-lg p-3 sm:p-4 hover:border-t1-blue/40 active:bg-t1-blue/5 transition-all no-underline"
+                className="premium-card rounded-[2rem] p-5"
               >
-                <div
-                  className={`w-2.5 h-2.5 rounded-full ${stageColors[stage.id]} mb-2`}
-                />
-                <h3 className="font-display text-xs sm:text-sm font-bold uppercase tracking-wide text-t1-text">
-                  {stage.shortName}
-                </h3>
-                <p className="text-[10px] text-t1-muted mt-0.5 line-clamp-2">
-                  {stage.subtitle}
-                </p>
-                {stage.contentStatus === "placeholder" && (
-                  <span className="mt-1.5 inline-block text-[9px] bg-t1-navy text-t1-blue px-1.5 py-0.5 rounded font-medium uppercase tracking-wider">
-                    Draft
-                  </span>
-                )}
-              </Link>
-            ))}
-          </div>
-        </section>
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                  <div>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span
+                        className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] ${brand.badgeClassName}`}
+                      >
+                        <span
+                          className={`h-2.5 w-2.5 rounded-full ${brand.dotClassName}`}
+                        />
+                        {stage.shortName}
+                      </span>
+                      <span className="rounded-full border border-t1-border bg-t1-bg px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-muted">
+                        {brand.tempo}
+                      </span>
+                    </div>
+                    <h3 className="mt-3 font-display text-2xl font-semibold uppercase tracking-[0.1em] text-t1-text">
+                      {stage.subtitle}
+                    </h3>
+                    <p className="mt-2 max-w-xl text-sm leading-6 text-t1-muted">
+                      {brand.summary}
+                    </p>
+                  </div>
 
-        {/* Featured Drills — single column on mobile */}
-        <section>
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="font-display text-base sm:text-xl font-bold uppercase tracking-wide text-t1-text">
-              Featured Drills
-            </h2>
-            <Link
-              href="/drills"
-              className="text-xs sm:text-sm text-t1-blue font-medium hover:underline no-underline flex items-center gap-1"
-            >
-              View All Drills <ChevronRight className="w-3.5 h-3.5" />
-            </Link>
-          </div>
-          <div className="space-y-2 sm:space-y-0 sm:grid sm:grid-cols-2 sm:gap-3">
-            {recentDrills.map(drill => {
-              const favorited = isFavorite(drill.id);
-              return (
-                <div
-                  key={drill.id}
-                  className="group bg-t1-surface border border-t1-border rounded-lg active:bg-t1-blue/5 transition-all relative"
-                >
-                  <button
-                    onClick={e => {
-                      e.preventDefault();
-                      toggleFavorite(drill.id);
-                    }}
-                    className={`absolute top-3 right-3 z-10 w-8 h-8 rounded-full flex items-center justify-center transition-all ${
-                      favorited
-                        ? "bg-yellow-500/15 text-yellow-400"
-                        : "bg-t1-bg/60 text-t1-muted/60 sm:opacity-0 sm:group-hover:opacity-100 hover:text-yellow-400"
-                    }`}
-                    title={
-                      favorited ? "Remove from My Drills" : "Add to My Drills"
-                    }
-                  >
-                    <Star
-                      className={`w-4 h-4 ${favorited ? "fill-yellow-400" : ""}`}
-                    />
-                  </button>
-                  <Link
-                    href={`/drills/${drill.id}`}
-                    className="block p-3 sm:p-4 no-underline"
-                  >
-                    <div className="pr-10">
-                      <h3 className="font-display text-sm font-bold uppercase tracking-wide text-t1-text group-hover:text-t1-blue transition-colors">
-                        {drill.name}
-                      </h3>
-                      <p className="text-xs text-t1-muted mt-0.5 line-clamp-1">
-                        {drill.objective}
+                  <div className="grid grid-cols-2 gap-2 sm:min-w-[180px]">
+                    <div className="rounded-[1.25rem] border border-t1-border bg-t1-bg px-3 py-3 text-center">
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-muted">
+                        Drills
+                      </p>
+                      <p className="mt-2 text-2xl font-semibold text-t1-text">
+                        {drillCount}
                       </p>
                     </div>
-                    <div className="flex items-center gap-1.5 mt-2 flex-wrap">
-                      {drill.level.map(l => (
-                        <span
-                          key={l}
-                          className="text-[10px] bg-t1-blue/10 text-t1-blue px-1.5 py-0.5 rounded font-medium uppercase tracking-wider"
-                        >
-                          {pathwayStages.find(s => s.id === l)?.shortName}
-                        </span>
-                      ))}
-                      <span className="text-[10px] bg-secondary text-t1-muted px-1.5 py-0.5 rounded font-medium uppercase tracking-wider">
-                        {drill.sessionBlock.replace("-", " ")}
-                      </span>
-                      <span className="text-[10px] text-t1-muted">
-                        {drill.recommendedTime}
-                      </span>
+                    <div className="rounded-[1.25rem] border border-t1-border bg-t1-bg px-3 py-3 text-center">
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-muted">
+                        Playbooks
+                      </p>
+                      <p className="mt-2 text-2xl font-semibold text-t1-text">
+                        {planCount}
+                      </p>
                     </div>
-                  </Link>
+                  </div>
                 </div>
-              );
-            })}
+              </article>
+            ))}
           </div>
         </section>
 
-        {/* Tier 1 Culture Banner */}
-        <section className="bg-t1-navy rounded-lg p-4 sm:p-8 border border-t1-border">
-          <h2 className="font-display text-base sm:text-xl font-bold uppercase tracking-wide text-white mb-3 sm:mb-4">
-            Tier 1 Culture
-          </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-            {[
-              "Player first — development over short-term results",
-              "Care over profits — every athlete matters",
-              "Long-term development over quick wins",
-              "Truth, accountability, and clear communication",
-              "High standards in effort and professionalism",
-              "Building players and people — every rep matters",
-            ].map((value, i) => (
-              <div key={i} className="flex items-start gap-2.5">
-                <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-t1-blue/20 flex items-center justify-center flex-shrink-0 mt-0.5">
-                  <CheckCircle className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-t1-blue" />
-                </div>
-                <span className="text-xs sm:text-sm text-t1-text/80">
-                  {value}
-                </span>
+        <section className="grid gap-3 xl:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)_minmax(0,0.9fr)]">
+          <article className="premium-card rounded-[2rem] p-5">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <p className="section-kicker">My drill bench</p>
+                <h2 className="mt-2 font-display text-2xl font-semibold uppercase tracking-[0.12em] text-t1-text">
+                  Go-to reps
+                </h2>
               </div>
-            ))}
-          </div>
+              <Link
+                href={
+                  favoriteDrills.length > 0
+                    ? "/drills?tab=favorites"
+                    : "/drills"
+                }
+                className="inline-flex items-center gap-1 text-sm font-semibold text-t1-blue no-underline"
+              >
+                Open
+                <ChevronRight className="h-4 w-4" />
+              </Link>
+            </div>
+
+            <div className="mt-4 space-y-2">
+              {favoriteDrills.length > 0 ? (
+                favoriteDrills.slice(0, 4).map(drill => {
+                  const primaryStage = pathwayStages.find(stage =>
+                    drill.level.includes(stage.id)
+                  );
+                  const primaryBrand = primaryStage
+                    ? getStageBrand(primaryStage.id)
+                    : null;
+
+                  return (
+                    <Link
+                      key={drill.id}
+                      href={`/drills/${drill.id}`}
+                      className="flex min-h-[68px] items-center justify-between gap-3 rounded-[1.35rem] border border-t1-border bg-t1-bg px-4 py-3 no-underline"
+                    >
+                      <div className="min-w-0">
+                        <div className="flex flex-wrap items-center gap-2">
+                          {primaryBrand && (
+                            <span
+                              className={`inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] ${primaryBrand.tintClassName}`}
+                            >
+                              {primaryStage?.shortName}
+                            </span>
+                          )}
+                          <span className="text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-muted">
+                            {drill.recommendedTime}
+                          </span>
+                        </div>
+                        <p className="mt-2 truncate text-sm font-semibold text-t1-text">
+                          {drill.name}
+                        </p>
+                        <p className="truncate text-sm text-t1-muted">
+                          {drill.objective}
+                        </p>
+                      </div>
+                      <Star className="h-4 w-4 flex-shrink-0 text-amber-400 fill-amber-400" />
+                    </Link>
+                  );
+                })
+              ) : (
+                <div className="coach-empty rounded-[1.5rem] p-5">
+                  <p className="text-sm leading-6 text-t1-muted">
+                    Star drills by class so coaches can get to trusted reps in
+                    one tap during live sessions.
+                  </p>
+                </div>
+              )}
+            </div>
+          </article>
+
+          <article className="premium-card rounded-[2rem] p-5">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <p className="section-kicker">Playbook shelf</p>
+                <h2 className="mt-2 font-display text-2xl font-semibold uppercase tracking-[0.12em] text-t1-text">
+                  Plans to reuse
+                </h2>
+              </div>
+              <Link
+                href="/session-plans"
+                className="inline-flex items-center gap-1 text-sm font-semibold text-t1-blue no-underline"
+              >
+                Open
+                <ChevronRight className="h-4 w-4" />
+              </Link>
+            </div>
+
+            <div className="mt-4 space-y-2">
+              {playbookShelf.length > 0 ? (
+                playbookShelf.slice(0, 4).map(plan => {
+                  const brand = getStageBrand(plan.level);
+
+                  return (
+                    <Link
+                      key={plan.id}
+                      href={`/session-plans${favoritePlans.length > 0 ? "?tab=favorites" : ""}`}
+                      className="flex min-h-[74px] items-center justify-between gap-3 rounded-[1.35rem] border border-t1-border bg-t1-bg px-4 py-3 no-underline"
+                    >
+                      <div className="min-w-0">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span
+                            className={`inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] ${brand.tintClassName}`}
+                          >
+                            {plan.levelTag}
+                          </span>
+                          <span className="text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-muted">
+                            {plan.totalTime} min
+                          </span>
+                        </div>
+                        <p className="mt-2 truncate text-sm font-semibold text-t1-text">
+                          {plan.name}
+                        </p>
+                        <p className="truncate text-sm text-t1-muted">
+                          {plan.coachingEmphasis}
+                        </p>
+                      </div>
+                      {favoritePlans.some(item => item.id === plan.id) ? (
+                        <Star className="h-4 w-4 flex-shrink-0 text-amber-400 fill-amber-400" />
+                      ) : (
+                        <Clock3 className="h-4 w-4 flex-shrink-0 text-t1-muted" />
+                      )}
+                    </Link>
+                  );
+                })
+              ) : (
+                <div className="coach-empty rounded-[1.5rem] p-5">
+                  <p className="text-sm leading-6 text-t1-muted">
+                    Favorite or open stock plans and they will stay close here
+                    for faster session prep.
+                  </p>
+                </div>
+              )}
+            </div>
+          </article>
+
+          <article className="premium-card rounded-[2rem] p-5">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <p className="section-kicker">Coach readiness</p>
+                <h2 className="mt-2 font-display text-2xl font-semibold uppercase tracking-[0.12em] text-t1-text">
+                  Standards first
+                </h2>
+              </div>
+              <Shield className="h-5 w-5 text-t1-blue" />
+            </div>
+
+            {hasPassed && bestQuizResult ? (
+              <div className="mt-4 rounded-[1.5rem] border border-emerald-500/20 bg-emerald-500/8 p-4">
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="h-5 w-5 text-emerald-500" />
+                  <p className="text-sm font-semibold text-t1-text">
+                    Certified coach
+                  </p>
+                </div>
+                <p className="mt-3 text-sm leading-6 text-t1-muted">
+                  Passed onboarding with {bestQuizResult.percentage}% on{" "}
+                  {formatDate(bestQuizResult.date)}.
+                </p>
+              </div>
+            ) : (
+              <div className="mt-4 rounded-[1.5rem] border border-t1-border bg-t1-bg p-4">
+                <div className="flex items-center gap-2">
+                  <GraduationCap className="h-5 w-5 text-t1-blue" />
+                  <p className="text-sm font-semibold text-t1-text">
+                    Onboarding in progress
+                  </p>
+                </div>
+                <p className="mt-3 text-sm leading-6 text-t1-muted">
+                  {completedLessons === 0
+                    ? "Start the coach standard modules before your first full on-court week."
+                    : `${completedLessons}/${totalLessons} lessons complete. ${lessonPercent}% done.`}
+                </p>
+              </div>
+            )}
+
+            <div className="mt-4 grid gap-2">
+              <Link
+                href="/coach-standards"
+                className="inline-flex min-h-[48px] items-center justify-between rounded-full border border-t1-border bg-t1-surface px-4 text-sm font-semibold text-t1-text no-underline"
+              >
+                Coach standards
+                <ChevronRight className="h-4 w-4 text-t1-blue" />
+              </Link>
+              <Link
+                href="/onboarding"
+                className="inline-flex min-h-[48px] items-center justify-between rounded-full border border-t1-border bg-t1-surface px-4 text-sm font-semibold text-t1-text no-underline"
+              >
+                Onboarding
+                <ChevronRight className="h-4 w-4 text-t1-blue" />
+              </Link>
+            </div>
+          </article>
         </section>
       </div>
     </div>

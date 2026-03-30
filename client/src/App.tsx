@@ -21,6 +21,7 @@ import PlanComparison from "./pages/PlanComparison";
 import Onboarding from "./pages/Onboarding";
 import OnboardingQuiz from "./pages/OnboardingQuiz";
 import AuthPage from "./pages/Auth";
+import OnCourtMode from "./pages/OnCourtMode";
 import { Loader2 } from "lucide-react";
 
 function Router() {
@@ -50,6 +51,7 @@ function Router() {
         <Route path="/drills" component={DrillLibrary} />
         <Route path="/drills/:id" component={DrillDetail} />
         <Route path="/coach-standards" component={CoachStandards} />
+        <Route path="/on-court" component={OnCourtMode} />
         <Route path="/session-builder" component={SessionBuilder} />
         <Route path="/assessments" component={Assessments} />
         <Route path="/advancement" component={Advancement} />
@@ -69,7 +71,7 @@ function App() {
   return (
     <ErrorBoundary>
       <AuthProvider>
-        <ThemeProvider defaultTheme="dark">
+        <ThemeProvider defaultTheme="light">
           <TooltipProvider>
             <Toaster />
             <Router />
