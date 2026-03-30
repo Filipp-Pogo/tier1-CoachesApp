@@ -1,16 +1,37 @@
-/*
-  DRILL QUICK PREVIEW: Slide-over panel for on-court coaches.
-  MOBILE-FIRST: Bottom drawer on mobile (85vh), side sheet on desktop.
-  Shows Coaching Cues, Setup, Standards, Quick Copy — without leaving the library.
-*/
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetClose } from '@/components/ui/sheet';
-import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerClose } from '@/components/ui/drawer';
-import { useIsMobile } from '@/hooks/useMobile';
+import { useCallback, useState } from 'react';
 import { Link } from 'wouter';
-import { X, Target, Clipboard, Check, Clock, Star, ExternalLink } from 'lucide-react';
-import { drills, pathwayStages, sessionBlocks, skillCategories } from '@/lib/data';
+import {
+  AlertTriangle,
+  Check,
+  Clipboard,
+  Clock,
+  ExternalLink,
+  Info,
+  ListChecks,
+  Star,
+  X,
+} from 'lucide-react';
+import {
+  Drawer,
+  DrawerClose,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+} from '@/components/ui/drawer';
+import {
+  Sheet,
+  SheetClose,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from '@/components/ui/sheet';
+import { useIsMobile } from '@/hooks/useMobile';
 import { useFavorites } from '@/hooks/useFavorites';
-import { useState, useCallback } from 'react';
+import { drills, pathwayStages, sessionBlocks } from '@/lib/data';
+import {
+  buildDrillClipboardText,
+  buildDrillCoachGuide,
+} from '@/lib/drillGuidance';
 import { formatSubBand } from '@/lib/customPlans';
 
 interface DrillQuickPreviewProps {
@@ -19,25 +40,20 @@ interface DrillQuickPreviewProps {
   onOpenChange: (open: boolean) => void;
 }
 
-export function DrillQuickPreview({ drillId, open, onOpenChange }: DrillQuickPreviewProps) {
+export function DrillQuickPreview({
+  drillId,
+  open,
+  onOpenChange,
+}: DrillQuickPreviewProps) {
   const isMobile = useIsMobile();
-  const drill = drillId ? drills.find(d => d.id === drillId) : null;
+  const drill = drillId ? drills.find(item => item.id === drillId) : null;
   const { isFavorite, toggleFavorite } = useFavorites();
   const [copied, setCopied] = useState(false);
 
   const handleCopy = useCallback(() => {
     if (!drill) return;
-    const text = [
-      `${drill.name} — Coaching Cues`,
-      '',
-      ...drill.coachingCues.map((c, i) => `${i + 1}. ${c}`),
-      '',
-      `Setup: ${drill.setup}`,
-      '',
-      `Standards:`,
-      ...drill.standards.map(s => `✓ ${s}`),
-    ].join('\n');
-    navigator.clipboard.writeText(text).then(() => {
+
+    navigator.clipboard.writeText(buildDrillClipboardText(drill)).then(() => {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     });
@@ -45,127 +61,157 @@ export function DrillQuickPreview({ drillId, open, onOpenChange }: DrillQuickPre
 
   if (!drill) return null;
 
-  const block = sessionBlocks.find(b => b.id === drill.sessionBlock);
+  const block = sessionBlocks.find(item => item.id === drill.sessionBlock);
   const favorited = isFavorite(drill.id);
+  const guide = buildDrillCoachGuide(drill);
 
   const content = (
-    <div className="flex flex-col h-full">
-      {/* Header info */}
-      <div className="flex-shrink-0 pb-3 border-b border-t1-border mb-3">
+    <div className="flex h-full flex-col">
+      <div className="mb-3 flex-shrink-0 border-b border-t1-border pb-3">
         <div className="flex items-center justify-between gap-2">
           <div className="flex flex-wrap gap-1.5">
-            {drill.level.map(l => (
-              <span key={l} className="text-[10px] bg-t1-blue/10 text-t1-blue px-1.5 py-0.5 rounded font-medium uppercase tracking-wider">
-                {pathwayStages.find(s => s.id === l)?.shortName}
+            {drill.level.map(level => (
+              <span
+                key={level}
+                className="rounded bg-t1-blue/10 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wider text-t1-blue"
+              >
+                {pathwayStages.find(stage => stage.id === level)?.shortName}
               </span>
             ))}
-            <span className="text-[10px] bg-secondary text-t1-muted px-1.5 py-0.5 rounded font-medium uppercase tracking-wider">
+            <span className="rounded bg-secondary px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wider text-t1-muted">
               {block?.shortName}
             </span>
             <span className="flex items-center gap-1 text-[10px] text-t1-muted">
-              <Clock className="w-3 h-3" /> {drill.recommendedTime}
+              <Clock className="h-3 w-3" /> {drill.recommendedTime}
             </span>
             {drill.subBand && (
-              <span className="text-[10px] bg-amber-500/10 text-amber-400 px-1.5 py-0.5 rounded font-medium uppercase tracking-wider">
+              <span className="rounded bg-amber-500/10 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wider text-amber-400">
                 {formatSubBand(drill.subBand)}
               </span>
             )}
-            {drill.skillCategory === 'doubles' && (
-              <span className="text-[10px] bg-purple-500/10 text-purple-400 px-1.5 py-0.5 rounded font-medium uppercase tracking-wider">
-                Doubles
-              </span>
-            )}
           </div>
-          <div className="flex items-center gap-1.5 flex-shrink-0">
+
+          <div className="flex flex-shrink-0 items-center gap-1.5">
             <button
               onClick={handleCopy}
-              className={`flex items-center gap-1 px-2.5 py-1.5 rounded-md border text-[10px] font-semibold uppercase tracking-wider transition-all min-h-[32px] ${
+              className={`flex min-h-[32px] items-center gap-1 rounded-md border px-2.5 py-1.5 text-[10px] font-semibold uppercase tracking-wider transition-all ${
                 copied
-                  ? 'bg-green-500/15 text-green-400 border-green-500/30'
-                  : 'bg-t1-surface border-t1-border text-t1-muted active:text-t1-blue'
+                  ? 'border-green-500/30 bg-green-500/15 text-green-400'
+                  : 'border-t1-border bg-t1-surface text-t1-muted active:text-t1-blue'
               }`}
             >
-              {copied ? <Check className="w-3 h-3" /> : <Clipboard className="w-3 h-3" />}
+              {copied ? (
+                <Check className="h-3 w-3" />
+              ) : (
+                <Clipboard className="h-3 w-3" />
+              )}
               {copied ? 'Copied' : 'Copy'}
             </button>
             <button
               onClick={() => toggleFavorite(drill.id)}
-              className={`flex items-center gap-1 px-2.5 py-1.5 rounded-md border text-[10px] font-semibold uppercase tracking-wider transition-all min-h-[32px] ${
+              className={`flex min-h-[32px] items-center gap-1 rounded-md border px-2.5 py-1.5 text-[10px] font-semibold uppercase tracking-wider transition-all ${
                 favorited
-                  ? 'bg-yellow-500/15 border-yellow-500/40 text-yellow-400'
-                  : 'bg-t1-surface border-t1-border text-t1-muted active:text-yellow-400'
+                  ? 'border-yellow-500/40 bg-yellow-500/15 text-yellow-400'
+                  : 'border-t1-border bg-t1-surface text-t1-muted active:text-yellow-400'
               }`}
             >
-              <Star className={`w-3 h-3 ${favorited ? 'fill-yellow-400' : ''}`} />
+              <Star className={`h-3 w-3 ${favorited ? 'fill-yellow-400' : ''}`} />
             </button>
           </div>
         </div>
       </div>
 
-      {/* Scrollable content */}
-      <div className="flex-1 overflow-y-auto space-y-3 pb-4 -mx-1 px-1">
-        {/* Coaching Cues — THE MOST IMPORTANT SECTION */}
-        <div className="bg-t1-blue/5 border border-t1-blue/20 rounded-lg p-3 sm:p-4">
-          <h3 className="font-display text-xs font-semibold uppercase tracking-wider text-t1-blue mb-2.5">
-            Coaching Cues
+      <div className="-mx-1 flex-1 space-y-3 overflow-y-auto px-1 pb-4">
+        <div className="rounded-lg border border-t1-border bg-t1-surface p-3 sm:p-4">
+          <h3 className="mb-2.5 flex items-center gap-2 font-display text-xs font-semibold uppercase tracking-wider text-t1-text">
+            <Info className="h-3.5 w-3.5 text-t1-blue" />
+            What This Drill Is
+          </h3>
+          <p className="text-xs leading-relaxed text-t1-text/80 sm:text-sm">
+            {guide.whatThisIs}
+          </p>
+        </div>
+
+        <div className="rounded-lg border border-t1-border bg-t1-surface p-3 sm:p-4">
+          <h3 className="mb-2.5 flex items-center gap-2 font-display text-xs font-semibold uppercase tracking-wider text-t1-text">
+            <ListChecks className="h-3.5 w-3.5 text-t1-blue" />
+            How To Run It
+          </h3>
+          <ol className="space-y-2">
+            {guide.howToRun.map((step, index) => (
+              <li key={step} className="flex items-start gap-2.5">
+                <span className="mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-t1-blue text-[10px] font-bold text-white">
+                  {index + 1}
+                </span>
+                <span className="text-xs leading-relaxed text-t1-text/80 sm:text-sm">
+                  {step}
+                </span>
+              </li>
+            ))}
+          </ol>
+        </div>
+
+        <div className="rounded-lg border border-t1-blue/20 bg-t1-blue/5 p-3 sm:p-4">
+          <h3 className="mb-2.5 font-display text-xs font-semibold uppercase tracking-wider text-t1-blue">
+            What To Coach
           </h3>
           <ul className="space-y-2">
-            {drill.coachingCues.map((cue, i) => (
-              <li key={i} className="flex items-start gap-2.5">
-                <span className="w-5 h-5 rounded-full bg-t1-blue text-white text-[10px] font-bold flex items-center justify-center flex-shrink-0 mt-0.5">
-                  {i + 1}
+            {guide.whatToCoach.map((cue, index) => (
+              <li key={cue} className="flex items-start gap-2.5">
+                <span className="mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-t1-blue text-[10px] font-bold text-white">
+                  {index + 1}
                 </span>
-                <span className="text-xs sm:text-sm text-t1-text/80 leading-relaxed">{cue}</span>
+                <span className="text-xs leading-relaxed text-t1-text/80 sm:text-sm">
+                  {cue}
+                </span>
               </li>
             ))}
           </ul>
         </div>
 
-        {/* Setup */}
-        <div className="bg-t1-surface border border-t1-border rounded-lg p-3 sm:p-4">
-          <h3 className="font-display text-xs font-semibold uppercase tracking-wider text-t1-text mb-1.5">
-            Setup
+        <div className="rounded-lg border border-t1-red/15 bg-t1-red/5 p-3 sm:p-4">
+          <h3 className="mb-2.5 flex items-center gap-2 font-display text-xs font-semibold uppercase tracking-wider text-t1-red">
+            <AlertTriangle className="h-3.5 w-3.5" />
+            Watch For
           </h3>
-          <p className="text-xs sm:text-sm text-t1-text/80 leading-relaxed">{drill.setup}</p>
-        </div>
-
-        {/* Standards */}
-        <div className="bg-t1-surface border border-t1-border rounded-lg p-3 sm:p-4">
-          <h3 className="font-display text-xs font-semibold uppercase tracking-wider text-t1-text mb-1.5 flex items-center gap-1.5">
-            <Target className="w-3.5 h-3.5 text-t1-blue" /> Standards
-          </h3>
-          <ul className="space-y-1.5">
-            {drill.standards.map((s, i) => (
-              <li key={i} className="flex items-start gap-2 text-xs sm:text-sm text-t1-text/80">
-                <span className="text-t1-blue mt-0.5 flex-shrink-0">&#10003;</span> {s}
+          <ul className="space-y-2">
+            {guide.watchFor.map(item => (
+              <li
+                key={item}
+                className="flex items-start gap-2 text-xs leading-relaxed text-t1-text/80 sm:text-sm"
+              >
+                <span className="mt-1 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-t1-red" />
+                <span>{item}</span>
               </li>
             ))}
           </ul>
         </div>
 
-        {/* Common Breakdowns */}
-        <div className="bg-t1-red/5 border border-t1-red/15 rounded-lg p-3 sm:p-4">
-          <h3 className="font-display text-xs font-semibold uppercase tracking-wider text-t1-red mb-1.5">
-            Common Breakdowns
+        <div className="rounded-lg border border-t1-border bg-t1-surface p-3 sm:p-4">
+          <h3 className="mb-2.5 font-display text-xs font-semibold uppercase tracking-wider text-t1-text">
+            Best Fit
           </h3>
-          <ul className="space-y-1.5">
-            {drill.commonBreakdowns.map((b, i) => (
-              <li key={i} className="flex items-start gap-2 text-xs sm:text-sm text-t1-text/80">
-                <span className="text-t1-red mt-0.5 flex-shrink-0">&times;</span> {b}
+          <ul className="space-y-2">
+            {guide.bestFit.map(item => (
+              <li
+                key={item}
+                className="flex items-start gap-2 text-xs leading-relaxed text-t1-text/80 sm:text-sm"
+              >
+                <span className="mt-1 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-t1-blue" />
+                <span>{item}</span>
               </li>
             ))}
           </ul>
         </div>
       </div>
 
-      {/* Footer — full detail link */}
-      <div className="flex-shrink-0 pt-3 border-t border-t1-border mt-auto">
+      <div className="mt-auto flex-shrink-0 border-t border-t1-border pt-3">
         <Link
           href={`/drills/${drill.id}`}
-          className="flex items-center justify-center gap-2 w-full py-3 bg-t1-blue/10 text-t1-blue text-xs font-semibold uppercase tracking-wider rounded-lg active:bg-t1-blue/20 transition-colors no-underline min-h-[44px]"
+          className="flex min-h-[44px] w-full items-center justify-center gap-2 rounded-lg bg-t1-blue/10 py-3 text-xs font-semibold uppercase tracking-wider text-t1-blue no-underline transition-colors active:bg-t1-blue/20"
           onClick={() => onOpenChange(false)}
         >
-          <ExternalLink className="w-3.5 h-3.5" />
+          <ExternalLink className="h-3.5 w-3.5" />
           Full Drill Details
         </Link>
       </div>
@@ -175,20 +221,18 @@ export function DrillQuickPreview({ drillId, open, onOpenChange }: DrillQuickPre
   if (isMobile) {
     return (
       <Drawer open={open} onOpenChange={onOpenChange}>
-        <DrawerContent className="bg-t1-bg border-t1-border max-h-[90vh]">
-          <DrawerHeader className="pb-0 px-4">
+        <DrawerContent className="max-h-[90vh] border-t1-border bg-t1-bg">
+          <DrawerHeader className="px-4 pb-0">
             <div className="flex items-center justify-between">
               <DrawerTitle className="font-display text-base font-bold uppercase tracking-wide text-t1-text">
                 {drill.name}
               </DrawerTitle>
-              <DrawerClose className="text-t1-muted hover:text-t1-text w-8 h-8 flex items-center justify-center">
-                <X className="w-5 h-5" />
+              <DrawerClose className="flex h-8 w-8 items-center justify-center text-t1-muted hover:text-t1-text">
+                <X className="h-5 w-5" />
               </DrawerClose>
             </div>
           </DrawerHeader>
-          <div className="px-4 pb-4 pt-2 overflow-y-auto flex-1">
-            {content}
-          </div>
+          <div className="flex-1 overflow-y-auto px-4 pb-4 pt-2">{content}</div>
         </DrawerContent>
       </Drawer>
     );
@@ -196,18 +240,21 @@ export function DrillQuickPreview({ drillId, open, onOpenChange }: DrillQuickPre
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="right" className="bg-t1-bg border-l border-t1-border w-full sm:max-w-md p-0">
-        <SheetHeader className="px-5 pt-5 pb-0">
+      <SheetContent
+        side="right"
+        className="w-full border-l border-t1-border bg-t1-bg p-0 sm:max-w-md"
+      >
+        <SheetHeader className="px-5 pb-0 pt-5">
           <div className="flex items-center justify-between">
             <SheetTitle className="font-display text-lg font-bold uppercase tracking-wide text-t1-text">
               {drill.name}
             </SheetTitle>
             <SheetClose className="text-t1-muted hover:text-t1-text">
-              <X className="w-5 h-5" />
+              <X className="h-5 w-5" />
             </SheetClose>
           </div>
         </SheetHeader>
-        <div className="px-5 pb-5 pt-3 h-[calc(100vh-80px)] overflow-y-auto">
+        <div className="h-[calc(100vh-80px)] overflow-y-auto px-5 pb-5 pt-3">
           {content}
         </div>
       </SheetContent>

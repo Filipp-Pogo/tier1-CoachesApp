@@ -29,6 +29,7 @@ import {
 } from "@/lib/data";
 import { formatSubBand } from "@/lib/customPlans";
 import { useFavorites } from "@/hooks/useFavorites";
+import { useCoachClass } from "@/hooks/useCoachClass";
 import { useRecentDrills } from "@/hooks/useRecentDrills";
 import { DrillQuickPreview } from "@/components/DrillQuickPreview";
 import { scoreDrillSearch } from "@/lib/drillSearch";
@@ -160,7 +161,7 @@ const drillIntentFilters: {
   },
 ];
 
-function readDrillStateFromUrl(): {
+function readDrillStateFromUrl(fallbackLevel: PathwayStageId | ""): {
   tab: DrillTab;
   level: PathwayStageId | "";
   problem: DrillProblemFilterId | "";
@@ -169,7 +170,7 @@ function readDrillStateFromUrl(): {
   if (typeof window === "undefined") {
     return {
       tab: "all" as DrillTab,
-      level: "" as PathwayStageId | "",
+      level: fallbackLevel,
       problem: "" as DrillProblemFilterId | "",
       intent: "" as DrillIntentFilterId | "",
     };
@@ -184,7 +185,7 @@ function readDrillStateFromUrl(): {
     tab: params.get("tab") === "favorites" ? "favorites" : "all",
     level: pathwayStages.some(stage => stage.id === rawLevel)
       ? (rawLevel as PathwayStageId)
-      : "",
+      : fallbackLevel,
     problem: drillProblemFilters.some(filter => filter.id === rawProblem)
       ? (rawProblem as DrillProblemFilterId)
       : "",
@@ -361,7 +362,8 @@ function getPrimaryStage(
 }
 
 export default function DrillLibrary() {
-  const initialState = readDrillStateFromUrl();
+  const { selectedClass, setSelectedClass } = useCoachClass();
+  const initialState = readDrillStateFromUrl(selectedClass);
   const [, navigate] = useLocation();
   const [searchQuery, setSearchQuery] = useState("");
   const [levelFilter, setLevelFilter] = useState<PathwayStageId | "">(
@@ -392,8 +394,14 @@ export default function DrillLibrary() {
   const { recentIds } = useRecentDrills();
 
   useEffect(() => {
+    if (levelFilter) {
+      setSelectedClass(levelFilter);
+    }
+  }, [levelFilter, setSelectedClass]);
+
+  useEffect(() => {
     const syncFromUrl = () => {
-      const nextState = readDrillStateFromUrl();
+      const nextState = readDrillStateFromUrl(selectedClass);
       setActiveTab(nextState.tab);
       setLevelFilter(nextState.level);
       setProblemFilter(nextState.problem);
@@ -402,7 +410,7 @@ export default function DrillLibrary() {
 
     window.addEventListener("popstate", syncFromUrl);
     return () => window.removeEventListener("popstate", syncFromUrl);
-  }, []);
+  }, [selectedClass]);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -550,9 +558,10 @@ export default function DrillLibrary() {
     feedingFilter,
     formatFilter,
   ].filter(Boolean).length;
+  const classFilterChanged = levelFilter !== selectedClass;
   const hasActiveFilters = Boolean(
     deferredSearchQuery.trim() ||
-      levelFilter ||
+      classFilterChanged ||
       problemFilter ||
       intentFilter ||
       advancedFilterCount
@@ -587,7 +596,7 @@ export default function DrillLibrary() {
 
   const clearFilters = () => {
     setSearchQuery("");
-    setLevelFilter("");
+    setLevelFilter(selectedClass);
     setProblemFilter("");
     setIntentFilter("");
     setUtrFilter("");
@@ -602,7 +611,8 @@ export default function DrillLibrary() {
   const launchBench = (drillsForBench: Drill[], sourceLabel: string) => {
     if (drillsForBench.length === 0) return;
 
-    const benchLevel = levelFilter || getPrimaryStage(drillsForBench[0], "");
+    const benchLevel =
+      levelFilter || selectedClass || getPrimaryStage(drillsForBench[0], "");
     const stage = pathwayStages.find(item => item.id === benchLevel)!;
     const problem = problemFilter
       ? drillProblemFilters.find(filter => filter.id === problemFilter)?.name
@@ -633,7 +643,7 @@ export default function DrillLibrary() {
   };
 
   const launchSingleDrill = (drill: Drill) => {
-    const stageId = getPrimaryStage(drill, levelFilter);
+    const stageId = getPrimaryStage(drill, levelFilter || selectedClass);
     const stage = pathwayStages.find(item => item.id === stageId)!;
 
     saveOnCourtSession(
@@ -858,9 +868,11 @@ export default function DrillLibrary() {
                     <button
                       key={stage.id}
                       onClick={() => {
-                        setLevelFilter(previous =>
-                          previous === stage.id ? "" : stage.id
-                        );
+                        setLevelFilter(previous => {
+                          const next = previous === stage.id ? "" : stage.id;
+                          if (next) setSelectedClass(next);
+                          return next;
+                        });
                         setVisibleCount(DRILLS_PER_PAGE);
                         setActiveTab("all");
                       }}
