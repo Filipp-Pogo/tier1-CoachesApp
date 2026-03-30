@@ -8,6 +8,8 @@ import {
 import { Link, useLocation } from "wouter";
 import {
   BookOpen,
+  ClipboardList,
+  ListChecks,
   PlayCircle,
   Route,
   Search,
@@ -43,9 +45,12 @@ import {
 } from "@/components/ui/empty";
 import {
   createOnCourtSessionFromDrills,
+  loadOnCourtSession,
   saveOnCourtSession,
 } from "@/lib/onCourtMode";
 import { getStageBrand } from "@/lib/stageBranding";
+import { getRecommendedDrillsForStage } from "@/lib/coachRecommendations";
+import { buildDrillCoachGuide } from "@/lib/drillGuidance";
 
 const DRILLS_PER_PAGE = 24;
 
@@ -361,6 +366,23 @@ function getPrimaryStage(
     : drill.level[0];
 }
 
+function buildDrillDetailSearch(options: {
+  intent: DrillIntentFilterId | "";
+  level: PathwayStageId | "";
+  problem: DrillProblemFilterId | "";
+  tab: DrillTab;
+}) {
+  const params = new URLSearchParams();
+
+  if (options.tab === "favorites") params.set("tab", "favorites");
+  if (options.level) params.set("level", options.level);
+  if (options.problem) params.set("problem", options.problem);
+  if (options.intent) params.set("intent", options.intent);
+
+  const query = params.toString();
+  return query ? `?${query}` : "";
+}
+
 export default function DrillLibrary() {
   const { selectedClass, setSelectedClass } = useCoachClass();
   const initialState = readDrillStateFromUrl(selectedClass);
@@ -392,6 +414,35 @@ export default function DrillLibrary() {
   const deferredSearchQuery = useDeferredValue(searchQuery);
   const { favorites, isFavorite, toggleFavorite } = useFavorites();
   const { recentIds } = useRecentDrills();
+  const onCourtSession = useMemo(() => loadOnCourtSession(), []);
+
+  const recommendedDrills = useMemo(
+    () =>
+      levelFilter
+        ? getRecommendedDrillsForStage({
+            favoriteIds: favorites,
+            recentIds,
+            stageId: levelFilter,
+          })
+        : [],
+    [favorites, levelFilter, recentIds]
+  );
+  const recommendedBenchDrills = useMemo(
+    () => recommendedDrills.map(item => item.drill),
+    [recommendedDrills]
+  );
+  const detailSearch = useMemo(
+    () =>
+      buildDrillDetailSearch({
+        intent: intentFilter,
+        level: levelFilter,
+        problem: problemFilter,
+        tab: activeTab,
+      }),
+    [activeTab, intentFilter, levelFilter, problemFilter]
+  );
+  const sameClassOnCourtSession =
+    levelFilter && onCourtSession?.level === levelFilter ? onCourtSession : null;
 
   useEffect(() => {
     if (levelFilter) {
@@ -576,6 +627,7 @@ export default function DrillLibrary() {
   const selectedIntent = intentFilter
     ? drillIntentFilters.find(filter => filter.id === intentFilter)
     : undefined;
+  const featuredCoachDrill = recommendedDrills[0]?.drill;
 
   const levelCounts = useMemo(() => {
     const source =
@@ -593,6 +645,22 @@ export default function DrillLibrary() {
   }, [activeTab, favorites]);
 
   const filteredBenchDrills = filteredDrills.slice(0, 6);
+  const benchDrills =
+    selectedStage && !hasActiveFilters && recommendedBenchDrills.length > 0
+      ? recommendedBenchDrills
+      : filteredBenchDrills;
+  const benchSourceLabel =
+    selectedStage && !hasActiveFilters && recommendedBenchDrills.length > 0
+      ? `${selectedStage.shortName} recommended drill bench`
+      : "Filtered drill library";
+
+  const openPreview = (drillId: string) => {
+    setPreviewDrillId(drillId);
+    setPreviewOpen(true);
+  };
+
+  const getDrillDetailHref = (drillId: string) =>
+    `/drills/${drillId}${detailSearch}`;
 
   const clearFilters = () => {
     setSearchQuery("");
@@ -669,107 +737,124 @@ export default function DrillLibrary() {
         <div className="container py-5 sm:py-8">
           <div className="grid gap-4 xl:grid-cols-[minmax(0,1.35fr)_minmax(320px,0.82fr)]">
             <section className="premium-card rounded-[2rem] p-5 sm:p-7">
-              <p className="section-kicker">Drills</p>
+              <p className="section-kicker">
+                {selectedStage ? "Class drills" : "Drills"}
+              </p>
               <h1 className="mt-3 font-display text-4xl font-semibold uppercase tracking-[0.1em] text-t1-text sm:text-5xl">
-                Pick the class. Find the drill.
+                {selectedStage
+                  ? `${selectedStage.shortName} drills, ready now.`
+                  : "Pick the class. Find the drill."}
               </h1>
               <p className="support-copy-strong mt-4 max-w-2xl text-sm leading-7 sm:text-base">
-                Start with the class, then add a problem or intent only when the
-                next rep is not obvious.
+                {selectedStage && selectedBrand
+                  ? `${selectedBrand.summary} ${selectedBrand.drillPrompt}`
+                  : "Start with the class, then add a problem or intent only when the next rep is not obvious."}
               </p>
 
-              <div className="mt-6">
-                <label className="relative block">
-                  <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-t1-muted" />
-                  <input
-                    type="text"
-                    value={searchQuery}
-                    onChange={event => {
-                      setSearchQuery(event.target.value);
-                      setVisibleCount(DRILLS_PER_PAGE);
-                    }}
-                    placeholder="Search by drill name, cue, or setup"
-                    className="h-[54px] w-full rounded-full border border-t1-border-strong bg-t1-surface pl-11 pr-10 text-sm text-t1-text placeholder:text-t1-muted/55 focus:border-t1-blue/35 focus:outline-none"
-                  />
-                  {searchQuery && (
-                    <button
-                      onClick={() => setSearchQuery("")}
-                      className="touch-icon absolute right-2 top-1/2 inline-flex -translate-y-1/2 items-center justify-center rounded-full text-t1-muted"
+              {selectedStage && selectedBrand ? (
+                <>
+                  <div className="mt-5 flex flex-wrap items-center gap-2">
+                    <span
+                      className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] ${selectedBrand.badgeClassName}`}
                     >
-                      <X className="h-4 w-4" />
-                    </button>
-                  )}
-                </label>
-              </div>
+                      <span
+                        className={`h-2.5 w-2.5 rounded-full ${selectedBrand.dotClassName}`}
+                      />
+                      {selectedStage.shortName}
+                    </span>
+                    <span className="rounded-full border border-t1-border bg-t1-surface px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-muted">
+                      {selectedStage.subtitle}
+                    </span>
+                    <span className="rounded-full border border-t1-border bg-t1-surface px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-muted">
+                      {selectedBrand.tempo}
+                    </span>
+                  </div>
 
-              <div className="mt-5 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-                <button
-                  onClick={() =>
-                    launchBench(filteredBenchDrills, "Filtered drill library")
-                  }
-                  disabled={filteredBenchDrills.length === 0}
-                  className="touch-pill inline-flex items-center justify-center gap-2 rounded-full bg-t1-blue px-5 text-sm font-semibold text-white disabled:opacity-40"
-                >
-                  <PlayCircle className="h-4 w-4" />
-                  Send to On-Court
-                </button>
-
-                <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
-                  <button
-                    onClick={() => {
-                      setActiveTab("all");
-                      setVisibleCount(DRILLS_PER_PAGE);
-                    }}
-                    className={`touch-pill inline-flex items-center rounded-full px-4 text-sm font-semibold uppercase tracking-[0.18em] ${
-                      activeTab === "all"
-                        ? "bg-t1-blue text-white"
-                        : "border border-t1-border bg-t1-surface text-t1-muted"
-                    }`}
-                  >
-                    All drills
-                  </button>
-                  <button
-                    onClick={() => {
-                      setActiveTab("favorites");
-                      setVisibleCount(DRILLS_PER_PAGE);
-                    }}
-                    className={`touch-pill inline-flex items-center gap-2 rounded-full px-4 text-sm font-semibold uppercase tracking-[0.18em] ${
-                      activeTab === "favorites"
-                        ? "bg-amber-500/15 text-amber-600 dark:text-amber-300"
-                        : "border border-t1-border bg-t1-surface text-t1-muted"
-                    }`}
-                  >
-                    <Star
-                      className={`h-3.5 w-3.5 ${activeTab === "favorites" ? "fill-current" : ""}`}
-                    />
-                    My drills
-                    {favorites.length > 0 && (
-                      <span className="rounded-full bg-white/20 px-2 py-0.5 text-[10px]">
-                        {favorites.length}
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    {selectedStage.priorities.slice(0, 3).map(priority => (
+                      <span
+                        key={priority}
+                        className="inline-flex items-center rounded-full border border-t1-border bg-t1-bg px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-t1-muted"
+                      >
+                        {priority}
                       </span>
-                    )}
+                    ))}
+                  </div>
+
+                  <div className="mt-5 grid gap-2 sm:grid-cols-3">
+                    <button
+                      onClick={() => {
+                        if (sameClassOnCourtSession) {
+                          navigate("/on-court");
+                          return;
+                        }
+
+                        launchBench(benchDrills, benchSourceLabel);
+                      }}
+                      disabled={!sameClassOnCourtSession && benchDrills.length === 0}
+                      className="touch-pill inline-flex items-center justify-center gap-2 rounded-full bg-t1-blue px-5 text-sm font-semibold text-white disabled:opacity-40"
+                    >
+                      <PlayCircle className="h-4 w-4" />
+                      {sameClassOnCourtSession
+                        ? "Resume board"
+                        : "Send class bench"}
+                    </button>
+                    <Link
+                      href={`/session-plans?level=${selectedStage.id}`}
+                      className="touch-pill inline-flex items-center justify-center gap-2 rounded-full border border-t1-border bg-t1-surface px-5 text-sm font-semibold text-t1-text no-underline"
+                    >
+                      <ClipboardList className="h-4 w-4 text-t1-blue" />
+                      Open playbooks
+                    </Link>
+                    <button
+                      onClick={() => {
+                        if (featuredCoachDrill) openPreview(featuredCoachDrill.id);
+                      }}
+                      disabled={!featuredCoachDrill}
+                      className="touch-pill inline-flex items-center justify-center gap-2 rounded-full border border-t1-border bg-t1-surface px-5 text-sm font-semibold text-t1-text disabled:opacity-40"
+                    >
+                      <ListChecks className="h-4 w-4 text-t1-blue" />
+                      How to run it
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <div className="mt-5 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+                  <button
+                    onClick={() => launchBench(benchDrills, benchSourceLabel)}
+                    disabled={benchDrills.length === 0}
+                    className="touch-pill inline-flex items-center justify-center gap-2 rounded-full bg-t1-blue px-5 text-sm font-semibold text-white disabled:opacity-40"
+                  >
+                    <PlayCircle className="h-4 w-4" />
+                    Send to On-Court
                   </button>
                 </div>
-              </div>
+              )}
             </section>
 
             <section className="premium-card rounded-[2rem] p-5 sm:p-6">
-              <p className="section-kicker">Current lens</p>
+              <p className="section-kicker">
+                {selectedStage ? "Coach view" : "Current lens"}
+              </p>
               <h2 className="mt-3 font-display text-2xl font-semibold uppercase tracking-[0.1em] text-t1-text">
-                Coach the next rep
+                {selectedStage ? "Move straight to the next rep" : "Coach the next rep"}
               </h2>
 
               <div className="mt-5 space-y-3">
                 <div className="rounded-[1.5rem] border border-t1-border bg-t1-bg p-4">
-                  <p className="meta-label">Class</p>
+                  <p className="meta-label">
+                    {selectedStage ? "Class context" : "Class"}
+                  </p>
                   <p className="mt-2 text-base font-semibold text-t1-text">
                     {selectedStage
-                      ? `${selectedStage.shortName} selected`
+                      ? `${selectedStage.shortName} • ${selectedStage.subtitle}`
                       : "All classes"}
                   </p>
                   <p className="support-copy mt-2 text-sm leading-6">
                     {selectedBrand
-                      ? selectedBrand.summary
+                      ? selectedStage
+                        ? selectedBrand.onCourtPrompt
+                        : selectedBrand.summary
                       : "Pick a class first when the group and pace are clear."}
                   </p>
                 </div>
@@ -793,11 +878,56 @@ export default function DrillLibrary() {
                     {filteredDrills.length}
                   </p>
                   <p className="support-copy mt-1 text-sm">
-                    drill{filteredDrills.length !== 1 ? "s" : ""} ready
+                    {activeTab === "favorites"
+                      ? "saved drill"
+                      : "drill"}
+                    {filteredDrills.length !== 1 ? "s" : ""} ready
                     {deferredSearchQuery.trim() &&
                       ` for "${deferredSearchQuery}"`}
                   </p>
+                  {sameClassOnCourtSession && (
+                    <p className="support-copy mt-2 text-sm leading-6">
+                      Live board already loaded: {sameClassOnCourtSession.title}
+                    </p>
+                  )}
                 </div>
+              </div>
+
+              <div className="mt-4 flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
+                <button
+                  onClick={() => {
+                    setActiveTab("all");
+                    setVisibleCount(DRILLS_PER_PAGE);
+                  }}
+                  className={`touch-pill inline-flex items-center rounded-full px-4 text-sm font-semibold uppercase tracking-[0.18em] ${
+                    activeTab === "all"
+                      ? "bg-t1-blue text-white"
+                      : "border border-t1-border bg-t1-surface text-t1-muted"
+                  }`}
+                >
+                  All drills
+                </button>
+                <button
+                  onClick={() => {
+                    setActiveTab("favorites");
+                    setVisibleCount(DRILLS_PER_PAGE);
+                  }}
+                  className={`touch-pill inline-flex items-center gap-2 rounded-full px-4 text-sm font-semibold uppercase tracking-[0.18em] ${
+                    activeTab === "favorites"
+                      ? "bg-amber-500/15 text-amber-600 dark:text-amber-300"
+                      : "border border-t1-border bg-t1-surface text-t1-muted"
+                  }`}
+                >
+                  <Star
+                    className={`h-3.5 w-3.5 ${activeTab === "favorites" ? "fill-current" : ""}`}
+                  />
+                  My drills
+                  {favorites.length > 0 && (
+                    <span className="rounded-full bg-white/20 px-2 py-0.5 text-[10px]">
+                      {favorites.length}
+                    </span>
+                  )}
+                </button>
               </div>
             </section>
           </div>
@@ -805,12 +935,117 @@ export default function DrillLibrary() {
       </section>
 
       <div className="container space-y-5 py-5 sm:py-7">
+        {selectedStage && selectedBrand && recommendedDrills.length > 0 && (
+          <section className="premium-card rounded-[2rem] p-5 sm:p-6">
+            <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+              <div>
+                <p className="section-kicker">Recommended drills</p>
+                <h2 className="mt-2 font-display text-2xl font-semibold uppercase tracking-[0.08em] text-t1-text">
+                  Start {selectedStage.shortName} fast
+                </h2>
+                <p className="support-copy mt-2 max-w-3xl text-sm leading-6">
+                  Three quick picks for the class you chose, with the first
+                  cue and first setup step visible before you head to court.
+                </p>
+              </div>
+
+              <button
+                onClick={() =>
+                  launchBench(
+                    recommendedBenchDrills,
+                    `${selectedStage.shortName} recommended drill bench`
+                  )
+                }
+                className="touch-pill inline-flex items-center justify-center gap-2 rounded-full bg-t1-blue px-5 text-sm font-semibold text-white"
+              >
+                <PlayCircle className="h-4 w-4" />
+                Send all to On-Court
+              </button>
+            </div>
+
+            <div className="mt-4 grid gap-3 xl:grid-cols-3">
+              {recommendedDrills.map(recommendation => {
+                const guide = buildDrillCoachGuide(recommendation.drill);
+
+                return (
+                  <article
+                    key={recommendation.drill.id}
+                    className="rounded-[1.7rem] border border-t1-border bg-t1-bg p-4 sm:p-5"
+                  >
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span
+                        className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] ${selectedBrand.badgeClassName}`}
+                      >
+                        <span
+                          className={`h-2.5 w-2.5 rounded-full ${selectedBrand.dotClassName}`}
+                        />
+                        {recommendation.label}
+                      </span>
+                      <span className="rounded-full border border-t1-border bg-t1-surface px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-muted">
+                        {recommendation.drill.recommendedTime}
+                      </span>
+                    </div>
+
+                    <h3 className="mt-4 text-xl font-semibold text-t1-text">
+                      {recommendation.drill.name}
+                    </h3>
+                    <p className="support-copy mt-2 text-sm leading-6">
+                      {recommendation.summary}
+                    </p>
+
+                    <div className="mt-4 grid gap-3">
+                      <div className="rounded-[1.3rem] border border-t1-border bg-t1-surface px-4 py-3">
+                        <p className="meta-label">How to run</p>
+                        <p className="support-copy-strong mt-2 text-sm leading-6">
+                          {guide.howToRun[0] ?? recommendation.drill.setup}
+                        </p>
+                      </div>
+                      <div className="rounded-[1.3rem] border border-t1-border bg-t1-surface px-4 py-3">
+                        <p className="meta-label">Coach first</p>
+                        <p className="support-copy-strong mt-2 text-sm leading-6">
+                          {guide.whatToCoach[0] ??
+                            recommendation.drill.coachingCues[0]}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="mt-4 grid gap-2 sm:grid-cols-3">
+                      <button
+                        onClick={() => openPreview(recommendation.drill.id)}
+                        className="touch-pill inline-flex items-center justify-center gap-2 rounded-full border border-t1-border bg-t1-surface px-4 text-sm font-semibold text-t1-text"
+                      >
+                        <ListChecks className="h-4 w-4 text-t1-blue" />
+                        How to run
+                      </button>
+                      <button
+                        onClick={() => launchSingleDrill(recommendation.drill)}
+                        className="touch-pill inline-flex items-center justify-center gap-2 rounded-full bg-t1-blue px-4 text-sm font-semibold text-white"
+                      >
+                        <PlayCircle className="h-4 w-4" />
+                        On-Court
+                      </button>
+                      <Link
+                        href={getDrillDetailHref(recommendation.drill.id)}
+                        className="touch-pill inline-flex items-center justify-center rounded-full border border-t1-border bg-t1-surface px-4 text-sm font-semibold text-t1-text no-underline"
+                      >
+                        Details
+                      </Link>
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+          </section>
+        )}
+
         <section className="panel-surface p-5 sm:p-6">
           <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
             <div>
-              <p className="section-kicker">Narrow fast</p>
+              <p className="section-kicker">Search + filters</p>
               <h2 className="mt-2 font-display text-2xl font-semibold uppercase tracking-[0.1em] text-t1-text">
-                Start wide. Tighten only when needed.
+                {selectedStage
+                  ? "Tighten the list only when you need a different rep."
+                  : "Start wide. Tighten only when needed."}
               </h2>
             </div>
             {hasActiveFilters && (
@@ -821,6 +1056,30 @@ export default function DrillLibrary() {
                 Reset all filters
               </button>
             )}
+          </div>
+
+          <div className="mt-5">
+            <label className="relative block">
+              <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-t1-muted" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={event => {
+                  setSearchQuery(event.target.value);
+                  setVisibleCount(DRILLS_PER_PAGE);
+                }}
+                placeholder="Search by drill name, cue, or setup"
+                className="h-[54px] w-full rounded-full border border-t1-border-strong bg-t1-surface pl-11 pr-10 text-sm text-t1-text placeholder:text-t1-muted/55 focus:border-t1-blue/35 focus:outline-none"
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery("")}
+                  className="touch-icon absolute right-2 top-1/2 inline-flex -translate-y-1/2 items-center justify-center rounded-full text-t1-muted"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              )}
+            </label>
           </div>
 
           <div className="mt-5 grid gap-4 xl:grid-cols-[minmax(0,1.08fr)_minmax(0,0.92fr)]">
@@ -1169,10 +1428,7 @@ export default function DrillLibrary() {
                   return (
                     <button
                       key={drill.id}
-                      onClick={() => {
-                        setPreviewDrillId(drill.id);
-                        setPreviewOpen(true);
-                      }}
+                      onClick={() => openPreview(drill.id)}
                       className="premium-card min-w-[230px] rounded-[1.6rem] p-4 text-left"
                     >
                       <div
@@ -1202,7 +1458,9 @@ export default function DrillLibrary() {
             <div>
               <p className="section-kicker">Results</p>
               <h2 className="mt-2 font-display text-2xl font-semibold uppercase tracking-[0.08em] text-t1-text">
-                Ready drills
+                {selectedStage
+                  ? `More ${selectedStage.shortName} drills`
+                  : "Ready drills"}
               </h2>
               <p className="support-copy mt-2 text-sm">
                 {filteredDrills.length} drill
@@ -1368,16 +1626,13 @@ export default function DrillLibrary() {
                           On-Court
                         </button>
                         <button
-                          onClick={() => {
-                            setPreviewDrillId(drill.id);
-                            setPreviewOpen(true);
-                          }}
+                          onClick={() => openPreview(drill.id)}
                           className="touch-pill inline-flex items-center justify-center rounded-full border border-t1-border bg-t1-bg px-4 text-sm font-semibold text-t1-text"
                         >
                           Preview
                         </button>
                         <Link
-                          href={`/drills/${drill.id}`}
+                          href={getDrillDetailHref(drill.id)}
                           className="touch-pill inline-flex items-center justify-center rounded-full border border-t1-border bg-t1-surface px-4 text-sm font-semibold text-t1-text no-underline"
                         >
                           Details
@@ -1407,6 +1662,9 @@ export default function DrillLibrary() {
       </div>
 
       <DrillQuickPreview
+        detailHref={
+          previewDrillId ? getDrillDetailHref(previewDrillId) : undefined
+        }
         drillId={previewDrillId}
         open={previewOpen}
         onOpenChange={setPreviewOpen}

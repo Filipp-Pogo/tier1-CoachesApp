@@ -118,6 +118,11 @@ export default function Dashboard() {
     [favoritePlanIds, recentIds, selectedClass]
   );
 
+  const openStageDrills = (stageId: PathwayStageId) => {
+    setSelectedClass(stageId);
+    navigate(`/drills?level=${stageId}`);
+  };
+
   const launchStageBoard = (stageId: PathwayStageId) => {
     setSelectedClass(stageId);
 
@@ -174,12 +179,11 @@ export default function Dashboard() {
             <section className="premium-card rounded-[2rem] p-5 sm:p-7">
               <p className="section-kicker">Coach flow</p>
               <h1 className="mt-3 max-w-4xl font-display text-4xl font-semibold uppercase tracking-[0.1em] text-t1-text sm:text-5xl">
-                Pick the class. Then go.
+                Pick the class. Open drills.
               </h1>
               <p className="support-copy-strong mt-4 max-w-3xl text-sm leading-7 sm:text-base">
-                Pick the group first. Everything below should tighten to the
-                next drill, the right playbook, and a live board you can send to
-                court immediately.
+                Tap the group first. The next screen should land on drills for
+                that class with the best next reps already surfaced.
               </p>
 
               <div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
@@ -190,7 +194,7 @@ export default function Dashboard() {
                   return (
                     <button
                       key={stage.id}
-                      onClick={() => setSelectedClass(stage.id)}
+                      onClick={() => openStageDrills(stage.id)}
                       className={`min-h-[11rem] rounded-[1.55rem] border p-3 text-left transition-all ${
                         active
                           ? "border-t1-blue/25 bg-t1-surface shadow-[0_16px_36px_rgba(2,6,23,0.1)]"
@@ -220,7 +224,9 @@ export default function Dashboard() {
                           {stage.subtitle}
                         </p>
                         <p className="support-copy mt-2 min-h-[2.5rem] text-[13px] leading-5">
-                          {active ? brand.summary : "Tap to load this class."}
+                          {active
+                            ? "Tap again to reopen the class drill view."
+                            : "Tap to open drills for this class."}
                         </p>
 
                         <div className="mt-4 grid grid-cols-2 gap-2">

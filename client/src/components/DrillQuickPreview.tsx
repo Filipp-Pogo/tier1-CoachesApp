@@ -35,12 +35,14 @@ import {
 import { formatSubBand } from '@/lib/customPlans';
 
 interface DrillQuickPreviewProps {
+  detailHref?: string;
   drillId: string | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
 export function DrillQuickPreview({
+  detailHref,
   drillId,
   open,
   onOpenChange,
@@ -207,7 +209,7 @@ export function DrillQuickPreview({
 
       <div className="mt-auto flex-shrink-0 border-t border-t1-border pt-3">
         <Link
-          href={`/drills/${drill.id}`}
+          href={detailHref ?? `/drills/${drill.id}`}
           className="flex min-h-[44px] w-full items-center justify-center gap-2 rounded-lg bg-t1-blue/10 py-3 text-xs font-semibold uppercase tracking-wider text-t1-blue no-underline transition-colors active:bg-t1-blue/20"
           onClick={() => onOpenChange(false)}
         >
