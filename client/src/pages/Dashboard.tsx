@@ -271,7 +271,7 @@ export default function Dashboard() {
             </div>
 
             <div
-              className={`mt-5 rounded-[1.7rem] border border-t1-border bg-gradient-to-br ${activeBrand.surfaceClassName} p-5`}
+              className={`mt-5 rounded-[1.7rem] border border-t1-border/80 bg-gradient-to-br ${activeBrand.surfaceClassName} p-5 shadow-[0_18px_40px_rgba(2,6,23,0.16)]`}
             >
               <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                 <div>
@@ -284,42 +284,42 @@ export default function Dashboard() {
                       />
                       {activeStage.shortName}
                     </span>
-                    <span className="rounded-full border border-t1-border bg-white/75 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-text">
+                    <span className="rounded-full border border-slate-300/80 bg-white/95 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.22em] text-slate-800 shadow-sm">
                       {activeBrand.tempo}
                     </span>
                   </div>
 
-                  <h3 className="mt-4 font-display text-3xl font-semibold uppercase tracking-[0.08em] text-t1-text">
+                  <h3 className="mt-4 font-display text-3xl font-bold uppercase tracking-[0.08em] text-slate-950">
                     {activeStage.subtitle}
                   </h3>
-                  <p className="mt-3 max-w-2xl text-sm leading-6 text-t1-text/78">
+                  <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-900/88">
                     {activeBrand.summary}
                   </p>
                 </div>
               </div>
 
               <div className="mt-5 grid gap-3 sm:grid-cols-3">
-                <div className="rounded-[1.35rem] border border-t1-border bg-white/78 px-4 py-3 backdrop-blur">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-muted">
+                <div className="rounded-[1.35rem] border border-slate-300/80 bg-white/95 px-4 py-3 shadow-sm backdrop-blur">
+                  <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-slate-600">
                     Drills
                   </p>
-                  <p className="mt-1 text-3xl font-semibold text-t1-text">
+                  <p className="mt-1 text-3xl font-bold text-slate-950">
                     {activeStageDrills.length}
                   </p>
                 </div>
-                <div className="rounded-[1.35rem] border border-t1-border bg-white/78 px-4 py-3 backdrop-blur">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-muted">
+                <div className="rounded-[1.35rem] border border-slate-300/80 bg-white/95 px-4 py-3 shadow-sm backdrop-blur">
+                  <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-slate-600">
                     Plans
                   </p>
-                  <p className="mt-1 text-3xl font-semibold text-t1-text">
+                  <p className="mt-1 text-3xl font-bold text-slate-950">
                     {activeStagePlans.length}
                   </p>
                 </div>
-                <div className="rounded-[1.35rem] border border-t1-border bg-white/78 px-4 py-3 backdrop-blur">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-muted">
+                <div className="rounded-[1.35rem] border border-slate-300/80 bg-white/95 px-4 py-3 shadow-sm backdrop-blur">
+                  <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-slate-600">
                     Saved
                   </p>
-                  <p className="mt-1 text-3xl font-semibold text-t1-text">
+                  <p className="mt-1 text-3xl font-bold text-slate-950">
                     {savedStageDrills.length}
                   </p>
                 </div>
@@ -328,21 +328,21 @@ export default function Dashboard() {
               <div className="mt-4 grid gap-2 sm:grid-cols-3">
                 <Link
                   href={`/drills?level=${activeStageId}`}
-                  className="inline-flex min-h-[48px] items-center justify-between rounded-full border border-t1-border bg-white/78 px-4 text-sm font-semibold text-t1-text no-underline backdrop-blur"
+                  className="inline-flex min-h-[48px] items-center justify-between rounded-full border border-slate-300/80 bg-white/95 px-4 text-sm font-semibold text-slate-900 no-underline shadow-sm backdrop-blur transition hover:bg-white"
                 >
                   <span>Open drills</span>
                   <ChevronRight className="h-4 w-4 text-t1-blue" />
                 </Link>
                 <Link
                   href={`/session-plans?level=${activeStageId}`}
-                  className="inline-flex min-h-[48px] items-center justify-between rounded-full border border-t1-border bg-white/78 px-4 text-sm font-semibold text-t1-text no-underline backdrop-blur"
+                  className="inline-flex min-h-[48px] items-center justify-between rounded-full border border-slate-300/80 bg-white/95 px-4 text-sm font-semibold text-slate-900 no-underline shadow-sm backdrop-blur transition hover:bg-white"
                 >
                   <span>Open plans</span>
                   <ChevronRight className="h-4 w-4 text-t1-blue" />
                 </Link>
                 <button
                   onClick={() => launchStageBoard(activeStageId)}
-                  className="inline-flex min-h-[48px] items-center justify-center gap-2 rounded-full bg-t1-blue px-4 text-sm font-semibold text-white"
+                  className="inline-flex min-h-[48px] items-center justify-center gap-2 rounded-full bg-t1-blue px-4 text-sm font-bold text-white shadow-[0_12px_24px_rgba(34,114,255,0.28)] transition hover:bg-[#1d63e6]"
                 >
                   <PlayCircle className="h-4 w-4" />
                   Launch On-Court

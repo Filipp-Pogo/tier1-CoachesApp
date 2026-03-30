@@ -176,7 +176,7 @@
     background: var(--background);
   }
 
-  body {
+body {
     @apply font-sans text-foreground;
     min-height: 100vh;
     background:
@@ -233,6 +233,21 @@
   input[type="radio"]:not(:disabled) {
     @apply cursor-pointer;
   }
+}
+
+:focus-visible {
+  outline: 3px solid rgba(34, 114, 255, 0.9);
+  outline-offset: 2px;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible,
+[role="button"]:focus-visible {
+  box-shadow: 0 0 0 3px rgba(34, 114, 255, 0.22);
+  border-radius: 12px;
 }
 
 @layer components {
