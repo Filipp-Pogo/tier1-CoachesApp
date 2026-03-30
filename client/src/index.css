@@ -100,16 +100,16 @@
   --t1-red: #dd5240;
   --t1-volt: #d6ff3f;
   --t1-border: rgba(17, 24, 39, 0.08);
-  --t1-border-strong: rgba(17, 24, 39, 0.14);
-  --t1-surface-soft: rgba(255, 255, 255, 0.86);
-  --t1-surface-muted: rgba(248, 250, 252, 0.88);
+  --t1-border-strong: rgba(17, 24, 39, 0.17);
+  --t1-surface-soft: rgba(255, 255, 255, 0.92);
+  --t1-surface-muted: rgba(248, 250, 252, 0.94);
   --t1-hero-overlay: linear-gradient(
     180deg,
     rgba(255, 255, 255, 0.92) 0%,
     rgba(238, 242, 246, 0.97) 66%,
     rgba(238, 242, 246, 1) 100%
   );
-  --t1-panel-shadow: 0 24px 56px rgba(15, 23, 42, 0.08);
+  --t1-panel-shadow: 0 28px 64px rgba(15, 23, 42, 0.1);
 }
 
 .dark {
@@ -155,16 +155,16 @@
   --t1-red: #ff6b57;
   --t1-volt: #d6ff3f;
   --t1-border: rgba(255, 255, 255, 0.08);
-  --t1-border-strong: rgba(255, 255, 255, 0.16);
-  --t1-surface-soft: rgba(21, 27, 35, 0.86);
-  --t1-surface-muted: rgba(18, 24, 32, 0.82);
+  --t1-border-strong: rgba(255, 255, 255, 0.2);
+  --t1-surface-soft: rgba(21, 27, 35, 0.9);
+  --t1-surface-muted: rgba(18, 24, 32, 0.88);
   --t1-hero-overlay: linear-gradient(
     180deg,
     rgba(16, 20, 27, 0.84) 0%,
     rgba(15, 20, 27, 0.94) 64%,
     rgba(15, 20, 27, 1) 100%
   );
-  --t1-panel-shadow: 0 26px 64px rgba(0, 0, 0, 0.26);
+  --t1-panel-shadow: 0 30px 72px rgba(0, 0, 0, 0.32);
 }
 
 @layer base {
@@ -308,24 +308,33 @@
   }
 
   .panel-surface {
-    border: 1px solid var(--t1-border);
+    border: 1px solid var(--t1-border-strong);
     border-radius: 1.5rem;
-    background: var(--t1-surface-soft);
+    background: linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--t1-surface) 96%, transparent),
+      color-mix(in srgb, var(--t1-surface-soft) 88%, var(--background))
+    );
     backdrop-filter: blur(18px);
     box-shadow: var(--t1-panel-shadow);
   }
 
   .panel-muted {
-    border: 1px solid var(--t1-border);
+    border: 1px solid
+      color-mix(in srgb, var(--t1-border-strong) 92%, transparent);
     border-radius: 1.5rem;
-    background: var(--t1-surface-muted);
+    background: linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--t1-surface) 94%, transparent),
+      color-mix(in srgb, var(--t1-surface-muted) 90%, var(--background))
+    );
     backdrop-filter: blur(12px);
   }
 
   .premium-card {
     position: relative;
     overflow: hidden;
-    border: 1px solid var(--t1-border);
+    border: 1px solid var(--t1-border-strong);
     background: linear-gradient(
       180deg,
       color-mix(in srgb, var(--t1-surface) 96%, transparent),
@@ -383,10 +392,10 @@
   }
 
   .section-kicker {
-    color: var(--t1-blue);
-    font-size: 0.72rem;
+    color: color-mix(in srgb, var(--t1-blue) 84%, var(--t1-text));
+    font-size: 0.74rem;
     font-weight: 700;
-    letter-spacing: 0.28em;
+    letter-spacing: 0.24em;
     text-transform: uppercase;
   }
 }

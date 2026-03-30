@@ -561,6 +561,12 @@ export default function DrillLibrary() {
     ? pathwayStages.find(stage => stage.id === levelFilter)
     : undefined;
   const selectedBrand = levelFilter ? getStageBrand(levelFilter) : undefined;
+  const selectedProblem = problemFilter
+    ? drillProblemFilters.find(filter => filter.id === problemFilter)
+    : undefined;
+  const selectedIntent = intentFilter
+    ? drillIntentFilters.find(filter => filter.id === intentFilter)
+    : undefined;
 
   const levelCounts = useMemo(() => {
     const source =
@@ -651,52 +657,74 @@ export default function DrillLibrary() {
     <div>
       <section className="page-hero">
         <div className="container py-5 sm:py-8">
-          <div className="grid gap-4 xl:grid-cols-[minmax(0,1.4fr)_minmax(320px,0.85fr)]">
+          <div className="grid gap-4 xl:grid-cols-[minmax(0,1.35fr)_minmax(320px,0.82fr)]">
             <section className="premium-card rounded-[2rem] p-5 sm:p-7">
-              <p className="section-kicker">Drill discovery</p>
-              <h1 className="mt-3 font-display text-3xl font-semibold uppercase tracking-[0.12em] text-t1-text sm:text-5xl">
-                Find the right rep for this class.
+              <p className="section-kicker">Drills</p>
+              <h1 className="mt-3 font-display text-4xl font-semibold uppercase tracking-[0.1em] text-t1-text sm:text-5xl">
+                Find the right drill fast
               </h1>
-              <p className="mt-4 max-w-2xl text-sm leading-7 text-t1-muted sm:text-base">
-                Start with class mode, narrow by coaching problem, then decide
-                whether you need install reps, live ball, or competitive finish.
+              <p className="mt-4 max-w-2xl text-sm leading-7 text-t1-text/72 sm:text-base">
+                Start with the class, then add a problem or intent only when the
+                next rep is not obvious.
               </p>
 
-              <div className="mt-6 flex flex-col gap-2 sm:flex-row">
-                <button
-                  onClick={() =>
-                    launchBench(filteredBenchDrills, "Filtered drill library")
-                  }
-                  disabled={filteredBenchDrills.length === 0}
-                  className="inline-flex min-h-[52px] items-center justify-center gap-2 rounded-full bg-t1-blue px-5 text-sm font-semibold text-white disabled:opacity-40"
-                >
-                  <PlayCircle className="h-4 w-4" />
-                  Launch filtered bench
-                </button>
-                <button
-                  onClick={() => {
-                    setActiveTab(previous =>
-                      previous === "favorites" ? "all" : "favorites"
-                    );
-                    setVisibleCount(DRILLS_PER_PAGE);
-                  }}
-                  className="inline-flex min-h-[52px] items-center justify-center gap-2 rounded-full border border-t1-border bg-t1-surface px-5 text-sm font-semibold text-t1-text"
-                >
-                  <Star className="h-4 w-4 text-amber-400" />
-                  {activeTab === "favorites"
-                    ? "View all drills"
-                    : "Open My Drills"}
-                </button>
+              <div className="mt-6">
+                <label className="relative block">
+                  <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-t1-muted" />
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={event => {
+                      setSearchQuery(event.target.value);
+                      setVisibleCount(DRILLS_PER_PAGE);
+                    }}
+                    placeholder="Search by drill name, cue, or setup"
+                    className="h-[54px] w-full rounded-full border border-t1-border-strong bg-t1-surface pl-11 pr-10 text-sm text-t1-text placeholder:text-t1-muted/55 focus:border-t1-blue/35 focus:outline-none"
+                  />
+                  {searchQuery && (
+                    <button
+                      onClick={() => setSearchQuery("")}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-t1-muted"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  )}
+                </label>
               </div>
 
-              <div className="mt-6 grid gap-2 sm:grid-cols-[auto_minmax(0,1fr)]">
+              <div className="mt-5 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    onClick={() =>
+                      launchBench(filteredBenchDrills, "Filtered drill library")
+                    }
+                    disabled={filteredBenchDrills.length === 0}
+                    className="inline-flex min-h-[48px] items-center justify-center gap-2 rounded-full bg-t1-blue px-5 text-sm font-semibold text-white disabled:opacity-40"
+                  >
+                    <PlayCircle className="h-4 w-4" />
+                    Send to On-Court
+                  </button>
+                  <button
+                    onClick={() => {
+                      setActiveTab(previous =>
+                        previous === "favorites" ? "all" : "favorites"
+                      );
+                      setVisibleCount(DRILLS_PER_PAGE);
+                    }}
+                    className="inline-flex min-h-[48px] items-center justify-center gap-2 rounded-full border border-t1-border bg-t1-surface px-5 text-sm font-semibold text-t1-text"
+                  >
+                    <Star className="h-4 w-4 text-amber-400" />
+                    {activeTab === "favorites" ? "All drills" : "My drills"}
+                  </button>
+                </div>
+
                 <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
                   <button
                     onClick={() => {
                       setActiveTab("all");
                       setVisibleCount(DRILLS_PER_PAGE);
                     }}
-                    className={`inline-flex min-h-[42px] items-center rounded-full px-4 text-xs font-semibold uppercase tracking-[0.24em] ${
+                    className={`inline-flex min-h-[42px] items-center rounded-full px-4 text-xs font-semibold uppercase tracking-[0.22em] ${
                       activeTab === "all"
                         ? "bg-t1-blue text-white"
                         : "border border-t1-border bg-t1-surface text-t1-muted"
@@ -709,7 +737,7 @@ export default function DrillLibrary() {
                       setActiveTab("favorites");
                       setVisibleCount(DRILLS_PER_PAGE);
                     }}
-                    className={`inline-flex min-h-[42px] items-center gap-2 rounded-full px-4 text-xs font-semibold uppercase tracking-[0.24em] ${
+                    className={`inline-flex min-h-[42px] items-center gap-2 rounded-full px-4 text-xs font-semibold uppercase tracking-[0.22em] ${
                       activeTab === "favorites"
                         ? "bg-amber-500/15 text-amber-600 dark:text-amber-300"
                         : "border border-t1-border bg-t1-surface text-t1-muted"
@@ -726,82 +754,56 @@ export default function DrillLibrary() {
                     )}
                   </button>
                 </div>
-
-                <label className="relative block">
-                  <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-t1-muted" />
-                  <input
-                    type="text"
-                    value={searchQuery}
-                    onChange={event => {
-                      setSearchQuery(event.target.value);
-                      setVisibleCount(DRILLS_PER_PAGE);
-                    }}
-                    placeholder="Search drills by cue, objective, setup, or session need..."
-                    className="h-[52px] w-full rounded-full border border-t1-border bg-t1-surface pl-11 pr-10 text-sm text-t1-text placeholder:text-t1-muted/55 focus:border-t1-blue/35 focus:outline-none"
-                  />
-                  {searchQuery && (
-                    <button
-                      onClick={() => setSearchQuery("")}
-                      className="absolute right-4 top-1/2 -translate-y-1/2 text-t1-muted"
-                    >
-                      <X className="h-4 w-4" />
-                    </button>
-                  )}
-                </label>
               </div>
             </section>
 
             <section className="premium-card rounded-[2rem] p-5 sm:p-6">
               <p className="section-kicker">Current lens</p>
-              <h2 className="mt-3 font-display text-2xl font-semibold uppercase tracking-[0.12em] text-t1-text">
-                Coach the situation, not the menu.
+              <h2 className="mt-3 font-display text-2xl font-semibold uppercase tracking-[0.1em] text-t1-text">
+                Coach the next rep
               </h2>
+
               <div className="mt-5 space-y-3">
                 <div className="rounded-[1.5rem] border border-t1-border bg-t1-bg p-4">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-muted">
-                    Class mode
+                    Class
                   </p>
-                  <p className="mt-2 text-sm font-semibold text-t1-text">
+                  <p className="mt-2 text-base font-semibold text-t1-text">
                     {selectedStage
                       ? `${selectedStage.shortName} selected`
-                      : "No class preset yet"}
+                      : "All classes"}
                   </p>
-                  <p className="mt-2 text-sm leading-6 text-t1-muted">
+                  <p className="mt-2 text-sm leading-6 text-t1-text/72">
                     {selectedBrand
                       ? selectedBrand.summary
-                      : "Pick a class first when you need a faster decision path."}
+                      : "Pick a class first when the group and pace are clear."}
                   </p>
                 </div>
+
                 <div className="rounded-[1.5rem] border border-t1-border bg-t1-bg p-4">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-muted">
                     Problem + intent
                   </p>
-                  <p className="mt-2 text-sm font-semibold text-t1-text">
-                    {problemFilter
-                      ? drillProblemFilters.find(
-                          filter => filter.id === problemFilter
-                        )?.name
-                      : "No problem selected"}
-                    {intentFilter &&
-                      ` • ${drillIntentFilters.find(filter => filter.id === intentFilter)?.name}`}
+                  <p className="mt-2 text-base font-semibold text-t1-text">
+                    {selectedProblem?.name ?? "No problem filter"}
+                    {selectedIntent ? ` • ${selectedIntent.name}` : ""}
                   </p>
-                  <p className="mt-2 text-sm leading-6 text-t1-muted">
-                    {problemFilter
-                      ? drillProblemFilters.find(
-                          filter => filter.id === problemFilter
-                        )?.description
-                      : "Use one of the coaching problems below when you know what is breaking down."}
+                  <p className="mt-2 text-sm leading-6 text-t1-text/72">
+                    {selectedProblem?.description ??
+                      selectedIntent?.description ??
+                      "Add one more lens only when you need a tighter decision path."}
                   </p>
                 </div>
+
                 <div className="rounded-[1.5rem] border border-t1-border bg-t1-bg p-4">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-muted">
-                    Library status
+                    Ready now
                   </p>
-                  <p className="mt-2 text-2xl font-semibold text-t1-text">
+                  <p className="mt-2 text-3xl font-semibold text-t1-text">
                     {filteredDrills.length}
                   </p>
-                  <p className="mt-1 text-sm text-t1-muted">
-                    drills ready
+                  <p className="mt-1 text-sm text-t1-text/72">
+                    drill{filteredDrills.length !== 1 ? "s" : ""} ready
                     {deferredSearchQuery.trim() &&
                       ` for "${deferredSearchQuery}"`}
                   </p>
@@ -813,371 +815,358 @@ export default function DrillLibrary() {
       </section>
 
       <div className="container space-y-5 py-5 sm:py-7">
-        <section className="space-y-3">
-          <div className="flex items-end justify-between gap-3">
+        <section className="panel-surface p-5 sm:p-6">
+          <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
             <div>
-              <p className="section-kicker">Class mode</p>
-              <h2 className="mt-2 font-display text-2xl font-semibold uppercase tracking-[0.12em] text-t1-text">
-                Pick the class first
+              <p className="section-kicker">Narrow fast</p>
+              <h2 className="mt-2 font-display text-2xl font-semibold uppercase tracking-[0.1em] text-t1-text">
+                Pick the class, then tighten only if needed
               </h2>
             </div>
-            {levelFilter && (
+            {hasActiveFilters && (
               <button
-                onClick={() => {
-                  setLevelFilter("");
-                  setVisibleCount(DRILLS_PER_PAGE);
-                }}
+                onClick={clearFilters}
                 className="text-sm font-semibold text-t1-blue"
               >
-                Clear class mode
+                Reset all filters
               </button>
             )}
           </div>
 
-          <div className="grid gap-3 lg:grid-cols-3 xl:grid-cols-6">
-            {pathwayStages.map(stage => {
-              const brand = getStageBrand(stage.id);
-              const active = levelFilter === stage.id;
-              return (
-                <button
-                  key={stage.id}
-                  onClick={() => {
-                    setLevelFilter(previous =>
-                      previous === stage.id ? "" : stage.id
-                    );
-                    setVisibleCount(DRILLS_PER_PAGE);
-                    setActiveTab("all");
-                  }}
-                  className={`premium-card rounded-[1.7rem] p-4 text-left transition-transform ${
-                    active ? "ring-2 ring-t1-blue/25" : ""
-                  }`}
-                >
-                  <div
-                    className={`rounded-[1.35rem] bg-gradient-to-br ${brand.surfaceClassName} p-4`}
-                  >
-                    <div className="flex items-center justify-between gap-3">
+          <div className="mt-5 grid gap-4 xl:grid-cols-[minmax(0,1.08fr)_minmax(0,0.92fr)]">
+            <div className="panel-muted rounded-[1.7rem] p-4 sm:p-5">
+              <div className="flex items-center gap-3">
+                <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-t1-blue text-[11px] font-semibold text-white">
+                  1
+                </span>
+                <div>
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-muted">
+                    Class
+                  </p>
+                  <h3 className="mt-1 text-lg font-semibold text-t1-text">
+                    Start with the class
+                  </h3>
+                </div>
+              </div>
+
+              <div className="mt-4 flex flex-wrap gap-2">
+                {pathwayStages.map(stage => {
+                  const brand = getStageBrand(stage.id);
+                  const active = levelFilter === stage.id;
+
+                  return (
+                    <button
+                      key={stage.id}
+                      onClick={() => {
+                        setLevelFilter(previous =>
+                          previous === stage.id ? "" : stage.id
+                        );
+                        setVisibleCount(DRILLS_PER_PAGE);
+                        setActiveTab("all");
+                      }}
+                      className={`inline-flex min-h-[42px] items-center gap-2 rounded-full border px-4 text-xs font-semibold uppercase tracking-[0.2em] ${
+                        active
+                          ? `${brand.badgeClassName} shadow-sm`
+                          : "border-t1-border bg-t1-surface text-t1-muted"
+                      }`}
+                    >
                       <span
-                        className={`inline-flex items-center gap-2 rounded-full border px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] ${brand.badgeClassName}`}
-                      >
-                        <span
-                          className={`h-2.5 w-2.5 rounded-full ${brand.dotClassName}`}
-                        />
-                        {stage.shortName}
-                      </span>
-                      <span className="text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-muted">
+                        className={`h-2.5 w-2.5 rounded-full ${brand.dotClassName}`}
+                      />
+                      {stage.shortName}
+                      <span className="text-[10px] opacity-75">
                         {levelCounts[stage.id] || 0}
                       </span>
-                    </div>
-                    <p className="mt-3 text-sm font-semibold text-t1-text">
-                      {stage.subtitle}
-                    </p>
-                    <p className="mt-2 text-sm leading-6 text-t1-muted">
-                      {brand.tempo}
-                    </p>
-                  </div>
-                </button>
-              );
-            })}
-          </div>
-        </section>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
 
-        <section className="space-y-3">
-          <div>
-            <p className="section-kicker">Coaching problem</p>
-            <h2 className="mt-2 font-display text-2xl font-semibold uppercase tracking-[0.12em] text-t1-text">
-              What needs fixing right now?
-            </h2>
-          </div>
-          <div className="grid gap-3 lg:grid-cols-3">
-            {drillProblemFilters.map(problem => {
-              const active = problemFilter === problem.id;
-              return (
-                <button
-                  key={problem.id}
-                  onClick={() => {
-                    setProblemFilter(previous =>
-                      previous === problem.id ? "" : problem.id
-                    );
-                    setVisibleCount(DRILLS_PER_PAGE);
-                  }}
-                  className={`premium-card rounded-[1.7rem] p-5 text-left transition-transform ${
-                    active ? "ring-2 ring-t1-blue/25" : ""
-                  }`}
-                >
-                  <div className="flex items-center justify-between gap-3">
-                    <span className="text-sm font-semibold uppercase tracking-[0.16em] text-t1-text">
+            <div className="grid gap-4">
+              <div className="panel-muted rounded-[1.7rem] p-4 sm:p-5">
+                <div className="flex items-center gap-3">
+                  <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-t1-blue text-[11px] font-semibold text-white">
+                    2
+                  </span>
+                  <div>
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-muted">
+                      Problem
+                    </p>
+                    <h3 className="mt-1 text-lg font-semibold text-t1-text">
+                      Fix the right thing
+                    </h3>
+                  </div>
+                </div>
+
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {drillProblemFilters.map(problem => (
+                    <button
+                      key={problem.id}
+                      onClick={() => {
+                        setProblemFilter(previous =>
+                          previous === problem.id ? "" : problem.id
+                        );
+                        setVisibleCount(DRILLS_PER_PAGE);
+                      }}
+                      className={`inline-flex min-h-[40px] items-center rounded-full border px-4 text-xs font-semibold uppercase tracking-[0.2em] ${
+                        problemFilter === problem.id
+                          ? "border-t1-blue/25 bg-t1-blue text-white"
+                          : "border-t1-border bg-t1-surface text-t1-muted"
+                      }`}
+                    >
                       {problem.name}
-                    </span>
-                    {active && (
-                      <span className="rounded-full bg-t1-blue px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.22em] text-white">
-                        Live
-                      </span>
-                    )}
-                  </div>
-                  <p className="mt-3 text-sm leading-6 text-t1-muted">
-                    {problem.description}
-                  </p>
-                </button>
-              );
-            })}
-          </div>
-        </section>
+                    </button>
+                  ))}
+                </div>
+              </div>
 
-        <section className="space-y-3">
-          <div>
-            <p className="section-kicker">Training intent</p>
-            <h2 className="mt-2 font-display text-2xl font-semibold uppercase tracking-[0.12em] text-t1-text">
-              How should the rep feel?
-            </h2>
+              <div className="panel-muted rounded-[1.7rem] p-4 sm:p-5">
+                <div className="flex items-center gap-3">
+                  <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-t1-blue text-[11px] font-semibold text-white">
+                    3
+                  </span>
+                  <div>
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-muted">
+                      Intent
+                    </p>
+                    <h3 className="mt-1 text-lg font-semibold text-t1-text">
+                      Set the rep feel
+                    </h3>
+                  </div>
+                </div>
+
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {drillIntentFilters.map(intent => (
+                    <button
+                      key={intent.id}
+                      onClick={() => {
+                        setIntentFilter(previous =>
+                          previous === intent.id ? "" : intent.id
+                        );
+                        setVisibleCount(DRILLS_PER_PAGE);
+                      }}
+                      className={`inline-flex min-h-[40px] items-center gap-2 rounded-full border px-4 text-xs font-semibold uppercase tracking-[0.2em] ${
+                        intentFilter === intent.id
+                          ? "border-t1-blue/25 bg-t1-blue text-white"
+                          : "border-t1-border bg-t1-surface text-t1-muted"
+                      }`}
+                    >
+                      <intent.icon className="h-3.5 w-3.5" />
+                      {intent.name}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
           </div>
-          <div className="grid gap-3 lg:grid-cols-5">
-            {drillIntentFilters.map(intent => {
-              const active = intentFilter === intent.id;
-              return (
+
+          <div className="mt-4 border-t border-t1-border pt-4">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <button
+                onClick={() => setShowAdvancedFilters(previous => !previous)}
+                className={`inline-flex min-h-[40px] items-center gap-2 rounded-full border px-4 text-xs font-semibold uppercase tracking-[0.22em] ${
+                  showAdvancedFilters || advancedFilterCount > 0
+                    ? "border-t1-blue/25 bg-t1-blue/10 text-t1-blue"
+                    : "border-t1-border bg-t1-surface text-t1-muted"
+                }`}
+              >
+                <SlidersHorizontal className="h-3.5 w-3.5" />
+                More filters
+                {advancedFilterCount > 0 && (
+                  <span className="rounded-full bg-t1-blue px-2 py-0.5 text-[10px] text-white">
+                    {advancedFilterCount}
+                  </span>
+                )}
+              </button>
+
+              {hasActiveFilters && (
                 <button
-                  key={intent.id}
-                  onClick={() => {
-                    setIntentFilter(previous =>
-                      previous === intent.id ? "" : intent.id
-                    );
-                    setVisibleCount(DRILLS_PER_PAGE);
-                  }}
-                  className={`premium-card rounded-[1.7rem] p-5 text-left transition-transform ${
-                    active ? "ring-2 ring-t1-blue/25" : ""
-                  }`}
+                  onClick={clearFilters}
+                  className="text-sm font-semibold text-t1-blue"
                 >
-                  <intent.icon className="h-5 w-5 text-t1-blue" />
-                  <p className="mt-4 text-sm font-semibold uppercase tracking-[0.16em] text-t1-text">
-                    {intent.name}
-                  </p>
-                  <p className="mt-3 text-sm leading-6 text-t1-muted">
-                    {intent.description}
-                  </p>
+                  Reset all
                 </button>
-              );
-            })}
-          </div>
-        </section>
-
-        <section className="panel-surface space-y-4 p-4 sm:p-5">
-          <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
-            <div>
-              <p className="section-kicker">Advanced filters</p>
-              <h2 className="mt-2 font-display text-xl font-semibold uppercase tracking-[0.12em] text-t1-text">
-                Tighten the library only when needed
-              </h2>
-            </div>
-            <button
-              onClick={() => setShowAdvancedFilters(previous => !previous)}
-              className={`inline-flex min-h-[42px] items-center justify-center gap-2 rounded-full border px-4 text-xs font-semibold uppercase tracking-[0.24em] ${
-                showAdvancedFilters || advancedFilterCount > 0
-                  ? "border-t1-blue/25 bg-t1-blue/10 text-t1-blue"
-                  : "border-t1-border bg-t1-surface text-t1-muted"
-              }`}
-            >
-              <SlidersHorizontal className="h-3.5 w-3.5" />
-              Filters
-              {advancedFilterCount > 0 && (
-                <span className="rounded-full bg-t1-blue px-2 py-0.5 text-[10px] text-white">
-                  {advancedFilterCount}
-                </span>
               )}
-            </button>
-          </div>
-
-          {showAdvancedFilters && (
-            <div className="grid gap-4 lg:grid-cols-2">
-              <div className="space-y-3">
-                <div>
-                  <label className="text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-muted">
-                    UTR
-                  </label>
-                  <div className="mt-2 flex flex-wrap gap-2">
-                    {availableUtrBands.map(band => (
-                      <button
-                        key={band}
-                        onClick={() => {
-                          setUtrFilter(previous =>
-                            previous === band ? "" : band
-                          );
-                          setVisibleCount(DRILLS_PER_PAGE);
-                        }}
-                        className={`rounded-full px-3 py-2 text-xs font-semibold uppercase tracking-[0.18em] ${
-                          utrFilter === band
-                            ? "bg-t1-blue text-white"
-                            : "border border-t1-border bg-t1-bg text-t1-muted"
-                        }`}
-                      >
-                        {band.replace(/\s+to\s+/gi, "-")}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <div>
-                  <label className="text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-muted">
-                    Block
-                  </label>
-                  <div className="mt-2 flex flex-wrap gap-2">
-                    {sessionBlocks.map(block => (
-                      <button
-                        key={block.id}
-                        onClick={() => {
-                          setBlockFilter(previous =>
-                            previous === block.id ? "" : block.id
-                          );
-                          setVisibleCount(DRILLS_PER_PAGE);
-                        }}
-                        className={`rounded-full px-3 py-2 text-xs font-semibold uppercase tracking-[0.18em] ${
-                          blockFilter === block.id
-                            ? "bg-t1-blue text-white"
-                            : "border border-t1-border bg-t1-bg text-t1-muted"
-                        }`}
-                      >
-                        {block.shortName}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <div>
-                  <label className="text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-muted">
-                    Skill
-                  </label>
-                  <div className="mt-2 flex flex-wrap gap-2">
-                    {drillSkillFilters.map(skill => (
-                      <button
-                        key={skill.id}
-                        onClick={() => {
-                          setCategoryFilter(previous =>
-                            previous === skill.id ? "" : skill.id
-                          );
-                          setVisibleCount(DRILLS_PER_PAGE);
-                        }}
-                        className={`rounded-full px-3 py-2 text-xs font-semibold uppercase tracking-[0.18em] ${
-                          categoryFilter === skill.id
-                            ? "bg-t1-blue text-white"
-                            : "border border-t1-border bg-t1-bg text-t1-muted"
-                        }`}
-                      >
-                        {skill.name}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              <div className="space-y-3">
-                <div>
-                  <label className="text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-muted">
-                    Type
-                  </label>
-                  <div className="mt-2 flex flex-wrap gap-2">
-                    {[
-                      "technical",
-                      "tactical",
-                      "competitive",
-                      "cooperative",
-                    ].map(type => (
-                      <button
-                        key={type}
-                        onClick={() => {
-                          setTypeFilter(previous =>
-                            previous === type ? "" : type
-                          );
-                          setVisibleCount(DRILLS_PER_PAGE);
-                        }}
-                        className={`rounded-full px-3 py-2 text-xs font-semibold uppercase tracking-[0.18em] ${
-                          typeFilter === type
-                            ? "bg-t1-blue text-white"
-                            : "border border-t1-border bg-t1-bg text-t1-muted"
-                        }`}
-                      >
-                        {type}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <div>
-                  <label className="text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-muted">
-                    Ball feed
-                  </label>
-                  <div className="mt-2 flex flex-wrap gap-2">
-                    {[
-                      { id: "feeding", label: "Feeding" },
-                      { id: "live-ball", label: "Live ball" },
-                      { id: "both", label: "Both" },
-                    ].map(item => (
-                      <button
-                        key={item.id}
-                        onClick={() => {
-                          setFeedingFilter(previous =>
-                            previous === item.id ? "" : item.id
-                          );
-                          setVisibleCount(DRILLS_PER_PAGE);
-                        }}
-                        className={`rounded-full px-3 py-2 text-xs font-semibold uppercase tracking-[0.18em] ${
-                          feedingFilter === item.id
-                            ? "bg-t1-blue text-white"
-                            : "border border-t1-border bg-t1-bg text-t1-muted"
-                        }`}
-                      >
-                        {item.label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <div>
-                  <label className="text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-muted">
-                    Format
-                  </label>
-                  <div className="mt-2 flex flex-wrap gap-2">
-                    {[
-                      { id: "singles", label: "Singles" },
-                      { id: "doubles", label: "Doubles" },
-                      { id: "private", label: "Private" },
-                    ].map(item => (
-                      <button
-                        key={item.id}
-                        onClick={() => {
-                          setFormatFilter(previous =>
-                            previous === item.id ? "" : item.id
-                          );
-                          setVisibleCount(DRILLS_PER_PAGE);
-                        }}
-                        className={`rounded-full px-3 py-2 text-xs font-semibold uppercase tracking-[0.18em] ${
-                          formatFilter === item.id
-                            ? "bg-t1-blue text-white"
-                            : "border border-t1-border bg-t1-bg text-t1-muted"
-                        }`}
-                      >
-                        {item.label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
             </div>
-          )}
 
-          {advancedFilterCount > 0 && (
-            <button
-              onClick={() => {
-                setUtrFilter("");
-                setBlockFilter("");
-                setCategoryFilter("");
-                setTypeFilter("");
-                setFeedingFilter("");
-                setFormatFilter("");
-                setVisibleCount(DRILLS_PER_PAGE);
-              }}
-              className="text-sm font-semibold text-t1-blue"
-            >
-              Clear advanced filters
-            </button>
-          )}
+            {showAdvancedFilters && (
+              <div className="mt-4 grid gap-4 lg:grid-cols-2">
+                <div className="space-y-4">
+                  <div>
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-muted">
+                      UTR
+                    </p>
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      {availableUtrBands.map(band => (
+                        <button
+                          key={band}
+                          onClick={() => {
+                            setUtrFilter(previous =>
+                              previous === band ? "" : band
+                            );
+                            setVisibleCount(DRILLS_PER_PAGE);
+                          }}
+                          className={`rounded-full border px-3 py-2 text-xs font-semibold uppercase tracking-[0.18em] ${
+                            utrFilter === band
+                              ? "border-t1-blue/25 bg-t1-blue text-white"
+                              : "border-t1-border bg-t1-surface text-t1-muted"
+                          }`}
+                        >
+                          {band.replace(/\s+to\s+/gi, "-")}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div>
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-muted">
+                      Block
+                    </p>
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      {sessionBlocks.map(block => (
+                        <button
+                          key={block.id}
+                          onClick={() => {
+                            setBlockFilter(previous =>
+                              previous === block.id ? "" : block.id
+                            );
+                            setVisibleCount(DRILLS_PER_PAGE);
+                          }}
+                          className={`rounded-full border px-3 py-2 text-xs font-semibold uppercase tracking-[0.18em] ${
+                            blockFilter === block.id
+                              ? "border-t1-blue/25 bg-t1-blue text-white"
+                              : "border-t1-border bg-t1-surface text-t1-muted"
+                          }`}
+                        >
+                          {block.shortName}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div>
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-muted">
+                      Skill
+                    </p>
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      {drillSkillFilters.map(skill => (
+                        <button
+                          key={skill.id}
+                          onClick={() => {
+                            setCategoryFilter(previous =>
+                              previous === skill.id ? "" : skill.id
+                            );
+                            setVisibleCount(DRILLS_PER_PAGE);
+                          }}
+                          className={`rounded-full border px-3 py-2 text-xs font-semibold uppercase tracking-[0.18em] ${
+                            categoryFilter === skill.id
+                              ? "border-t1-blue/25 bg-t1-blue text-white"
+                              : "border-t1-border bg-t1-surface text-t1-muted"
+                          }`}
+                        >
+                          {skill.name}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <div>
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-muted">
+                      Type
+                    </p>
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      {[
+                        "technical",
+                        "tactical",
+                        "competitive",
+                        "cooperative",
+                      ].map(type => (
+                        <button
+                          key={type}
+                          onClick={() => {
+                            setTypeFilter(previous =>
+                              previous === type ? "" : type
+                            );
+                            setVisibleCount(DRILLS_PER_PAGE);
+                          }}
+                          className={`rounded-full border px-3 py-2 text-xs font-semibold uppercase tracking-[0.18em] ${
+                            typeFilter === type
+                              ? "border-t1-blue/25 bg-t1-blue text-white"
+                              : "border-t1-border bg-t1-surface text-t1-muted"
+                          }`}
+                        >
+                          {type}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div>
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-muted">
+                      Ball feed
+                    </p>
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      {[
+                        { id: "feeding", label: "Feeding" },
+                        { id: "live-ball", label: "Live ball" },
+                        { id: "both", label: "Both" },
+                      ].map(item => (
+                        <button
+                          key={item.id}
+                          onClick={() => {
+                            setFeedingFilter(previous =>
+                              previous === item.id ? "" : item.id
+                            );
+                            setVisibleCount(DRILLS_PER_PAGE);
+                          }}
+                          className={`rounded-full border px-3 py-2 text-xs font-semibold uppercase tracking-[0.18em] ${
+                            feedingFilter === item.id
+                              ? "border-t1-blue/25 bg-t1-blue text-white"
+                              : "border-t1-border bg-t1-surface text-t1-muted"
+                          }`}
+                        >
+                          {item.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div>
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-muted">
+                      Format
+                    </p>
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      {[
+                        { id: "singles", label: "Singles" },
+                        { id: "doubles", label: "Doubles" },
+                        { id: "private", label: "Private" },
+                      ].map(item => (
+                        <button
+                          key={item.id}
+                          onClick={() => {
+                            setFormatFilter(previous =>
+                              previous === item.id ? "" : item.id
+                            );
+                            setVisibleCount(DRILLS_PER_PAGE);
+                          }}
+                          className={`rounded-full border px-3 py-2 text-xs font-semibold uppercase tracking-[0.18em] ${
+                            formatFilter === item.id
+                              ? "border-t1-blue/25 bg-t1-blue text-white"
+                              : "border-t1-border bg-t1-surface text-t1-muted"
+                          }`}
+                        >
+                          {item.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
         </section>
 
         {activeTab === "all" &&
@@ -1188,10 +1177,10 @@ export default function DrillLibrary() {
           !deferredSearchQuery &&
           recentDrills.length > 0 && (
             <section>
-              <div className="mb-3 flex items-end justify-between gap-3">
+              <div className="mb-3 flex items-center justify-between gap-3">
                 <div>
-                  <p className="section-kicker">Recently viewed</p>
-                  <h2 className="mt-2 font-display text-2xl font-semibold uppercase tracking-[0.12em] text-t1-text">
+                  <p className="section-kicker">Recent</p>
+                  <h2 className="mt-2 text-lg font-semibold text-t1-text">
                     Jump back in
                   </h2>
                 </div>
@@ -1200,7 +1189,9 @@ export default function DrillLibrary() {
               <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
                 {recentDrills.map(drill => {
                   const stageId = getPrimaryStage(drill, "");
+                  const stage = pathwayStages.find(item => item.id === stageId);
                   const brand = getStageBrand(stageId);
+
                   return (
                     <button
                       key={drill.id}
@@ -1208,23 +1199,20 @@ export default function DrillLibrary() {
                         setPreviewDrillId(drill.id);
                         setPreviewOpen(true);
                       }}
-                      className="premium-card min-w-[240px] rounded-[1.7rem] p-4 text-left"
+                      className="premium-card min-w-[230px] rounded-[1.6rem] p-4 text-left"
                     >
                       <div
-                        className={`rounded-[1.3rem] bg-gradient-to-br ${brand.surfaceClassName} p-4`}
+                        className={`rounded-[1.35rem] bg-gradient-to-br ${brand.surfaceClassName} p-4`}
                       >
                         <span
-                          className={`inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] ${brand.tintClassName}`}
+                          className={`inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] ${brand.tintClassName}`}
                         >
-                          {
-                            pathwayStages.find(stage => stage.id === stageId)
-                              ?.shortName
-                          }
+                          {stage?.shortName}
                         </span>
-                        <p className="mt-3 text-sm font-semibold text-t1-text">
+                        <p className="mt-3 line-clamp-2 text-sm font-semibold text-t1-text">
                           {drill.name}
                         </p>
-                        <p className="mt-2 text-sm leading-6 text-t1-muted">
+                        <p className="mt-1 text-sm text-t1-text/72">
                           {drill.recommendedTime}
                         </p>
                       </div>
@@ -1239,7 +1227,10 @@ export default function DrillLibrary() {
           <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
             <div>
               <p className="section-kicker">Results</p>
-              <p className="mt-2 text-sm text-t1-muted">
+              <h2 className="mt-2 font-display text-2xl font-semibold uppercase tracking-[0.08em] text-t1-text">
+                Ready drills
+              </h2>
+              <p className="mt-2 text-sm text-t1-text/72">
                 {filteredDrills.length} drill
                 {filteredDrills.length !== 1 ? "s" : ""} ready
                 {hasMore && ` • showing ${visibleCount}`}
@@ -1265,11 +1256,10 @@ export default function DrillLibrary() {
                   <BookOpen className="size-5" />
                 </EmptyMedia>
                 <EmptyTitle className="font-display text-xl font-semibold uppercase tracking-[0.12em] text-t1-text">
-                  No drills match this lens
+                  No drills match this filter
                 </EmptyTitle>
                 <EmptyDescription className="max-w-lg text-sm leading-6 text-t1-muted">
-                  Clear the coaching problem, widen the class mode, or remove
-                  advanced filters to bring more drills back into view.
+                  Clear a filter or widen the class to bring more drills back.
                 </EmptyDescription>
               </EmptyHeader>
               <EmptyContent>
@@ -1292,9 +1282,6 @@ export default function DrillLibrary() {
                   const brand = getStageBrand(primaryStageId);
                   const problemTags = getDrillProblems(drill);
                   const intentTags = getDrillIntentTags(drill);
-                  const leadProblem = drillProblemFilters.find(
-                    filter => filter.id === problemTags[0]
-                  );
                   const leadIntent = drillIntentFilters.find(
                     filter => filter.id === intentTags[0]
                   );
@@ -1303,13 +1290,13 @@ export default function DrillLibrary() {
                   return (
                     <article
                       key={drill.id}
-                      className="premium-card rounded-[1.8rem] p-4"
+                      className="premium-card rounded-[1.8rem] p-4 sm:p-5"
                     >
                       <div
-                        className={`rounded-[1.5rem] bg-gradient-to-br ${brand.surfaceClassName} p-4`}
+                        className={`rounded-[1.45rem] border border-t1-border bg-gradient-to-br ${brand.surfaceClassName} p-4`}
                       >
-                        <div className="flex items-start justify-between gap-3">
-                          <div className="min-w-0 pr-16">
+                        <div className="flex items-start gap-3">
+                          <div className="min-w-0 flex-1">
                             <div className="flex flex-wrap items-center gap-2">
                               <span
                                 className={`inline-flex items-center gap-2 rounded-full border px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] ${brand.badgeClassName}`}
@@ -1319,89 +1306,56 @@ export default function DrillLibrary() {
                                 />
                                 {stage.shortName}
                               </span>
-                              <span className="rounded-full border border-t1-border bg-t1-surface/80 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-muted">
+                              <span className="rounded-full border border-t1-border bg-t1-surface/85 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-muted">
                                 {
                                   sessionBlocks.find(
                                     block => block.id === drill.sessionBlock
                                   )?.shortName
                                 }
                               </span>
-                              <span className="rounded-full border border-t1-border bg-t1-surface/80 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-muted">
+                              <span className="rounded-full border border-t1-border bg-t1-surface/85 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-muted">
                                 {drill.recommendedTime}
                               </span>
+                              {drill.subBand && (
+                                <span className="rounded-full border border-amber-500/20 bg-amber-500/10 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-amber-700 dark:text-amber-300">
+                                  {formatSubBand(drill.subBand)}
+                                </span>
+                              )}
                             </div>
-                            <h3 className="mt-4 font-display text-2xl font-semibold uppercase tracking-[0.1em] text-t1-text">
+
+                            <h3 className="mt-3 text-xl font-semibold text-t1-text">
                               {drill.name}
                             </h3>
-                            <p className="mt-3 text-sm leading-6 text-t1-muted">
+                            <p className="mt-2 line-clamp-2 text-sm leading-6 text-t1-text/72">
                               {drill.objective}
                             </p>
                           </div>
 
-                          <div className="absolute right-6 top-6 flex gap-2">
-                            <button
-                              onClick={() => {
-                                setPreviewDrillId(drill.id);
-                                setPreviewOpen(true);
-                              }}
-                              className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-t1-border bg-t1-surface/90 text-t1-muted"
-                              aria-label={`Preview ${drill.name}`}
-                            >
-                              <BookOpen className="h-4 w-4" />
-                            </button>
-                            <button
-                              onClick={() => toggleFavorite(drill.id)}
-                              className={`inline-flex h-10 w-10 items-center justify-center rounded-full border ${
-                                favorited
-                                  ? "border-amber-500/30 bg-amber-500/12 text-amber-500"
-                                  : "border-t1-border bg-t1-surface/90 text-t1-muted"
-                              }`}
-                              aria-label={
-                                favorited
-                                  ? `Remove ${drill.name} from My Drills`
-                                  : `Add ${drill.name} to My Drills`
-                              }
-                            >
-                              <Star
-                                className={`h-4 w-4 ${favorited ? "fill-current" : ""}`}
-                              />
-                            </button>
-                          </div>
-                        </div>
-
-                        <div className="mt-4 grid gap-2 sm:grid-cols-2">
-                          <div className="rounded-[1.25rem] border border-t1-border bg-t1-surface/85 p-3">
-                            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-muted">
-                              Best for
-                            </p>
-                            <p className="mt-2 text-sm font-semibold text-t1-text">
-                              {leadProblem?.name ?? "Coaching problem"}
-                            </p>
-                            <p className="mt-1 text-sm leading-6 text-t1-muted">
-                              {leadProblem?.description ??
-                                "Use the first cue that matters most right now."}
-                            </p>
-                          </div>
-                          <div className="rounded-[1.25rem] border border-t1-border bg-t1-surface/85 p-3">
-                            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-muted">
-                              Intent
-                            </p>
-                            <p className="mt-2 text-sm font-semibold text-t1-text">
-                              {leadIntent?.name ?? "Session intent"}
-                            </p>
-                            <p className="mt-1 text-sm leading-6 text-t1-muted">
-                              {leadIntent?.description ??
-                                "Keep the rep style clear for the group."}
-                            </p>
-                          </div>
+                          <button
+                            onClick={() => toggleFavorite(drill.id)}
+                            className={`inline-flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full border ${
+                              favorited
+                                ? "border-amber-500/30 bg-amber-500/12 text-amber-500"
+                                : "border-t1-border bg-t1-surface/85 text-t1-muted"
+                            }`}
+                            aria-label={
+                              favorited
+                                ? `Remove ${drill.name} from My Drills`
+                                : `Add ${drill.name} to My Drills`
+                            }
+                          >
+                            <Star
+                              className={`h-4 w-4 ${favorited ? "fill-current" : ""}`}
+                            />
+                          </button>
                         </div>
                       </div>
 
                       <div className="mt-4 flex flex-wrap gap-2">
-                        {problemTags.slice(0, 3).map(problem => (
+                        {problemTags.slice(0, 2).map(problem => (
                           <span
                             key={problem}
-                            className="inline-flex items-center rounded-full border border-t1-border bg-t1-bg px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-muted"
+                            className="inline-flex items-center rounded-full border border-t1-border bg-t1-bg px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-t1-muted"
                           >
                             {
                               drillProblemFilters.find(
@@ -1410,13 +1364,13 @@ export default function DrillLibrary() {
                             }
                           </span>
                         ))}
-                        {drill.subBand && (
-                          <span className="inline-flex items-center rounded-full border border-amber-500/20 bg-amber-500/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-amber-700 dark:text-amber-300">
-                            {formatSubBand(drill.subBand)}
+                        {leadIntent && (
+                          <span className="inline-flex items-center rounded-full border border-t1-border bg-t1-bg px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-t1-muted">
+                            {leadIntent.name}
                           </span>
                         )}
                         {drill.skillCategory === "doubles" && (
-                          <span className="inline-flex items-center rounded-full border border-t1-border bg-t1-bg px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-muted">
+                          <span className="inline-flex items-center rounded-full border border-t1-border bg-t1-bg px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-t1-muted">
                             Doubles
                           </span>
                         )}
@@ -1425,7 +1379,7 @@ export default function DrillLibrary() {
                       {drill.coachingCues[0] && (
                         <div className="mt-4 rounded-[1.35rem] border border-t1-border bg-t1-bg px-4 py-3">
                           <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-muted">
-                            First cue to hold
+                            First cue
                           </p>
                           <p className="mt-2 text-sm leading-6 text-t1-text">
                             {drill.coachingCues[0]}
@@ -1433,28 +1387,28 @@ export default function DrillLibrary() {
                         </div>
                       )}
 
-                      <div className="mt-4 grid gap-2 sm:grid-cols-3">
+                      <div className="mt-4 flex flex-wrap gap-2">
                         <button
                           onClick={() => {
                             setPreviewDrillId(drill.id);
                             setPreviewOpen(true);
                           }}
-                          className="inline-flex min-h-[46px] items-center justify-center gap-2 rounded-full border border-t1-border bg-t1-bg px-4 text-sm font-semibold text-t1-text"
+                          className="inline-flex min-h-[44px] items-center justify-center rounded-full border border-t1-border bg-t1-bg px-4 text-sm font-semibold text-t1-text"
                         >
                           Preview
                         </button>
                         <button
                           onClick={() => launchSingleDrill(drill)}
-                          className="inline-flex min-h-[46px] items-center justify-center gap-2 rounded-full bg-t1-blue px-4 text-sm font-semibold text-white"
+                          className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-full bg-t1-blue px-4 text-sm font-semibold text-white"
                         >
                           <PlayCircle className="h-4 w-4" />
-                          Court
+                          On-Court
                         </button>
                         <Link
                           href={`/drills/${drill.id}`}
-                          className="inline-flex min-h-[46px] items-center justify-center gap-2 rounded-full border border-t1-border bg-t1-surface px-4 text-sm font-semibold text-t1-text no-underline"
+                          className="inline-flex min-h-[44px] items-center justify-center rounded-full border border-t1-border bg-t1-surface px-4 text-sm font-semibold text-t1-text no-underline"
                         >
-                          Full detail
+                          Details
                         </Link>
                       </div>
                     </article>

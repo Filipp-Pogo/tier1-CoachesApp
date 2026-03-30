@@ -222,7 +222,7 @@ function PlanCard({
   return (
     <article className="premium-card rounded-[1.9rem] p-4 sm:p-5">
       <div
-        className={`rounded-[1.5rem] bg-gradient-to-br ${brand.surfaceClassName} p-4 sm:p-5`}
+        className={`rounded-[1.5rem] border border-t1-border bg-gradient-to-br ${brand.surfaceClassName} p-4 sm:p-5`}
       >
         <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
           <div className="min-w-0 flex-1">
@@ -261,214 +261,210 @@ function PlanCard({
               )}
             </div>
 
-            <button onClick={onToggle} className="mt-4 block w-full text-left">
-              <h3 className="font-display text-2xl font-semibold uppercase tracking-[0.1em] text-t1-text">
-                {plan.name}
-              </h3>
-              <p className="mt-3 max-w-3xl text-sm leading-6 text-t1-muted">
-                {plan.objective}
-              </p>
-            </button>
-
-            <div className="mt-4 grid gap-2 lg:grid-cols-2">
-              <div className="rounded-[1.3rem] border border-t1-border bg-t1-surface/85 p-3">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-muted">
-                  Game model
+            <div className="mt-4 flex items-start gap-3">
+              <button onClick={onToggle} className="min-w-0 flex-1 text-left">
+                <h3 className="font-display text-2xl font-semibold text-t1-text">
+                  {plan.name}
+                </h3>
+                <p className="mt-2 line-clamp-2 text-sm leading-6 text-t1-text/72">
+                  {plan.objective}
                 </p>
-                <p className="mt-2 text-sm font-semibold leading-6 text-t1-text">
-                  {plan.coachingEmphasis}
-                </p>
-              </div>
-
-              <div className="rounded-[1.3rem] border border-t1-border bg-t1-surface/85 p-3">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-muted">
-                  Block flow
-                </p>
-                <div className="mt-3 flex flex-wrap gap-2">
-                  {plan.blocks.slice(0, 4).map(block => (
-                    <span
-                      key={`${plan.id}-${block.label}`}
-                      className="inline-flex items-center rounded-full border border-t1-border bg-t1-bg px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-t1-muted"
-                    >
-                      {block.label}
-                    </span>
-                  ))}
-                  {plan.blocks.length > 4 && (
-                    <span className="inline-flex items-center rounded-full border border-t1-border bg-t1-bg px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-t1-muted">
-                      +{plan.blocks.length - 4}
-                    </span>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="flex gap-2 xl:flex-col">
-            {plan.planType === "stock" && onToggleFavorite && (
-              <button
-                onClick={onToggleFavorite}
-                className={`inline-flex h-11 w-11 items-center justify-center rounded-full border ${
-                  isFavorite
-                    ? "border-amber-500/30 bg-amber-500/12 text-amber-500"
-                    : "border-t1-border bg-t1-surface/90 text-t1-muted"
-                }`}
-                aria-label={isFavorite ? "Remove favorite" : "Add favorite"}
-              >
-                <Star
-                  className={`h-4 w-4 ${isFavorite ? "fill-current" : ""}`}
-                />
               </button>
-            )}
-            <button
-              onClick={onLaunchOnCourt}
-              className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-full bg-t1-blue px-4 text-sm font-semibold text-white"
-            >
-              <PlayCircle className="h-4 w-4" />
-              Court
-            </button>
+
+              {plan.planType === "stock" && onToggleFavorite && (
+                <button
+                  onClick={onToggleFavorite}
+                  className={`inline-flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full border ${
+                    isFavorite
+                      ? "border-amber-500/30 bg-amber-500/12 text-amber-500"
+                      : "border-t1-border bg-t1-surface/85 text-t1-muted"
+                  }`}
+                  aria-label={isFavorite ? "Remove favorite" : "Add favorite"}
+                >
+                  <Star
+                    className={`h-4 w-4 ${isFavorite ? "fill-current" : ""}`}
+                  />
+                </button>
+              )}
+            </div>
+
+            <div className="mt-4 flex flex-wrap gap-2">
+              {plan.blocks.slice(0, 4).map(block => (
+                <span
+                  key={`${plan.id}-${block.label}`}
+                  className="inline-flex items-center rounded-full border border-t1-border bg-t1-surface/85 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-t1-muted"
+                >
+                  {block.label}
+                </span>
+              ))}
+              {plan.blocks.length > 4 && (
+                <span className="inline-flex items-center rounded-full border border-t1-border bg-t1-surface/85 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-t1-muted">
+                  +{plan.blocks.length - 4}
+                </span>
+              )}
+            </div>
+
+            <p className="mt-4 text-sm leading-6 text-t1-text">
+              <span className="font-semibold text-t1-muted">Focus:</span>{" "}
+              {plan.coachingEmphasis}
+            </p>
           </div>
         </div>
       </div>
 
+      <div className="mt-4 flex flex-wrap gap-2 xl:max-w-[320px]">
+        <button
+          onClick={onLaunchOnCourt}
+          className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-full bg-t1-blue px-4 text-sm font-semibold text-white"
+        >
+          <PlayCircle className="h-4 w-4" />
+          On-Court
+        </button>
+        <button
+          onClick={onPrimaryAction}
+          className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-full border border-t1-border bg-t1-bg px-4 text-sm font-semibold text-t1-text"
+        >
+          <Edit3 className="h-4 w-4 text-t1-blue" />
+          {primaryActionLabel ??
+            (plan.planType === "stock" ? "Customize copy" : "Edit in builder")}
+        </button>
+        <button
+          onClick={onToggle}
+          className="inline-flex min-h-[44px] items-center justify-center rounded-full border border-t1-border bg-t1-bg px-4 text-sm font-semibold text-t1-text"
+        >
+          {isExpanded ? "Hide details" : "Details"}
+        </button>
+      </div>
+
       {isExpanded && (
-        <div className="mt-4 grid gap-4 xl:grid-cols-[minmax(0,1.3fr)_minmax(0,0.85fr)]">
-          <div className="space-y-3">
-            {plan.blocks.map((block, index) => (
-              <div
-                key={`${plan.id}-${block.label}-${index}`}
-                className="rounded-[1.45rem] border border-t1-border bg-t1-bg px-4 py-4"
-              >
-                <div className="flex items-center gap-3">
-                  <span className="inline-flex h-8 min-w-8 items-center justify-center rounded-full bg-t1-blue text-[11px] font-semibold text-white">
-                    {index + 1}
-                  </span>
-                  <p className="text-sm font-semibold uppercase tracking-[0.16em] text-t1-text">
-                    {block.label}
-                  </p>
+        <div className="mt-4 border-t border-t1-border pt-4">
+          <div className="grid gap-4 xl:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)]">
+            <div className="space-y-3">
+              <div>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-muted">
+                  Block flow
+                </p>
+                <div className="mt-3 space-y-3">
+                  {plan.blocks.map((block, index) => (
+                    <div
+                      key={`${plan.id}-${block.label}-${index}`}
+                      className="rounded-[1.25rem] border border-t1-border bg-t1-bg px-4 py-3"
+                    >
+                      <div className="flex items-center gap-3">
+                        <span className="inline-flex h-7 min-w-7 items-center justify-center rounded-full bg-t1-blue text-[10px] font-semibold text-white">
+                          {index + 1}
+                        </span>
+                        <p className="text-sm font-semibold text-t1-text">
+                          {block.label}
+                        </p>
+                      </div>
+                      <p className="mt-2 text-sm leading-6 text-t1-muted">
+                        {block.content}
+                      </p>
+                    </div>
+                  ))}
                 </div>
-                <p className="mt-3 text-sm leading-6 text-t1-muted">
-                  {block.content}
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-muted">
+                  Standards
+                </p>
+                <div className="mt-3 space-y-2">
+                  {plan.standards.map(item => (
+                    <div
+                      key={item}
+                      className="flex items-start gap-2 rounded-[1.15rem] border border-t1-border bg-t1-bg px-4 py-3 text-sm text-t1-text"
+                    >
+                      <Zap className="mt-0.5 h-4 w-4 flex-shrink-0 text-t1-blue" />
+                      <span>{item}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-muted">
+                  Watch for
+                </p>
+                <div className="mt-3 space-y-2">
+                  {plan.commonMistakes.map(item => (
+                    <div
+                      key={item}
+                      className="flex items-start gap-2 rounded-[1.15rem] border border-red-500/18 bg-red-500/8 px-4 py-3 text-sm text-t1-text"
+                    >
+                      <AlertTriangle className="mt-0.5 h-4 w-4 flex-shrink-0 text-red-500" />
+                      <span>{item}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="rounded-[1.25rem] border border-t1-border bg-t1-bg px-4 py-4">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-muted">
+                  Match transfer
+                </p>
+                <p className="mt-2 text-sm leading-6 text-t1-text">
+                  {plan.matchPlayTransfer}
                 </p>
               </div>
-            ))}
-          </div>
-
-          <div className="space-y-3">
-            <div className="rounded-[1.45rem] border border-t1-border bg-t1-bg p-4">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-muted">
-                Standards to hold
-              </p>
-              <div className="mt-3 space-y-2">
-                {plan.standards.map(item => (
-                  <div
-                    key={item}
-                    className="inline-flex items-start gap-2 rounded-[1.15rem] border border-t1-border bg-t1-surface px-4 py-3 text-sm text-t1-text"
-                  >
-                    <Zap className="mt-0.5 h-4 w-4 flex-shrink-0 text-t1-blue" />
-                    <span>{item}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="rounded-[1.45rem] border border-t1-border bg-t1-bg p-4">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-muted">
-                Avoid
-              </p>
-              <div className="mt-3 space-y-2">
-                {plan.commonMistakes.map(item => (
-                  <div
-                    key={item}
-                    className="inline-flex items-start gap-2 rounded-[1.15rem] border border-red-500/18 bg-red-500/8 px-4 py-3 text-sm text-t1-text"
-                  >
-                    <AlertTriangle className="mt-0.5 h-4 w-4 flex-shrink-0 text-red-500" />
-                    <span>{item}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="rounded-[1.45rem] border border-t1-border bg-t1-bg p-4">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-muted">
-                Match transfer
-              </p>
-              <p className="mt-3 text-sm leading-6 text-t1-text">
-                {plan.matchPlayTransfer}
-              </p>
             </div>
           </div>
-        </div>
-      )}
 
-      {isExpanded && (
-        <div className="mt-4 flex flex-col gap-2 border-t border-t1-border pt-4 sm:flex-row sm:flex-wrap">
-          <button
-            onClick={onLaunchOnCourt}
-            className="inline-flex min-h-[46px] items-center justify-center gap-2 rounded-full bg-t1-blue px-4 text-sm font-semibold text-white"
-          >
-            <PlayCircle className="h-4 w-4" />
-            Launch On-Court
-          </button>
-          <button
-            onClick={copyPlanText}
-            className="inline-flex min-h-[46px] items-center justify-center gap-2 rounded-full border border-t1-border bg-t1-bg px-4 text-sm font-semibold text-t1-text"
-          >
-            {copied ? (
-              <Check className="h-4 w-4 text-emerald-500" />
-            ) : (
-              <Copy className="h-4 w-4" />
+          <div className="mt-4 flex flex-wrap gap-2">
+            <button
+              onClick={copyPlanText}
+              className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-full border border-t1-border bg-t1-bg px-4 text-sm font-semibold text-t1-text"
+            >
+              {copied ? (
+                <Check className="h-4 w-4 text-emerald-500" />
+              ) : (
+                <Copy className="h-4 w-4" />
+              )}
+              {copied ? "Copied" : "Copy"}
+            </button>
+            <button
+              onClick={handlePrint}
+              className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-full border border-t1-border bg-t1-bg px-4 text-sm font-semibold text-t1-text"
+            >
+              <Printer className="h-4 w-4" />
+              Print
+            </button>
+            {onDelete && (
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <button className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-full border border-red-500/20 bg-red-500/8 px-4 text-sm font-semibold text-red-500">
+                    <Trash2 className="h-4 w-4" />
+                    Delete
+                  </button>
+                </AlertDialogTrigger>
+                <AlertDialogContent className="border-t1-border bg-t1-surface">
+                  <AlertDialogHeader>
+                    <AlertDialogTitle className="font-display text-lg uppercase tracking-[0.14em] text-t1-text">
+                      Delete this custom plan?
+                    </AlertDialogTitle>
+                    <AlertDialogDescription className="text-sm text-t1-muted">
+                      This removes the plan from your library. If it was team
+                      shared, coaches lose access to this version.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel className="border-t1-border bg-t1-bg text-t1-text hover:bg-t1-surface">
+                      Cancel
+                    </AlertDialogCancel>
+                    <AlertDialogAction
+                      className="bg-red-500 text-white hover:bg-red-500/90"
+                      onClick={onDelete}
+                    >
+                      Delete plan
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             )}
-            {copied ? "Copied" : "Copy"}
-          </button>
-          <button
-            onClick={handlePrint}
-            className="inline-flex min-h-[46px] items-center justify-center gap-2 rounded-full border border-t1-border bg-t1-bg px-4 text-sm font-semibold text-t1-text"
-          >
-            <Printer className="h-4 w-4" />
-            Print
-          </button>
-          <button
-            onClick={onPrimaryAction}
-            className="inline-flex min-h-[46px] items-center justify-center gap-2 rounded-full border border-t1-border bg-t1-surface px-4 text-sm font-semibold text-t1-text"
-          >
-            <Edit3 className="h-4 w-4 text-t1-blue" />
-            {primaryActionLabel ??
-              (plan.planType === "stock"
-                ? "Customize copy"
-                : "Edit in builder")}
-          </button>
-          {onDelete && (
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <button className="inline-flex min-h-[46px] items-center justify-center gap-2 rounded-full border border-red-500/20 bg-red-500/8 px-4 text-sm font-semibold text-red-500">
-                  <Trash2 className="h-4 w-4" />
-                  Delete
-                </button>
-              </AlertDialogTrigger>
-              <AlertDialogContent className="border-t1-border bg-t1-surface">
-                <AlertDialogHeader>
-                  <AlertDialogTitle className="font-display text-lg uppercase tracking-[0.14em] text-t1-text">
-                    Delete this custom plan?
-                  </AlertDialogTitle>
-                  <AlertDialogDescription className="text-sm text-t1-muted">
-                    This removes the plan from your library. If it was team
-                    shared, coaches lose access to this version.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel className="border-t1-border bg-t1-bg text-t1-text hover:bg-t1-surface">
-                    Cancel
-                  </AlertDialogCancel>
-                  <AlertDialogAction
-                    className="bg-red-500 text-white hover:bg-red-500/90"
-                    onClick={onDelete}
-                  >
-                    Delete plan
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
-          )}
+          </div>
         </div>
       )}
     </article>
@@ -759,6 +755,35 @@ export default function SessionPlans() {
     () => sharedPlans.filter(plan => matchesSearch(plan, deferredSearchQuery)),
     [deferredSearchQuery, sharedPlans]
   );
+  const stockLevelCounts = useMemo(() => {
+    const counts = {} as Record<PathwayStageId, number>;
+
+    pathwayStages.forEach(stage => {
+      counts[stage.id] = stockPlanCards.filter(
+        plan => plan.level === stage.id
+      ).length;
+    });
+
+    return counts;
+  }, [stockPlanCards]);
+  const hasStockFilters =
+    activeLevel !== "all" || activeSubBand != null || durationFilter != null;
+  const activeLevelStage =
+    activeLevel !== "all"
+      ? pathwayStages.find(stage => stage.id === activeLevel)
+      : undefined;
+  const activeTabSummary =
+    activeTab === "all"
+      ? activeLevelStage
+        ? `${activeLevelStage.shortName} stock playbooks`
+        : "All stock playbooks"
+      : activeTab === "favorites"
+        ? "Favorite playbooks"
+        : activeTab === "recent"
+          ? "Recent playbooks"
+          : activeTab === "custom"
+            ? "My custom playbooks"
+            : "Team shared playbooks";
 
   const clearStockFilters = () => {
     setActiveLevel("all");
@@ -887,28 +912,49 @@ export default function SessionPlans() {
     <div>
       <section className="page-hero">
         <div className="container py-5 sm:py-8">
-          <div className="grid gap-4 xl:grid-cols-[minmax(0,1.35fr)_minmax(320px,0.85fr)]">
+          <div className="grid gap-4 xl:grid-cols-[minmax(0,1.32fr)_minmax(320px,0.82fr)]">
             <section className="premium-card rounded-[2rem] p-5 sm:p-7">
-              <p className="section-kicker">Session playbooks</p>
-              <h1 className="mt-3 font-display text-3xl font-semibold uppercase tracking-[0.12em] text-t1-text sm:text-5xl">
-                Plans should read like playbooks.
+              <p className="section-kicker">Playbooks</p>
+              <h1 className="mt-3 font-display text-4xl font-semibold uppercase tracking-[0.1em] text-t1-text sm:text-5xl">
+                Find the right session plan fast
               </h1>
-              <p className="mt-4 max-w-2xl text-sm leading-7 text-t1-muted sm:text-base">
-                Start from stock structure, customize where you need to, and
-                keep shared versions clean enough to hand to another coach.
+              <p className="mt-4 max-w-2xl text-sm leading-7 text-t1-text/72 sm:text-base">
+                Start from stock structure, open the right playbook, and send it
+                straight to court without extra menu work.
               </p>
+
+              <div className="mt-6">
+                <label className="relative block">
+                  <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-t1-muted" />
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={event => setSearchQuery(event.target.value)}
+                    placeholder="Search by name, block, or focus"
+                    className="h-[54px] w-full rounded-full border border-t1-border-strong bg-t1-surface pl-11 pr-10 text-sm text-t1-text placeholder:text-t1-muted/55 focus:border-t1-blue/35 focus:outline-none"
+                  />
+                  {searchQuery && (
+                    <button
+                      onClick={() => setSearchQuery("")}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-t1-muted"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  )}
+                </label>
+              </div>
 
               <div className="mt-6 grid gap-2 sm:grid-cols-3">
                 <Link
                   href="/session-builder"
-                  className="inline-flex min-h-[52px] items-center justify-center gap-2 rounded-full bg-t1-blue px-5 text-sm font-semibold text-white no-underline"
+                  className="inline-flex min-h-[50px] items-center justify-center gap-2 rounded-full bg-t1-blue px-5 text-sm font-semibold text-white no-underline"
                 >
                   <Edit3 className="h-4 w-4" />
-                  Open builder
+                  Builder
                 </Link>
                 <Link
                   href="/compare-plans"
-                  className="inline-flex min-h-[52px] items-center justify-center gap-2 rounded-full border border-t1-border bg-t1-surface px-5 text-sm font-semibold text-t1-text no-underline"
+                  className="inline-flex min-h-[50px] items-center justify-center gap-2 rounded-full border border-t1-border bg-t1-surface px-5 text-sm font-semibold text-t1-text no-underline"
                 >
                   <ArrowLeftRight className="h-4 w-4 text-t1-blue" />
                   Compare
@@ -916,10 +962,10 @@ export default function SessionPlans() {
                 {onCourtSession ? (
                   <Link
                     href="/on-court"
-                    className="inline-flex min-h-[52px] items-center justify-center gap-2 rounded-full border border-t1-border bg-t1-surface px-5 text-sm font-semibold text-t1-text no-underline"
+                    className="inline-flex min-h-[50px] items-center justify-center gap-2 rounded-full border border-t1-border bg-t1-surface px-5 text-sm font-semibold text-t1-text no-underline"
                   >
                     <PlayCircle className="h-4 w-4 text-t1-blue" />
-                    Resume court mode
+                    Resume On-Court
                   </Link>
                 ) : (
                   <button
@@ -928,10 +974,10 @@ export default function SessionPlans() {
                       launchPlanOnCourt(filteredStockPlans[0])
                     }
                     disabled={filteredStockPlans.length === 0}
-                    className="inline-flex min-h-[52px] items-center justify-center gap-2 rounded-full border border-t1-border bg-t1-surface px-5 text-sm font-semibold text-t1-text disabled:opacity-40"
+                    className="inline-flex min-h-[50px] items-center justify-center gap-2 rounded-full border border-t1-border bg-t1-surface px-5 text-sm font-semibold text-t1-text disabled:opacity-40"
                   >
                     <PlayCircle className="h-4 w-4 text-t1-blue" />
-                    Launch top playbook
+                    Top plan to court
                   </button>
                 )}
               </div>
@@ -939,9 +985,10 @@ export default function SessionPlans() {
 
             <section className="premium-card rounded-[2rem] p-5 sm:p-6">
               <p className="section-kicker">Library status</p>
-              <h2 className="mt-3 font-display text-2xl font-semibold uppercase tracking-[0.12em] text-t1-text">
+              <h2 className="mt-3 font-display text-2xl font-semibold uppercase tracking-[0.1em] text-t1-text">
                 Stock, custom, shared
               </h2>
+
               <div className="mt-5 grid gap-3 sm:grid-cols-3">
                 <div className="rounded-[1.45rem] border border-t1-border bg-t1-bg p-4">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-muted">
@@ -971,11 +1018,15 @@ export default function SessionPlans() {
 
               <div className="mt-4 rounded-[1.45rem] border border-t1-border bg-t1-bg p-4">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-muted">
-                  Beta workflow
+                  Current lane
                 </p>
-                <p className="mt-3 text-sm leading-6 text-t1-muted">
-                  Stock first. Customize second. Share only when the version is
-                  solid enough for another coach to run without extra context.
+                <p className="mt-2 text-base font-semibold text-t1-text">
+                  {activeTabSummary}
+                </p>
+                <p className="mt-2 text-sm leading-6 text-t1-text/72">
+                  {deferredSearchQuery.trim()
+                    ? `Searching for "${deferredSearchQuery}".`
+                    : "Stock first. Customize second. Share only when another coach can run the version clean."}
                 </p>
               </div>
             </section>
@@ -984,12 +1035,19 @@ export default function SessionPlans() {
       </section>
 
       <div className="container space-y-5 py-5 sm:py-7">
-        <section className="space-y-3">
-          <div className="grid gap-3 lg:grid-cols-2 xl:grid-cols-5">
+        <section className="panel-surface p-5 sm:p-6">
+          <div>
+            <p className="section-kicker">Browse</p>
+            <h2 className="mt-2 font-display text-2xl font-semibold uppercase tracking-[0.1em] text-t1-text">
+              Stock, favorites, recent, and team plans
+            </h2>
+          </div>
+
+          <div className="mt-4 flex flex-wrap gap-2">
             {[
               {
                 key: "all" as const,
-                label: "All playbooks",
+                label: "All",
                 icon: ClipboardList,
                 count: stockPlanCards.length,
               },
@@ -1021,192 +1079,182 @@ export default function SessionPlans() {
               <button
                 key={tab.key}
                 onClick={() => setActiveTab(tab.key)}
-                className={`premium-card rounded-[1.65rem] p-5 text-left ${
-                  activeTab === tab.key ? "ring-2 ring-t1-blue/25" : ""
+                className={`inline-flex min-h-[42px] items-center gap-2 rounded-full border px-4 text-xs font-semibold uppercase tracking-[0.22em] ${
+                  activeTab === tab.key
+                    ? "border-t1-blue/25 bg-t1-blue text-white"
+                    : "border-t1-border bg-t1-surface text-t1-muted"
                 }`}
               >
-                <tab.icon className="h-5 w-5 text-t1-blue" />
-                <p className="mt-4 text-sm font-semibold uppercase tracking-[0.16em] text-t1-text">
-                  {tab.label}
-                </p>
-                <p className="mt-2 text-3xl font-semibold text-t1-text">
+                <tab.icon className="h-3.5 w-3.5" />
+                {tab.label}
+                <span
+                  className={`rounded-full px-2 py-0.5 text-[10px] ${
+                    activeTab === tab.key
+                      ? "bg-white/20 text-white"
+                      : "bg-t1-bg text-t1-muted"
+                  }`}
+                >
                   {tab.count}
-                </p>
+                </span>
               </button>
             ))}
           </div>
 
-          <label className="relative block">
-            <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-t1-muted" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={event => setSearchQuery(event.target.value)}
-              placeholder="Search playbooks by name, block, emphasis, or keyword..."
-              className="h-[52px] w-full rounded-full border border-t1-border bg-t1-surface pl-11 pr-10 text-sm text-t1-text placeholder:text-t1-muted/55 focus:border-t1-blue/35 focus:outline-none"
-            />
-            {searchQuery && (
-              <button
-                onClick={() => setSearchQuery("")}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-t1-muted"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            )}
-          </label>
-        </section>
-
-        {activeTab === "all" && (
-          <section className="panel-surface space-y-4 p-4 sm:p-5">
-            <div className="flex items-end justify-between gap-3">
+          {activeTab === "all" && (
+            <div className="mt-5 space-y-4 border-t border-t1-border pt-4">
               <div>
-                <p className="section-kicker">Class filter</p>
-                <h2 className="mt-2 font-display text-xl font-semibold uppercase tracking-[0.12em] text-t1-text">
-                  Pick the lane before the playbook
-                </h2>
-              </div>
-              {(activeLevel !== "all" ||
-                activeSubBand ||
-                durationFilter != null) && (
-                <button
-                  onClick={clearStockFilters}
-                  className="text-sm font-semibold text-t1-blue"
-                >
-                  Clear filters
-                </button>
-              )}
-            </div>
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-muted">
+                      Class filter
+                    </p>
+                    <h3 className="mt-1 text-lg font-semibold text-t1-text">
+                      Pick the lane before the playbook
+                    </h3>
+                  </div>
+                  {hasStockFilters && (
+                    <button
+                      onClick={clearStockFilters}
+                      className="text-sm font-semibold text-t1-blue"
+                    >
+                      Clear filters
+                    </button>
+                  )}
+                </div>
 
-            <div className="grid gap-3 xl:grid-cols-6">
-              <button
-                onClick={() => {
-                  setActiveLevel("all");
-                  setActiveSubBand(null);
-                  setExpandedPlan(null);
-                }}
-                className={`premium-card rounded-[1.65rem] p-4 text-left ${
-                  activeLevel === "all" ? "ring-2 ring-t1-blue/25" : ""
-                }`}
-              >
-                <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-muted">
-                  All
-                </p>
-                <p className="mt-3 text-xl font-semibold text-t1-text">
-                  {stockPlanCards.length}
-                </p>
-              </button>
-
-              {availableLevels.map(stage => {
-                const brand = getStageBrand(stage.id);
-                const count = stockPlanCards.filter(
-                  plan => plan.level === stage.id
-                ).length;
-                return (
+                <div className="mt-3 flex flex-wrap gap-2">
                   <button
-                    key={stage.id}
                     onClick={() => {
-                      setActiveLevel(stage.id);
+                      setActiveLevel("all");
                       setActiveSubBand(null);
                       setExpandedPlan(null);
                     }}
-                    className={`premium-card rounded-[1.65rem] p-4 text-left ${
-                      activeLevel === stage.id ? "ring-2 ring-t1-blue/25" : ""
+                    className={`inline-flex min-h-[40px] items-center gap-2 rounded-full border px-4 text-xs font-semibold uppercase tracking-[0.2em] ${
+                      activeLevel === "all"
+                        ? "border-t1-blue/25 bg-t1-blue text-white"
+                        : "border-t1-border bg-t1-surface text-t1-muted"
                     }`}
                   >
+                    All
                     <span
-                      className={`inline-flex items-center gap-2 rounded-full border px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] ${brand.badgeClassName}`}
+                      className={`rounded-full px-2 py-0.5 text-[10px] ${
+                        activeLevel === "all"
+                          ? "bg-white/20 text-white"
+                          : "bg-t1-bg text-t1-muted"
+                      }`}
                     >
-                      <span
-                        className={`h-2.5 w-2.5 rounded-full ${brand.dotClassName}`}
-                      />
-                      {stage.shortName}
+                      {stockPlanCards.length}
                     </span>
-                    <p className="mt-3 text-lg font-semibold text-t1-text">
-                      {count}
-                    </p>
-                    <p className="mt-1 text-sm text-t1-muted">{brand.tempo}</p>
                   </button>
-                );
-              })}
-            </div>
 
-            {availableSubBands.length > 0 && (
+                  {availableLevels.map(stage => {
+                    const brand = getStageBrand(stage.id);
+
+                    return (
+                      <button
+                        key={stage.id}
+                        onClick={() => {
+                          setActiveLevel(stage.id);
+                          setActiveSubBand(null);
+                          setExpandedPlan(null);
+                        }}
+                        className={`inline-flex min-h-[40px] items-center gap-2 rounded-full border px-4 text-xs font-semibold uppercase tracking-[0.2em] ${
+                          activeLevel === stage.id
+                            ? `${brand.badgeClassName} shadow-sm`
+                            : "border-t1-border bg-t1-surface text-t1-muted"
+                        }`}
+                      >
+                        <span
+                          className={`h-2.5 w-2.5 rounded-full ${brand.dotClassName}`}
+                        />
+                        {stage.shortName}
+                        <span className="text-[10px] opacity-75">
+                          {stockLevelCounts[stage.id]}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {availableSubBands.length > 0 && (
+                <div>
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-muted">
+                    Sub-band
+                  </p>
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    <button
+                      onClick={() => {
+                        setActiveSubBand(null);
+                        setExpandedPlan(null);
+                      }}
+                      className={`rounded-full border px-3 py-2 text-xs font-semibold uppercase tracking-[0.18em] ${
+                        !activeSubBand
+                          ? "border-t1-blue/25 bg-t1-blue text-white"
+                          : "border-t1-border bg-t1-surface text-t1-muted"
+                      }`}
+                    >
+                      All
+                    </button>
+                    {availableSubBands.map(group => (
+                      <button
+                        key={group.subBand}
+                        onClick={() => {
+                          setActiveSubBand(group.subBand);
+                          setExpandedPlan(null);
+                        }}
+                        className={`rounded-full border px-3 py-2 text-xs font-semibold uppercase tracking-[0.18em] ${
+                          activeSubBand === group.subBand
+                            ? "border-t1-blue/25 bg-t1-blue text-white"
+                            : "border-t1-border bg-t1-surface text-t1-muted"
+                        }`}
+                      >
+                        {group.label} ({group.planCount})
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               <div>
                 <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-muted">
-                  Sub-band
+                  Length
                 </p>
                 <div className="mt-2 flex flex-wrap gap-2">
                   <button
                     onClick={() => {
-                      setActiveSubBand(null);
+                      setDurationFilter(null);
                       setExpandedPlan(null);
                     }}
-                    className={`rounded-full px-3 py-2 text-xs font-semibold uppercase tracking-[0.18em] ${
-                      !activeSubBand
-                        ? "bg-t1-blue text-white"
-                        : "border border-t1-border bg-t1-bg text-t1-muted"
+                    className={`rounded-full border px-3 py-2 text-xs font-semibold uppercase tracking-[0.18em] ${
+                      durationFilter == null
+                        ? "border-t1-blue/25 bg-t1-blue text-white"
+                        : "border-t1-border bg-t1-surface text-t1-muted"
                     }`}
                   >
                     All
                   </button>
-                  {availableSubBands.map(group => (
+                  {availableDurations.map(duration => (
                     <button
-                      key={group.subBand}
+                      key={duration}
                       onClick={() => {
-                        setActiveSubBand(group.subBand);
+                        setDurationFilter(duration);
                         setExpandedPlan(null);
                       }}
-                      className={`rounded-full px-3 py-2 text-xs font-semibold uppercase tracking-[0.18em] ${
-                        activeSubBand === group.subBand
-                          ? "bg-t1-blue text-white"
-                          : "border border-t1-border bg-t1-bg text-t1-muted"
+                      className={`rounded-full border px-3 py-2 text-xs font-semibold uppercase tracking-[0.18em] ${
+                        durationFilter === duration
+                          ? "border-t1-blue/25 bg-t1-blue text-white"
+                          : "border-t1-border bg-t1-surface text-t1-muted"
                       }`}
                     >
-                      {group.label} ({group.planCount})
+                      {duration} min
                     </button>
                   ))}
                 </div>
               </div>
-            )}
-
-            <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-muted">
-                Duration
-              </p>
-              <div className="mt-2 flex flex-wrap gap-2">
-                <button
-                  onClick={() => {
-                    setDurationFilter(null);
-                    setExpandedPlan(null);
-                  }}
-                  className={`rounded-full px-3 py-2 text-xs font-semibold uppercase tracking-[0.18em] ${
-                    durationFilter == null
-                      ? "bg-t1-blue text-white"
-                      : "border border-t1-border bg-t1-bg text-t1-muted"
-                  }`}
-                >
-                  All
-                </button>
-                {availableDurations.map(duration => (
-                  <button
-                    key={duration}
-                    onClick={() => {
-                      setDurationFilter(duration);
-                      setExpandedPlan(null);
-                    }}
-                    className={`rounded-full px-3 py-2 text-xs font-semibold uppercase tracking-[0.18em] ${
-                      durationFilter === duration
-                        ? "bg-t1-blue text-white"
-                        : "border border-t1-border bg-t1-bg text-t1-muted"
-                    }`}
-                  >
-                    {duration} min
-                  </button>
-                ))}
-              </div>
             </div>
-          </section>
-        )}
+          )}
+        </section>
 
         {activeTab === "all" && (
           <>
@@ -1223,8 +1271,7 @@ export default function SessionPlans() {
                     No stock playbooks match right now
                   </EmptyTitle>
                   <EmptyDescription className="max-w-lg text-sm leading-6 text-t1-muted">
-                    Clear the search or widen the class filters to bring stock
-                    playbooks back into view.
+                    Clear the search or widen the filters to bring plans back.
                   </EmptyDescription>
                 </EmptyHeader>
                 <EmptyContent>
@@ -1242,7 +1289,7 @@ export default function SessionPlans() {
                   const brand = getStageBrand(group.level);
                   return (
                     <section key={group.label}>
-                      <div className="mb-3 flex items-end justify-between gap-3">
+                      <div className="mb-3 flex items-center justify-between gap-3">
                         <div>
                           <span
                             className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] ${brand.badgeClassName}`}
@@ -1315,7 +1362,7 @@ export default function SessionPlans() {
                             No playbooks match this search
                           </EmptyTitle>
                           <EmptyDescription className="max-w-lg text-sm leading-6 text-t1-muted">
-                            Clear the search to see the full tab again.
+                            Clear the search to see this tab again.
                           </EmptyDescription>
                         </EmptyHeader>
                         <EmptyContent>
