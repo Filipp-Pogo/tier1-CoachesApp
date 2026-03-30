@@ -1,5 +1,5 @@
-import { useMemo } from 'react';
-import { Link, useLocation } from 'wouter';
+import { useMemo } from "react";
+import { Link, useLocation } from "wouter";
 import {
   BookOpen,
   ChevronRight,
@@ -9,27 +9,32 @@ import {
   Star,
   Target,
   Wrench,
-} from 'lucide-react';
-import { drills, pathwayStages, type Drill, type PathwayStageId } from '@/lib/data';
-import { sessionPlans } from '@/lib/sessionPlans';
-import { stockPlanToCardPlan } from '@/lib/customPlans';
-import { useFavorites } from '@/hooks/useFavorites';
-import { useRecentDrills } from '@/hooks/useRecentDrills';
-import { useSessionPlanFavorites } from '@/hooks/useSessionPlanFavorites';
-import { useCoachClass } from '@/hooks/useCoachClass';
+} from "lucide-react";
+import {
+  drills,
+  pathwayStages,
+  type Drill,
+  type PathwayStageId,
+} from "@/lib/data";
+import { sessionPlans } from "@/lib/sessionPlans";
+import { stockPlanToCardPlan } from "@/lib/customPlans";
+import { useFavorites } from "@/hooks/useFavorites";
+import { useRecentDrills } from "@/hooks/useRecentDrills";
+import { useSessionPlanFavorites } from "@/hooks/useSessionPlanFavorites";
+import { useCoachClass } from "@/hooks/useCoachClass";
 import {
   buildStageBenchSession,
   createOnCourtSessionFromDrills,
   createOnCourtSessionFromPlan,
   loadOnCourtSession,
   saveOnCourtSession,
-} from '@/lib/onCourtMode';
-import { getStageBrand } from '@/lib/stageBranding';
+} from "@/lib/onCourtMode";
+import { getStageBrand } from "@/lib/stageBranding";
 import {
   getRecommendedDrillsForStage,
   getRecommendedPlansForStage,
-} from '@/lib/coachRecommendations';
-import { buildDrillCoachGuide } from '@/lib/drillGuidance';
+} from "@/lib/coachRecommendations";
+import { buildDrillCoachGuide } from "@/lib/drillGuidance";
 
 function buildStageCounts() {
   const drillCounts = {} as Record<PathwayStageId, number>;
@@ -39,7 +44,9 @@ function buildStageCounts() {
     drillCounts[stage.id] = drills.filter(drill =>
       drill.level.includes(stage.id)
     ).length;
-    planCounts[stage.id] = sessionPlans.filter(plan => plan.level === stage.id).length;
+    planCounts[stage.id] = sessionPlans.filter(
+      plan => plan.level === stage.id
+    ).length;
   });
 
   return { drillCounts, planCounts };
@@ -52,7 +59,7 @@ export default function Dashboard() {
   const { favorites: favoritePlanIds, recentIds } = useSessionPlanFavorites();
   const onCourtSession = useMemo(() => loadOnCourtSession(), []);
   const { selectedClass, setSelectedClass } = useCoachClass(
-    onCourtSession?.level ?? 'jasa'
+    onCourtSession?.level ?? "jasa"
   );
 
   const favoriteDrills = useMemo(
@@ -77,14 +84,18 @@ export default function Dashboard() {
   const activeStageDrills = drills.filter(drill =>
     drill.level.includes(selectedClass)
   );
-  const activeStagePlans = sessionPlans.filter(plan => plan.level === selectedClass);
+  const activeStagePlans = sessionPlans.filter(
+    plan => plan.level === selectedClass
+  );
   const savedStageDrills = favoriteDrills.filter(drill =>
     drill.level.includes(selectedClass)
   );
   const favoriteStagePlans = favoritePlans.filter(
     plan => plan.level === selectedClass
   );
-  const recentStagePlans = recentPlans.filter(plan => plan.level === selectedClass);
+  const recentStagePlans = recentPlans.filter(
+    plan => plan.level === selectedClass
+  );
   const stagePlaybookShelf =
     favoriteStagePlans.length > 0 ? favoriteStagePlans : recentStagePlans;
 
@@ -118,7 +129,7 @@ export default function Dashboard() {
     if (!board) return;
 
     saveOnCourtSession(board);
-    navigate('/on-court');
+    navigate("/on-court");
   };
 
   const launchDrill = (drill: Drill) => {
@@ -130,13 +141,13 @@ export default function Dashboard() {
         drills: [drill],
         title: drill.name,
         subtitle: `${activeStage.shortName} single-drill focus`,
-        sourceLabel: 'Dashboard recommendation',
+        sourceLabel: "Dashboard recommendation",
         objective: guide.whatThisIs,
-        emphasis: guide.whatToCoach[0] ?? 'Coach the next cue cleanly.',
+        emphasis: guide.whatToCoach[0] ?? "Coach the next cue cleanly.",
       })
     );
 
-    navigate('/on-court');
+    navigate("/on-court");
   };
 
   const launchPlan = (planId: string) => {
@@ -145,7 +156,7 @@ export default function Dashboard() {
 
     saveOnCourtSession(createOnCourtSessionFromPlan(stockPlanToCardPlan(plan)));
 
-    navigate('/on-court');
+    navigate("/on-court");
   };
 
   const favoriteStagePlansHref =
@@ -163,12 +174,12 @@ export default function Dashboard() {
             <section className="premium-card rounded-[2rem] p-5 sm:p-7">
               <p className="section-kicker">Coach flow</p>
               <h1 className="mt-3 max-w-4xl font-display text-4xl font-semibold uppercase tracking-[0.1em] text-t1-text sm:text-5xl">
-                Pick the class first.
+                Pick the class. Then go.
               </h1>
-              <p className="mt-4 max-w-3xl text-sm leading-7 text-t1-text/72 sm:text-base">
-                Once the class is clear, the app should hand you the right lane:
-                the next drill, the best stock playbook, and a live board you can
-                send to court immediately.
+              <p className="support-copy-strong mt-4 max-w-3xl text-sm leading-7 sm:text-base">
+                Pick the group first. Everything below should tighten to the
+                next drill, the right playbook, and a live board you can send to
+                court immediately.
               </p>
 
               <div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
@@ -180,18 +191,18 @@ export default function Dashboard() {
                     <button
                       key={stage.id}
                       onClick={() => setSelectedClass(stage.id)}
-                      className={`rounded-[1.55rem] border p-3 text-left transition-all ${
+                      className={`min-h-[11rem] rounded-[1.55rem] border p-3 text-left transition-all ${
                         active
-                          ? 'border-t1-blue/25 bg-t1-surface shadow-[0_16px_36px_rgba(2,6,23,0.1)]'
-                          : 'border-t1-border bg-t1-bg hover:-translate-y-0.5 hover:border-t1-blue/20'
+                          ? "border-t1-blue/25 bg-t1-surface shadow-[0_16px_36px_rgba(2,6,23,0.1)]"
+                          : "border-t1-border bg-t1-bg hover:-translate-y-0.5 hover:border-t1-blue/20"
                       }`}
                     >
                       <div
-                        className={`rounded-[1.3rem] border border-t1-border/70 bg-gradient-to-br p-4 ${active ? brand.surfaceClassName : 'from-white via-slate-50 to-slate-100/70 dark:from-slate-900 dark:via-slate-900 dark:to-slate-800'}`}
+                        className={`rounded-[1.3rem] border border-t1-border/70 bg-gradient-to-br p-4 ${active ? brand.surfaceClassName : "from-white via-slate-50 to-slate-100/70 dark:from-slate-900 dark:via-slate-900 dark:to-slate-800"}`}
                       >
                         <div className="flex items-start justify-between gap-3">
                           <span
-                            className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] ${active ? brand.badgeClassName : 'border-t1-border bg-t1-surface/90 text-t1-muted'}`}
+                            className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] ${active ? brand.badgeClassName : "border-t1-border bg-t1-surface/90 text-t1-muted"}`}
                           >
                             <span
                               className={`h-2.5 w-2.5 rounded-full ${brand.dotClassName}`}
@@ -200,21 +211,21 @@ export default function Dashboard() {
                           </span>
                           {active && (
                             <span className="rounded-full border border-slate-300/80 bg-white/90 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.22em] text-slate-800 shadow-sm">
-                              Current class
+                              Active
                             </span>
                           )}
                         </div>
 
-                        <p className="mt-4 text-sm font-semibold text-t1-text">
+                        <p className="support-copy-strong mt-4 text-sm font-semibold">
                           {stage.subtitle}
                         </p>
-                        <p className="mt-2 line-clamp-2 text-[13px] leading-5 text-t1-text/72">
-                          {brand.summary}
+                        <p className="support-copy mt-2 min-h-[2.5rem] text-[13px] leading-5">
+                          {active ? brand.summary : "Tap to load this class."}
                         </p>
 
                         <div className="mt-4 grid grid-cols-2 gap-2">
                           <div className="rounded-[1rem] border border-slate-300/70 bg-white/90 px-3 py-2 shadow-sm">
-                            <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-slate-600">
+                            <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-slate-700">
                               Drills
                             </p>
                             <p className="mt-1 text-lg font-semibold text-slate-950">
@@ -222,7 +233,7 @@ export default function Dashboard() {
                             </p>
                           </div>
                           <div className="rounded-[1rem] border border-slate-300/70 bg-white/90 px-3 py-2 shadow-sm">
-                            <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-slate-600">
+                            <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-slate-700">
                               Plans
                             </p>
                             <p className="mt-1 text-lg font-semibold text-slate-950">
@@ -246,7 +257,7 @@ export default function Dashboard() {
                   </h2>
                 </div>
                 <div className="rounded-full border border-t1-border bg-t1-bg px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-muted">
-                  {onCourtSession ? 'Ready' : 'Fast launch'}
+                  {onCourtSession ? "Ready" : "Fast launch"}
                 </div>
               </div>
 
@@ -269,7 +280,7 @@ export default function Dashboard() {
                     {activeBrand.tempo}
                   </span>
                 </div>
-                <p className="mt-3 text-sm leading-6 text-slate-900/88">
+                <p className="mt-3 text-sm leading-6 text-slate-900">
                   {activeBrand.summary}
                 </p>
               </div>
@@ -283,8 +294,8 @@ export default function Dashboard() {
                     <h3 className="mt-3 text-xl font-semibold text-t1-text">
                       {onCourtSession.title}
                     </h3>
-                    <p className="mt-2 text-sm leading-6 text-t1-text/72">
-                      {onCourtSession.subtitle}. {onCourtSession.items.length}{' '}
+                    <p className="support-copy mt-2 text-sm leading-6">
+                      {onCourtSession.subtitle}. {onCourtSession.items.length}{" "}
                       live blocks are already queued.
                     </p>
                   </div>
@@ -292,14 +303,14 @@ export default function Dashboard() {
                   <div className="mt-4 grid gap-2 sm:grid-cols-2">
                     <Link
                       href="/on-court"
-                      className="inline-flex min-h-[48px] items-center justify-center gap-2 rounded-full bg-t1-blue px-4 text-sm font-semibold text-white no-underline"
+                      className="touch-pill inline-flex items-center justify-center gap-2 rounded-full bg-t1-blue px-4 text-sm font-semibold text-white no-underline"
                     >
                       <PlayCircle className="h-4 w-4" />
                       Resume board
                     </Link>
                     <Link
                       href={`/session-plans?level=${selectedClass}`}
-                      className="inline-flex min-h-[48px] items-center justify-center gap-2 rounded-full border border-t1-border bg-t1-surface px-4 text-sm font-semibold text-t1-text no-underline"
+                      className="touch-pill inline-flex items-center justify-center gap-2 rounded-full border border-t1-border bg-t1-surface px-4 text-sm font-semibold text-t1-text no-underline"
                     >
                       <ClipboardList className="h-4 w-4 text-t1-blue" />
                       Open class playbooks
@@ -310,14 +321,14 @@ export default function Dashboard() {
                 <div className="mt-4 grid gap-2 sm:grid-cols-2">
                   <button
                     onClick={() => launchStageBoard(selectedClass)}
-                    className="inline-flex min-h-[48px] items-center justify-center gap-2 rounded-full bg-t1-blue px-4 text-sm font-semibold text-white"
+                    className="touch-pill inline-flex items-center justify-center gap-2 rounded-full bg-t1-blue px-4 text-sm font-semibold text-white"
                   >
                     <PlayCircle className="h-4 w-4" />
                     Launch {activeStage.shortName}
                   </button>
                   <Link
                     href={`/session-plans?level=${selectedClass}`}
-                    className="inline-flex min-h-[48px] items-center justify-center gap-2 rounded-full border border-t1-border bg-t1-surface px-4 text-sm font-semibold text-t1-text no-underline"
+                    className="touch-pill inline-flex items-center justify-center gap-2 rounded-full border border-t1-border bg-t1-surface px-4 text-sm font-semibold text-t1-text no-underline"
                   >
                     <ClipboardList className="h-4 w-4 text-t1-blue" />
                     Open playbooks
@@ -333,11 +344,11 @@ export default function Dashboard() {
         <section className="premium-card rounded-[2rem] p-5 sm:p-6">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
             <div>
-              <p className="section-kicker">Selected class</p>
+              <p className="section-kicker">Quick start</p>
               <h2 className="mt-2 font-display text-2xl font-semibold uppercase tracking-[0.1em] text-t1-text">
-                Now coaching {activeStage.shortName}
+                Start {activeStage.shortName} clean
               </h2>
-              <p className="mt-3 max-w-3xl text-sm leading-7 text-t1-text/72">
+              <p className="support-copy-strong mt-3 max-w-3xl text-sm leading-7">
                 {activeBrand.summary}
               </p>
             </div>
@@ -365,25 +376,19 @@ export default function Dashboard() {
 
           <div className="mt-5 grid gap-3 sm:grid-cols-3">
             <div className="rounded-[1.35rem] border border-t1-border bg-t1-bg px-4 py-3">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-muted">
-                Drills
-              </p>
+              <p className="meta-label">Drills</p>
               <p className="mt-1 text-3xl font-semibold text-t1-text">
                 {activeStageDrills.length}
               </p>
             </div>
             <div className="rounded-[1.35rem] border border-t1-border bg-t1-bg px-4 py-3">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-muted">
-                Playbooks
-              </p>
+              <p className="meta-label">Playbooks</p>
               <p className="mt-1 text-3xl font-semibold text-t1-text">
                 {activeStagePlans.length}
               </p>
             </div>
             <div className="rounded-[1.35rem] border border-t1-border bg-t1-bg px-4 py-3">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-muted">
-                Saved drills
-              </p>
+              <p className="meta-label">Saved drills</p>
               <p className="mt-1 text-3xl font-semibold text-t1-text">
                 {savedStageDrills.length}
               </p>
@@ -391,30 +396,30 @@ export default function Dashboard() {
           </div>
 
           <div className="mt-4 grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
+            <button
+              onClick={() => launchStageBoard(selectedClass)}
+              className="touch-pill inline-flex items-center justify-center gap-2 rounded-full bg-t1-blue px-4 text-sm font-semibold text-white"
+            >
+              <PlayCircle className="h-4 w-4" />
+              Launch On-Court
+            </button>
             <Link
               href={`/drills?level=${selectedClass}`}
-              className="inline-flex min-h-[48px] items-center justify-between rounded-full border border-t1-border bg-t1-surface px-4 text-sm font-semibold text-t1-text no-underline"
+              className="touch-pill inline-flex items-center justify-between rounded-full border border-t1-border bg-t1-surface px-4 text-sm font-semibold text-t1-text no-underline"
             >
               <span>Open drills</span>
               <ChevronRight className="h-4 w-4 text-t1-blue" />
             </Link>
             <Link
               href={`/session-plans?level=${selectedClass}`}
-              className="inline-flex min-h-[48px] items-center justify-between rounded-full border border-t1-border bg-t1-surface px-4 text-sm font-semibold text-t1-text no-underline"
+              className="touch-pill inline-flex items-center justify-between rounded-full border border-t1-border bg-t1-surface px-4 text-sm font-semibold text-t1-text no-underline"
             >
               <span>Open playbooks</span>
               <ChevronRight className="h-4 w-4 text-t1-blue" />
             </Link>
-            <button
-              onClick={() => launchStageBoard(selectedClass)}
-              className="inline-flex min-h-[48px] items-center justify-center gap-2 rounded-full bg-t1-blue px-4 text-sm font-semibold text-white"
-            >
-              <PlayCircle className="h-4 w-4" />
-              Launch On-Court
-            </button>
             <Link
               href="/session-builder"
-              className="inline-flex min-h-[48px] items-center justify-center gap-2 rounded-full border border-t1-border bg-t1-surface px-4 text-sm font-semibold text-t1-text no-underline"
+              className="touch-pill inline-flex items-center justify-center gap-2 rounded-full border border-t1-border bg-t1-surface px-4 text-sm font-semibold text-t1-text no-underline"
             >
               <Wrench className="h-4 w-4 text-t1-blue" />
               Build session
@@ -430,14 +435,14 @@ export default function Dashboard() {
                 <h2 className="mt-2 font-display text-2xl font-semibold uppercase tracking-[0.08em] text-t1-text">
                   Next reps for {activeStage.shortName}
                 </h2>
-                <p className="mt-2 text-sm leading-6 text-t1-text/72">
+                <p className="support-copy mt-2 text-sm leading-6">
                   A fast start, a main rep, and a pressure finish for the class
                   you selected.
                 </p>
               </div>
               <Link
                 href={`/drills?level=${selectedClass}`}
-                className="text-sm font-semibold text-t1-blue no-underline"
+                className="touch-pill inline-flex items-center justify-center rounded-full border border-t1-border bg-t1-surface px-4 text-sm font-semibold text-t1-text no-underline"
               >
                 Open all
               </Link>
@@ -469,33 +474,32 @@ export default function Dashboard() {
                     <h3 className="mt-4 text-lg font-semibold text-t1-text">
                       {recommendation.drill.name}
                     </h3>
-                    <p className="mt-2 text-sm leading-6 text-t1-text/72">
+                    <p className="support-copy mt-2 text-sm leading-6">
                       {recommendation.summary}
                     </p>
 
                     <div className="mt-4 rounded-[1.25rem] border border-t1-border bg-t1-surface px-4 py-3">
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-muted">
-                        Coach first
-                      </p>
-                      <p className="mt-2 text-sm leading-6 text-t1-text">
-                        {guide.whatToCoach[0] ?? recommendation.drill.coachingCues[0]}
+                      <p className="meta-label">Coach first</p>
+                      <p className="support-copy-strong mt-2 text-sm leading-6">
+                        {guide.whatToCoach[0] ??
+                          recommendation.drill.coachingCues[0]}
                       </p>
                     </div>
 
-                    <div className="mt-4 flex flex-wrap gap-2">
-                      <Link
-                        href={`/drills/${recommendation.drill.id}`}
-                        className="inline-flex min-h-[42px] items-center justify-center rounded-full border border-t1-border bg-t1-surface px-4 text-sm font-semibold text-t1-text no-underline"
-                      >
-                        Open drill
-                      </Link>
+                    <div className="mt-4 grid gap-2 sm:grid-cols-2">
                       <button
                         onClick={() => launchDrill(recommendation.drill)}
-                        className="inline-flex min-h-[42px] items-center justify-center gap-2 rounded-full bg-t1-blue px-4 text-sm font-semibold text-white"
+                        className="touch-pill inline-flex items-center justify-center gap-2 rounded-full bg-t1-blue px-4 text-sm font-semibold text-white"
                       >
                         <PlayCircle className="h-4 w-4" />
                         On-Court
                       </button>
+                      <Link
+                        href={`/drills/${recommendation.drill.id}`}
+                        className="touch-pill inline-flex items-center justify-center rounded-full border border-t1-border bg-t1-surface px-4 text-sm font-semibold text-t1-text no-underline"
+                      >
+                        Open drill
+                      </Link>
                     </div>
                   </article>
                 );
@@ -510,13 +514,13 @@ export default function Dashboard() {
                 <h2 className="mt-2 font-display text-2xl font-semibold uppercase tracking-[0.08em] text-t1-text">
                   Stock plans for {activeStage.shortName}
                 </h2>
-                <p className="mt-2 text-sm leading-6 text-t1-text/72">
+                <p className="support-copy mt-2 text-sm leading-6">
                   Quick stock options so a coach can pick structure and move.
                 </p>
               </div>
               <Link
                 href={`/session-plans?level=${selectedClass}`}
-                className="text-sm font-semibold text-t1-blue no-underline"
+                className="touch-pill inline-flex items-center justify-center rounded-full border border-t1-border bg-t1-surface px-4 text-sm font-semibold text-t1-text no-underline"
               >
                 Open all
               </Link>
@@ -545,25 +549,25 @@ export default function Dashboard() {
                   <h3 className="mt-4 text-lg font-semibold text-t1-text">
                     {recommendation.plan.name}
                   </h3>
-                  <p className="mt-2 text-sm leading-6 text-t1-text/72">
+                  <p className="support-copy mt-2 text-sm leading-6">
                     {recommendation.summary}
                   </p>
                   <p className="mt-3 text-sm leading-6 text-t1-text">
-                    <span className="font-semibold text-t1-muted">Focus:</span>{' '}
+                    <span className="meta-label mr-2 text-t1-muted">Focus</span>
                     {recommendation.plan.coachingEmphasis}
                   </p>
 
-                  <div className="mt-4 flex flex-wrap gap-2">
+                  <div className="mt-4 grid gap-2 sm:grid-cols-2">
                     <button
                       onClick={() => launchPlan(recommendation.plan.id)}
-                      className="inline-flex min-h-[42px] items-center justify-center gap-2 rounded-full bg-t1-blue px-4 text-sm font-semibold text-white"
+                      className="touch-pill inline-flex items-center justify-center gap-2 rounded-full bg-t1-blue px-4 text-sm font-semibold text-white"
                     >
                       <PlayCircle className="h-4 w-4" />
                       To court
                     </button>
                     <Link
                       href={`/session-plans?level=${selectedClass}`}
-                      className="inline-flex min-h-[42px] items-center justify-center rounded-full border border-t1-border bg-t1-surface px-4 text-sm font-semibold text-t1-text no-underline"
+                      className="touch-pill inline-flex items-center justify-center rounded-full border border-t1-border bg-t1-surface px-4 text-sm font-semibold text-t1-text no-underline"
                     >
                       Open playbooks
                     </Link>
@@ -589,7 +593,7 @@ export default function Dashboard() {
                 </span>
                 <Link
                   href={`/drills?tab=favorites&level=${selectedClass}`}
-                  className="text-sm font-semibold text-t1-blue no-underline"
+                  className="touch-pill inline-flex items-center justify-center rounded-full border border-t1-border bg-t1-surface px-4 text-sm font-semibold text-t1-text no-underline"
                 >
                   Open
                 </Link>
@@ -602,7 +606,7 @@ export default function Dashboard() {
                   <Link
                     key={drill.id}
                     href={`/drills/${drill.id}`}
-                    className="flex items-start justify-between gap-3 rounded-[1.4rem] border border-t1-border bg-t1-bg px-4 py-3 no-underline"
+                    className="flex min-h-[6rem] items-start justify-between gap-3 rounded-[1.4rem] border border-t1-border bg-t1-bg px-4 py-3 no-underline"
                   >
                     <div className="min-w-0">
                       <div className="flex flex-wrap items-center gap-2">
@@ -618,7 +622,7 @@ export default function Dashboard() {
                       <p className="mt-2 truncate text-sm font-semibold text-t1-text">
                         {drill.name}
                       </p>
-                      <p className="mt-1 line-clamp-2 text-[13px] leading-5 text-t1-text/72">
+                      <p className="support-copy mt-1 line-clamp-2 text-[13px] leading-5">
                         {drill.objective}
                       </p>
                     </div>
@@ -647,7 +651,7 @@ export default function Dashboard() {
                 </span>
                 <Link
                   href={favoriteStagePlansHref}
-                  className="text-sm font-semibold text-t1-blue no-underline"
+                  className="touch-pill inline-flex items-center justify-center rounded-full border border-t1-border bg-t1-surface px-4 text-sm font-semibold text-t1-text no-underline"
                 >
                   Open
                 </Link>
@@ -665,7 +669,7 @@ export default function Dashboard() {
                     <Link
                       key={plan.id}
                       href={favoriteStagePlansHref}
-                      className="flex items-start justify-between gap-3 rounded-[1.4rem] border border-t1-border bg-t1-bg px-4 py-3 no-underline"
+                      className="flex min-h-[6rem] items-start justify-between gap-3 rounded-[1.4rem] border border-t1-border bg-t1-bg px-4 py-3 no-underline"
                     >
                       <div className="min-w-0">
                         <div className="flex flex-wrap items-center gap-2">
@@ -681,7 +685,7 @@ export default function Dashboard() {
                         <p className="mt-2 truncate text-sm font-semibold text-t1-text">
                           {plan.name}
                         </p>
-                        <p className="mt-1 line-clamp-2 text-[13px] leading-5 text-t1-text/72">
+                        <p className="support-copy mt-1 line-clamp-2 text-[13px] leading-5">
                           {plan.coachingEmphasis}
                         </p>
                       </div>

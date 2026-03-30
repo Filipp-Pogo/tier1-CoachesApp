@@ -42,6 +42,7 @@ import {
 import { pathwayStages, type PathwayStageId } from "@/lib/data";
 import { sessionPlans, sessionPlanLevelGroups } from "@/lib/sessionPlans";
 import { useSessionPlanFavorites } from "@/hooks/useSessionPlanFavorites";
+import { useCoachClass } from "@/hooks/useCoachClass";
 import { useAuth } from "@/contexts/AuthContext";
 import {
   customRecordToDraft,
@@ -63,12 +64,15 @@ import { getStageBrand } from "@/lib/stageBranding";
 
 type PlansTab = "all" | "favorites" | "recent" | "custom" | "shared";
 
-function readSessionPlansState(): {
+function readSessionPlansState(fallbackLevel: PathwayStageId): {
   tab: PlansTab;
   level: PathwayStageId | "all";
 } {
   if (typeof window === "undefined") {
-    return { tab: "all" as PlansTab, level: "all" as PathwayStageId | "all" };
+    return {
+      tab: "all" as PlansTab,
+      level: fallbackLevel as PathwayStageId | "all",
+    };
   }
 
   const params = new URLSearchParams(window.location.search);
@@ -85,7 +89,7 @@ function readSessionPlansState(): {
         : "all",
     level: pathwayStages.some(stage => stage.id === rawLevel)
       ? (rawLevel as PathwayStageId)
-      : "all",
+      : fallbackLevel,
   };
 }
 
@@ -266,7 +270,7 @@ function PlanCard({
                 <h3 className="font-display text-2xl font-semibold text-t1-text">
                   {plan.name}
                 </h3>
-                <p className="mt-2 line-clamp-2 text-sm leading-6 text-t1-text/72">
+                <p className="support-copy mt-2 line-clamp-2 text-sm leading-6">
                   {plan.objective}
                 </p>
               </button>
@@ -274,7 +278,7 @@ function PlanCard({
               {plan.planType === "stock" && onToggleFavorite && (
                 <button
                   onClick={onToggleFavorite}
-                  className={`inline-flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full border ${
+                  className={`touch-icon inline-flex flex-shrink-0 items-center justify-center rounded-full border ${
                     isFavorite
                       ? "border-amber-500/30 bg-amber-500/12 text-amber-500"
                       : "border-t1-border bg-t1-surface/85 text-t1-muted"
@@ -305,24 +309,24 @@ function PlanCard({
             </div>
 
             <p className="mt-4 text-sm leading-6 text-t1-text">
-              <span className="font-semibold text-t1-muted">Focus:</span>{" "}
+              <span className="meta-label mr-2 text-t1-muted">Focus</span>
               {plan.coachingEmphasis}
             </p>
           </div>
         </div>
       </div>
 
-      <div className="mt-4 flex flex-wrap gap-2 xl:max-w-[320px]">
+      <div className="mt-4 grid grid-cols-2 gap-2 xl:max-w-[340px]">
         <button
           onClick={onLaunchOnCourt}
-          className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-full bg-t1-blue px-4 text-sm font-semibold text-white"
+          className="touch-pill col-span-2 inline-flex items-center justify-center gap-2 rounded-full bg-t1-blue px-4 text-sm font-semibold text-white"
         >
           <PlayCircle className="h-4 w-4" />
           On-Court
         </button>
         <button
           onClick={onPrimaryAction}
-          className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-full border border-t1-border bg-t1-bg px-4 text-sm font-semibold text-t1-text"
+          className="touch-pill inline-flex items-center justify-center gap-2 rounded-full border border-t1-border bg-t1-bg px-4 text-sm font-semibold text-t1-text"
         >
           <Edit3 className="h-4 w-4 text-t1-blue" />
           {primaryActionLabel ??
@@ -330,7 +334,7 @@ function PlanCard({
         </button>
         <button
           onClick={onToggle}
-          className="inline-flex min-h-[44px] items-center justify-center rounded-full border border-t1-border bg-t1-bg px-4 text-sm font-semibold text-t1-text"
+          className="touch-pill inline-flex items-center justify-center rounded-full border border-t1-border bg-t1-bg px-4 text-sm font-semibold text-t1-text"
         >
           {isExpanded ? "Hide details" : "Details"}
         </button>
@@ -341,9 +345,7 @@ function PlanCard({
           <div className="grid gap-4 xl:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)]">
             <div className="space-y-3">
               <div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-muted">
-                  Block flow
-                </p>
+                <p className="meta-label">Block flow</p>
                 <div className="mt-3 space-y-3">
                   {plan.blocks.map((block, index) => (
                     <div
@@ -358,7 +360,7 @@ function PlanCard({
                           {block.label}
                         </p>
                       </div>
-                      <p className="mt-2 text-sm leading-6 text-t1-muted">
+                      <p className="support-copy mt-2 text-sm leading-6">
                         {block.content}
                       </p>
                     </div>
@@ -369,9 +371,7 @@ function PlanCard({
 
             <div className="space-y-4">
               <div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-muted">
-                  Standards
-                </p>
+                <p className="meta-label">Standards</p>
                 <div className="mt-3 space-y-2">
                   {plan.standards.map(item => (
                     <div
@@ -386,9 +386,7 @@ function PlanCard({
               </div>
 
               <div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-muted">
-                  Watch for
-                </p>
+                <p className="meta-label">Watch for</p>
                 <div className="mt-3 space-y-2">
                   {plan.commonMistakes.map(item => (
                     <div
@@ -403,10 +401,8 @@ function PlanCard({
               </div>
 
               <div className="rounded-[1.25rem] border border-t1-border bg-t1-bg px-4 py-4">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-muted">
-                  Match transfer
-                </p>
-                <p className="mt-2 text-sm leading-6 text-t1-text">
+                <p className="meta-label">Match transfer</p>
+                <p className="support-copy-strong mt-2 text-sm leading-6">
                   {plan.matchPlayTransfer}
                 </p>
               </div>
@@ -416,7 +412,7 @@ function PlanCard({
           <div className="mt-4 flex flex-wrap gap-2">
             <button
               onClick={copyPlanText}
-              className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-full border border-t1-border bg-t1-bg px-4 text-sm font-semibold text-t1-text"
+              className="touch-pill inline-flex items-center justify-center gap-2 rounded-full border border-t1-border bg-t1-bg px-4 text-sm font-semibold text-t1-text"
             >
               {copied ? (
                 <Check className="h-4 w-4 text-emerald-500" />
@@ -427,7 +423,7 @@ function PlanCard({
             </button>
             <button
               onClick={handlePrint}
-              className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-full border border-t1-border bg-t1-bg px-4 text-sm font-semibold text-t1-text"
+              className="touch-pill inline-flex items-center justify-center gap-2 rounded-full border border-t1-border bg-t1-bg px-4 text-sm font-semibold text-t1-text"
             >
               <Printer className="h-4 w-4" />
               Print
@@ -435,7 +431,7 @@ function PlanCard({
             {onDelete && (
               <AlertDialog>
                 <AlertDialogTrigger asChild>
-                  <button className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-full border border-red-500/20 bg-red-500/8 px-4 text-sm font-semibold text-red-500">
+                  <button className="touch-pill inline-flex items-center justify-center gap-2 rounded-full border border-red-500/20 bg-red-500/8 px-4 text-sm font-semibold text-red-500">
                     <Trash2 className="h-4 w-4" />
                     Delete
                   </button>
@@ -472,7 +468,8 @@ function PlanCard({
 }
 
 export default function SessionPlans() {
-  const initialState = readSessionPlansState();
+  const { selectedClass, setSelectedClass } = useCoachClass();
+  const initialState = readSessionPlansState(selectedClass);
   const [activeLevel, setActiveLevel] = useState<PathwayStageId | "all">(
     initialState.level
   );
@@ -492,8 +489,14 @@ export default function SessionPlans() {
   const onCourtSession = useMemo(() => loadOnCourtSession(), []);
 
   useEffect(() => {
+    if (activeLevel !== "all") {
+      setSelectedClass(activeLevel);
+    }
+  }, [activeLevel, setSelectedClass]);
+
+  useEffect(() => {
     const syncFromUrl = () => {
-      const nextState = readSessionPlansState();
+      const nextState = readSessionPlansState(selectedClass);
       setActiveTab(nextState.tab);
       setActiveLevel(nextState.level);
       setActiveSubBand(null);
@@ -502,7 +505,7 @@ export default function SessionPlans() {
 
     window.addEventListener("popstate", syncFromUrl);
     return () => window.removeEventListener("popstate", syncFromUrl);
-  }, []);
+  }, [selectedClass]);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -766,8 +769,9 @@ export default function SessionPlans() {
 
     return counts;
   }, [stockPlanCards]);
+  const classFilterChanged = activeLevel !== selectedClass;
   const hasStockFilters =
-    activeLevel !== "all" || activeSubBand != null || durationFilter != null;
+    classFilterChanged || activeSubBand != null || durationFilter != null;
   const activeLevelStage =
     activeLevel !== "all"
       ? pathwayStages.find(stage => stage.id === activeLevel)
@@ -786,7 +790,7 @@ export default function SessionPlans() {
             : "Team shared playbooks";
 
   const clearStockFilters = () => {
-    setActiveLevel("all");
+    setActiveLevel(selectedClass);
     setActiveSubBand(null);
     setDurationFilter(null);
     setSearchQuery("");
@@ -813,7 +817,7 @@ export default function SessionPlans() {
           <EmptyContent>
             <Link
               href="/session-builder"
-              className="inline-flex min-h-[48px] items-center justify-center rounded-full bg-t1-blue px-5 text-sm font-semibold text-white no-underline"
+              className="touch-pill inline-flex items-center justify-center rounded-full bg-t1-blue px-5 text-sm font-semibold text-white no-underline"
             >
               Open builder
             </Link>
@@ -843,7 +847,7 @@ export default function SessionPlans() {
           <EmptyContent>
             <Link
               href="/session-builder"
-              className="inline-flex min-h-[48px] items-center justify-center rounded-full bg-t1-blue px-5 text-sm font-semibold text-white no-underline"
+              className="touch-pill inline-flex items-center justify-center rounded-full bg-t1-blue px-5 text-sm font-semibold text-white no-underline"
             >
               Create a shared playbook
             </Link>
@@ -873,7 +877,7 @@ export default function SessionPlans() {
           <EmptyContent>
             <button
               onClick={() => setActiveTab("all")}
-              className="inline-flex min-h-[48px] items-center justify-center rounded-full bg-t1-blue px-5 text-sm font-semibold text-white"
+              className="touch-pill inline-flex items-center justify-center rounded-full bg-t1-blue px-5 text-sm font-semibold text-white"
             >
               Browse stock playbooks
             </button>
@@ -899,7 +903,7 @@ export default function SessionPlans() {
         <EmptyContent>
           <button
             onClick={() => setActiveTab("all")}
-            className="inline-flex min-h-[48px] items-center justify-center rounded-full bg-t1-blue px-5 text-sm font-semibold text-white"
+            className="touch-pill inline-flex items-center justify-center rounded-full bg-t1-blue px-5 text-sm font-semibold text-white"
           >
             Browse stock playbooks
           </button>
@@ -916,9 +920,9 @@ export default function SessionPlans() {
             <section className="premium-card rounded-[2rem] p-5 sm:p-7">
               <p className="section-kicker">Playbooks</p>
               <h1 className="mt-3 font-display text-4xl font-semibold uppercase tracking-[0.1em] text-t1-text sm:text-5xl">
-                Find the right session plan fast
+                Pick the playbook. Send it to court.
               </h1>
-              <p className="mt-4 max-w-2xl text-sm leading-7 text-t1-text/72 sm:text-base">
+              <p className="support-copy-strong mt-4 max-w-2xl text-sm leading-7 sm:text-base">
                 Start from stock structure, open the right playbook, and send it
                 straight to court without extra menu work.
               </p>
@@ -936,7 +940,7 @@ export default function SessionPlans() {
                   {searchQuery && (
                     <button
                       onClick={() => setSearchQuery("")}
-                      className="absolute right-4 top-1/2 -translate-y-1/2 text-t1-muted"
+                      className="touch-icon absolute right-2 top-1/2 inline-flex -translate-y-1/2 items-center justify-center rounded-full text-t1-muted"
                     >
                       <X className="h-4 w-4" />
                     </button>
@@ -945,24 +949,10 @@ export default function SessionPlans() {
               </div>
 
               <div className="mt-6 grid gap-2 sm:grid-cols-3">
-                <Link
-                  href="/session-builder"
-                  className="inline-flex min-h-[50px] items-center justify-center gap-2 rounded-full bg-t1-blue px-5 text-sm font-semibold text-white no-underline"
-                >
-                  <Edit3 className="h-4 w-4" />
-                  Builder
-                </Link>
-                <Link
-                  href="/compare-plans"
-                  className="inline-flex min-h-[50px] items-center justify-center gap-2 rounded-full border border-t1-border bg-t1-surface px-5 text-sm font-semibold text-t1-text no-underline"
-                >
-                  <ArrowLeftRight className="h-4 w-4 text-t1-blue" />
-                  Compare
-                </Link>
                 {onCourtSession ? (
                   <Link
                     href="/on-court"
-                    className="inline-flex min-h-[50px] items-center justify-center gap-2 rounded-full border border-t1-border bg-t1-surface px-5 text-sm font-semibold text-t1-text no-underline"
+                    className="touch-pill inline-flex items-center justify-center gap-2 rounded-full border border-t1-border bg-t1-surface px-5 text-sm font-semibold text-t1-text no-underline"
                   >
                     <PlayCircle className="h-4 w-4 text-t1-blue" />
                     Resume On-Court
@@ -974,12 +964,26 @@ export default function SessionPlans() {
                       launchPlanOnCourt(filteredStockPlans[0])
                     }
                     disabled={filteredStockPlans.length === 0}
-                    className="inline-flex min-h-[50px] items-center justify-center gap-2 rounded-full border border-t1-border bg-t1-surface px-5 text-sm font-semibold text-t1-text disabled:opacity-40"
+                    className="touch-pill inline-flex items-center justify-center gap-2 rounded-full border border-t1-border bg-t1-surface px-5 text-sm font-semibold text-t1-text disabled:opacity-40"
                   >
                     <PlayCircle className="h-4 w-4 text-t1-blue" />
                     Top plan to court
                   </button>
                 )}
+                <Link
+                  href="/session-builder"
+                  className="touch-pill inline-flex items-center justify-center gap-2 rounded-full bg-t1-blue px-5 text-sm font-semibold text-white no-underline"
+                >
+                  <Edit3 className="h-4 w-4" />
+                  Builder
+                </Link>
+                <Link
+                  href="/compare-plans"
+                  className="touch-pill inline-flex items-center justify-center gap-2 rounded-full border border-t1-border bg-t1-surface px-5 text-sm font-semibold text-t1-text no-underline"
+                >
+                  <ArrowLeftRight className="h-4 w-4 text-t1-blue" />
+                  Compare
+                </Link>
               </div>
             </section>
 
@@ -991,25 +995,19 @@ export default function SessionPlans() {
 
               <div className="mt-5 grid gap-3 sm:grid-cols-3">
                 <div className="rounded-[1.45rem] border border-t1-border bg-t1-bg p-4">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-muted">
-                    Stock
-                  </p>
+                  <p className="meta-label">Stock</p>
                   <p className="mt-2 text-3xl font-semibold text-t1-text">
                     {stockPlanCards.length}
                   </p>
                 </div>
                 <div className="rounded-[1.45rem] border border-t1-border bg-t1-bg p-4">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-muted">
-                    My plans
-                  </p>
+                  <p className="meta-label">My plans</p>
                   <p className="mt-2 text-3xl font-semibold text-t1-text">
                     {customPlans.length}
                   </p>
                 </div>
                 <div className="rounded-[1.45rem] border border-t1-border bg-t1-bg p-4">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-muted">
-                    Team shared
-                  </p>
+                  <p className="meta-label">Team shared</p>
                   <p className="mt-2 text-3xl font-semibold text-t1-text">
                     {sharedPlans.length}
                   </p>
@@ -1017,13 +1015,11 @@ export default function SessionPlans() {
               </div>
 
               <div className="mt-4 rounded-[1.45rem] border border-t1-border bg-t1-bg p-4">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-muted">
-                  Current lane
-                </p>
+                <p className="meta-label">Current lane</p>
                 <p className="mt-2 text-base font-semibold text-t1-text">
                   {activeTabSummary}
                 </p>
-                <p className="mt-2 text-sm leading-6 text-t1-text/72">
+                <p className="support-copy mt-2 text-sm leading-6">
                   {deferredSearchQuery.trim()
                     ? `Searching for "${deferredSearchQuery}".`
                     : "Stock first. Customize second. Share only when another coach can run the version clean."}
@@ -1079,7 +1075,7 @@ export default function SessionPlans() {
               <button
                 key={tab.key}
                 onClick={() => setActiveTab(tab.key)}
-                className={`inline-flex min-h-[42px] items-center gap-2 rounded-full border px-4 text-xs font-semibold uppercase tracking-[0.22em] ${
+                className={`touch-pill inline-flex items-center gap-2 rounded-full border px-4 text-sm font-semibold uppercase tracking-[0.18em] ${
                   activeTab === tab.key
                     ? "border-t1-blue/25 bg-t1-blue text-white"
                     : "border-t1-border bg-t1-surface text-t1-muted"
@@ -1105,9 +1101,7 @@ export default function SessionPlans() {
               <div>
                 <div className="flex items-center justify-between gap-3">
                   <div>
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-muted">
-                      Class filter
-                    </p>
+                    <p className="meta-label">Class filter</p>
                     <h3 className="mt-1 text-lg font-semibold text-t1-text">
                       Pick the lane before the playbook
                     </h3>
@@ -1115,7 +1109,7 @@ export default function SessionPlans() {
                   {hasStockFilters && (
                     <button
                       onClick={clearStockFilters}
-                      className="text-sm font-semibold text-t1-blue"
+                      className="touch-pill inline-flex items-center justify-center rounded-full border border-t1-border bg-t1-surface px-4 text-sm font-semibold text-t1-text"
                     >
                       Clear filters
                     </button>
@@ -1129,7 +1123,7 @@ export default function SessionPlans() {
                       setActiveSubBand(null);
                       setExpandedPlan(null);
                     }}
-                    className={`inline-flex min-h-[40px] items-center gap-2 rounded-full border px-4 text-xs font-semibold uppercase tracking-[0.2em] ${
+                    className={`touch-pill inline-flex items-center gap-2 rounded-full border px-4 text-sm font-semibold uppercase tracking-[0.18em] ${
                       activeLevel === "all"
                         ? "border-t1-blue/25 bg-t1-blue text-white"
                         : "border-t1-border bg-t1-surface text-t1-muted"
@@ -1158,7 +1152,7 @@ export default function SessionPlans() {
                           setActiveSubBand(null);
                           setExpandedPlan(null);
                         }}
-                        className={`inline-flex min-h-[40px] items-center gap-2 rounded-full border px-4 text-xs font-semibold uppercase tracking-[0.2em] ${
+                        className={`touch-pill inline-flex items-center gap-2 rounded-full border px-4 text-sm font-semibold uppercase tracking-[0.18em] ${
                           activeLevel === stage.id
                             ? `${brand.badgeClassName} shadow-sm`
                             : "border-t1-border bg-t1-surface text-t1-muted"
@@ -1179,16 +1173,14 @@ export default function SessionPlans() {
 
               {availableSubBands.length > 0 && (
                 <div>
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-muted">
-                    Sub-band
-                  </p>
+                  <p className="meta-label">Sub-band</p>
                   <div className="mt-2 flex flex-wrap gap-2">
                     <button
                       onClick={() => {
                         setActiveSubBand(null);
                         setExpandedPlan(null);
                       }}
-                      className={`rounded-full border px-3 py-2 text-xs font-semibold uppercase tracking-[0.18em] ${
+                      className={`touch-pill rounded-full border px-3 text-sm font-semibold uppercase tracking-[0.16em] ${
                         !activeSubBand
                           ? "border-t1-blue/25 bg-t1-blue text-white"
                           : "border-t1-border bg-t1-surface text-t1-muted"
@@ -1203,7 +1195,7 @@ export default function SessionPlans() {
                           setActiveSubBand(group.subBand);
                           setExpandedPlan(null);
                         }}
-                        className={`rounded-full border px-3 py-2 text-xs font-semibold uppercase tracking-[0.18em] ${
+                        className={`touch-pill rounded-full border px-3 text-sm font-semibold uppercase tracking-[0.16em] ${
                           activeSubBand === group.subBand
                             ? "border-t1-blue/25 bg-t1-blue text-white"
                             : "border-t1-border bg-t1-surface text-t1-muted"
@@ -1217,16 +1209,14 @@ export default function SessionPlans() {
               )}
 
               <div>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-muted">
-                  Length
-                </p>
+                <p className="meta-label">Length</p>
                 <div className="mt-2 flex flex-wrap gap-2">
                   <button
                     onClick={() => {
                       setDurationFilter(null);
                       setExpandedPlan(null);
                     }}
-                    className={`rounded-full border px-3 py-2 text-xs font-semibold uppercase tracking-[0.18em] ${
+                    className={`touch-pill rounded-full border px-3 text-sm font-semibold uppercase tracking-[0.16em] ${
                       durationFilter == null
                         ? "border-t1-blue/25 bg-t1-blue text-white"
                         : "border-t1-border bg-t1-surface text-t1-muted"
@@ -1241,7 +1231,7 @@ export default function SessionPlans() {
                         setDurationFilter(duration);
                         setExpandedPlan(null);
                       }}
-                      className={`rounded-full border px-3 py-2 text-xs font-semibold uppercase tracking-[0.18em] ${
+                      className={`touch-pill rounded-full border px-3 text-sm font-semibold uppercase tracking-[0.16em] ${
                         durationFilter === duration
                           ? "border-t1-blue/25 bg-t1-blue text-white"
                           : "border-t1-border bg-t1-surface text-t1-muted"
@@ -1277,7 +1267,7 @@ export default function SessionPlans() {
                 <EmptyContent>
                   <button
                     onClick={clearStockFilters}
-                    className="inline-flex min-h-[48px] items-center justify-center rounded-full bg-t1-blue px-5 text-sm font-semibold text-white"
+                    className="touch-pill inline-flex items-center justify-center rounded-full bg-t1-blue px-5 text-sm font-semibold text-white"
                   >
                     Reset filters
                   </button>
@@ -1299,7 +1289,7 @@ export default function SessionPlans() {
                             />
                             {group.label}
                           </span>
-                          <p className="mt-2 text-sm text-t1-muted">
+                          <p className="support-copy mt-2 text-sm">
                             {group.plans.length} playbook
                             {group.plans.length !== 1 ? "s" : ""}
                           </p>
@@ -1368,7 +1358,7 @@ export default function SessionPlans() {
                         <EmptyContent>
                           <button
                             onClick={() => setSearchQuery("")}
-                            className="inline-flex min-h-[48px] items-center justify-center rounded-full bg-t1-blue px-5 text-sm font-semibold text-white"
+                            className="touch-pill inline-flex items-center justify-center rounded-full bg-t1-blue px-5 text-sm font-semibold text-white"
                           >
                             Clear search
                           </button>

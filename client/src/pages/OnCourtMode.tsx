@@ -18,6 +18,7 @@ import {
 import { clearOnCourtSession, loadOnCourtSession } from "@/lib/onCourtMode";
 import { getStageBrand } from "@/lib/stageBranding";
 import { pathwayStages } from "@/lib/data";
+import { useIsMobile } from "@/hooks/useMobile";
 
 function formatElapsed(seconds: number) {
   const minutes = Math.floor(seconds / 60);
@@ -30,7 +31,10 @@ export default function OnCourtMode() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const [timerRunning, setTimerRunning] = useState(false);
-  const [queueOpen, setQueueOpen] = useState(true);
+  const isMobile = useIsMobile();
+  const [queueOpen, setQueueOpen] = useState(() =>
+    typeof window === "undefined" ? true : window.innerWidth >= 768
+  );
 
   useEffect(() => {
     if (!timerRunning) return;
@@ -47,6 +51,12 @@ export default function OnCourtMode() {
     setElapsedSeconds(0);
     setTimerRunning(false);
   }, [session?.id]);
+
+  useEffect(() => {
+    if (isMobile) {
+      setQueueOpen(false);
+    }
+  }, [isMobile]);
 
   const currentItem = session?.items[currentIndex] ?? null;
   const brand = session ? getStageBrand(session.level) : null;
@@ -68,7 +78,7 @@ export default function OnCourtMode() {
             <h1 className="mt-3 font-display text-3xl font-semibold uppercase tracking-[0.12em] text-t1-text sm:text-4xl">
               No live board is loaded.
             </h1>
-            <p className="mt-3 text-sm leading-6 text-t1-muted sm:text-base">
+            <p className="support-copy-strong mt-3 text-sm leading-6 sm:text-base">
               Launch a board from the dashboard, the drill library, or session
               playbooks. This view is intentionally stripped down for live court
               use.
@@ -78,14 +88,14 @@ export default function OnCourtMode() {
           <div className="mt-6 flex flex-col gap-2 sm:flex-row">
             <Link
               href="/"
-              className="inline-flex min-h-[48px] items-center justify-center gap-2 rounded-full bg-t1-blue px-5 text-sm font-semibold text-white no-underline"
+              className="touch-pill inline-flex items-center justify-center gap-2 rounded-full bg-t1-blue px-5 text-sm font-semibold text-white no-underline"
             >
               <ArrowLeft className="h-4 w-4" />
               Back to dashboard
             </Link>
             <Link
               href="/session-plans"
-              className="inline-flex min-h-[48px] items-center justify-center gap-2 rounded-full border border-t1-border bg-t1-bg px-5 text-sm font-semibold text-t1-text no-underline"
+              className="touch-pill inline-flex items-center justify-center gap-2 rounded-full border border-t1-border bg-t1-bg px-5 text-sm font-semibold text-t1-text no-underline"
             >
               Open playbooks
             </Link>
@@ -124,7 +134,7 @@ export default function OnCourtMode() {
                   <h1 className="mt-2 font-display text-3xl font-semibold uppercase tracking-[0.12em] text-t1-text sm:text-5xl">
                     {session.title}
                   </h1>
-                  <p className="mt-3 text-sm leading-6 text-t1-muted sm:text-base">
+                  <p className="support-copy-strong mt-3 text-sm leading-6 sm:text-base">
                     {session.subtitle}. One cue at a time, fast next action, no
                     extra UI.
                   </p>
@@ -133,7 +143,7 @@ export default function OnCourtMode() {
                 <div className="flex flex-wrap gap-2">
                   <Link
                     href="/"
-                    className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-full border border-t1-border bg-t1-bg px-4 text-sm font-semibold text-t1-text no-underline"
+                    className="touch-pill inline-flex items-center justify-center gap-2 rounded-full border border-t1-border bg-t1-bg px-4 text-sm font-semibold text-t1-text no-underline"
                   >
                     <ArrowLeft className="h-4 w-4" />
                     Exit
@@ -143,7 +153,7 @@ export default function OnCourtMode() {
                       clearOnCourtSession();
                       setSession(null);
                     }}
-                    className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-full border border-red-500/20 bg-red-500/8 px-4 text-sm font-semibold text-red-500"
+                    className="touch-pill inline-flex items-center justify-center gap-2 rounded-full border border-red-500/20 bg-red-500/8 px-4 text-sm font-semibold text-red-500"
                   >
                     <Trash2 className="h-4 w-4" />
                     Clear board
@@ -162,33 +172,32 @@ export default function OnCourtMode() {
                 </div>
                 <button
                   onClick={() => setQueueOpen(previous => !previous)}
-                  className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-t1-border bg-t1-bg text-t1-text"
+                  className="touch-pill inline-flex items-center justify-center gap-2 rounded-full border border-t1-border bg-t1-bg px-4 text-sm font-semibold text-t1-text sm:h-11 sm:w-11 sm:px-0"
                   aria-label={queueOpen ? "Hide queue" : "Show queue"}
                 >
                   <ListOrdered className="h-5 w-5" />
+                  <span className="sm:hidden">
+                    {queueOpen ? "Hide queue" : "Show queue"}
+                  </span>
                 </button>
               </div>
 
               <div className="mt-5 grid grid-cols-2 gap-3">
                 <div className="rounded-[1.5rem] border border-t1-border bg-t1-bg p-4">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-muted">
-                    Progress
-                  </p>
+                  <p className="meta-label">Progress</p>
                   <p className="mt-2 text-3xl font-semibold text-t1-text">
                     {completionPercent}%
                   </p>
-                  <p className="mt-1 text-sm text-t1-muted">
+                  <p className="support-copy mt-1 text-sm">
                     Block {currentIndex + 1} of {session.items.length}
                   </p>
                 </div>
                 <div className="rounded-[1.5rem] border border-t1-border bg-t1-bg p-4">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-muted">
-                    Timer
-                  </p>
+                  <p className="meta-label">Timer</p>
                   <p className="mt-2 text-3xl font-semibold text-t1-text">
                     {formatElapsed(elapsedSeconds)}
                   </p>
-                  <p className="mt-1 text-sm text-t1-muted">
+                  <p className="support-copy mt-1 text-sm">
                     {timerRunning ? "Running live" : "Paused"}
                   </p>
                 </div>
@@ -197,7 +206,7 @@ export default function OnCourtMode() {
               <div className="mt-4 flex flex-col gap-2 sm:flex-row">
                 <button
                   onClick={() => setTimerRunning(previous => !previous)}
-                  className="inline-flex min-h-[48px] flex-1 items-center justify-center gap-2 rounded-full bg-t1-blue px-4 text-sm font-semibold text-white"
+                  className="touch-pill inline-flex flex-1 items-center justify-center gap-2 rounded-full bg-t1-blue px-4 text-sm font-semibold text-white"
                 >
                   {timerRunning ? (
                     <>
@@ -213,7 +222,7 @@ export default function OnCourtMode() {
                 </button>
                 <button
                   onClick={() => setElapsedSeconds(0)}
-                  className="inline-flex min-h-[48px] flex-1 items-center justify-center gap-2 rounded-full border border-t1-border bg-t1-bg px-4 text-sm font-semibold text-t1-text"
+                  className="touch-pill inline-flex flex-1 items-center justify-center gap-2 rounded-full border border-t1-border bg-t1-bg px-4 text-sm font-semibold text-t1-text"
                 >
                   <Clock3 className="h-4 w-4" />
                   Reset clock
@@ -224,7 +233,7 @@ export default function OnCourtMode() {
         </div>
       </section>
 
-      <div className="container pb-10 pt-5 sm:pt-6">
+      <div className="container pb-20 pt-5 sm:pb-10 sm:pt-6">
         <div className="grid gap-4 xl:grid-cols-[minmax(0,1.5fr)_minmax(320px,0.85fr)]">
           <section className="premium-card overflow-hidden rounded-[2rem] border border-t1-border bg-t1-surface p-5 sm:p-7">
             <div className="flex flex-wrap items-start justify-between gap-3">
@@ -247,9 +256,7 @@ export default function OnCourtMode() {
               </div>
 
               <div className="rounded-[1.5rem] border border-t1-border bg-t1-bg px-4 py-3 text-right">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-muted">
-                  Hold this emphasis
-                </p>
+                <p className="meta-label">Hold this emphasis</p>
                 <p className="mt-2 max-w-[260px] text-sm font-semibold leading-6 text-t1-text">
                   {session.emphasis}
                 </p>
@@ -272,10 +279,8 @@ export default function OnCourtMode() {
 
                   {currentItem.secondary && (
                     <div className="mt-4 rounded-[1.5rem] border border-t1-border bg-t1-surface px-4 py-3">
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-muted">
-                        Detail
-                      </p>
-                      <p className="mt-2 text-sm leading-6 text-t1-text">
+                      <p className="meta-label">Run it</p>
+                      <p className="support-copy-strong mt-2 text-sm leading-6">
                         {currentItem.secondary}
                       </p>
                     </div>
@@ -283,9 +288,7 @@ export default function OnCourtMode() {
 
                   {currentItem.cue && (
                     <div className="coach-tip mt-4 rounded-[1.5rem] p-4">
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-blue">
-                        Cue to coach
-                      </p>
+                      <p className="meta-label text-t1-blue">Cue to coach</p>
                       <p className="mt-2 text-sm font-semibold leading-6 text-t1-text sm:text-base">
                         {currentItem.cue}
                       </p>
@@ -320,42 +323,46 @@ export default function OnCourtMode() {
               ))}
             </div>
 
-            <div className="mt-6 grid gap-2 sm:grid-cols-3">
-              <button
-                onClick={() =>
-                  setCurrentIndex(previous => Math.max(previous - 1, 0))
-                }
-                disabled={currentIndex === 0}
-                className="inline-flex min-h-[52px] items-center justify-center gap-2 rounded-full border border-t1-border bg-t1-bg px-4 text-sm font-semibold text-t1-text disabled:opacity-40"
-              >
-                <ChevronLeft className="h-4 w-4" />
-                Previous
-              </button>
-              <button
-                onClick={() => {
-                  if (currentIndex === session.items.length - 1) return;
-                  setCurrentIndex(previous =>
-                    Math.min(previous + 1, session.items.length - 1)
-                  );
-                }}
-                disabled={currentIndex === session.items.length - 1}
-                className="inline-flex min-h-[52px] items-center justify-center gap-2 rounded-full bg-t1-blue px-4 text-sm font-semibold text-white disabled:opacity-40"
-              >
-                <CheckCircle2 className="h-4 w-4" />
-                Mark done
-              </button>
-              <button
-                onClick={() =>
-                  setCurrentIndex(previous =>
-                    Math.min(previous + 1, session.items.length - 1)
-                  )
-                }
-                disabled={currentIndex === session.items.length - 1}
-                className="inline-flex min-h-[52px] items-center justify-center gap-2 rounded-full border border-t1-border bg-t1-bg px-4 text-sm font-semibold text-t1-text disabled:opacity-40"
-              >
-                Next
-                <ChevronRight className="h-4 w-4" />
-              </button>
+            <div className="mt-6">
+              <div className="sticky bottom-4 z-20 rounded-[1.75rem] border border-t1-border bg-t1-surface/96 p-3 shadow-[0_18px_48px_rgba(15,23,42,0.16)] backdrop-blur-xl md:static md:border-0 md:bg-transparent md:p-0 md:shadow-none">
+                <div className="grid grid-cols-2 gap-2 md:grid-cols-3">
+                  <button
+                    onClick={() =>
+                      setCurrentIndex(previous => Math.max(previous - 1, 0))
+                    }
+                    disabled={currentIndex === 0}
+                    className="touch-pill inline-flex items-center justify-center gap-2 rounded-full border border-t1-border bg-t1-bg px-4 text-sm font-semibold text-t1-text disabled:opacity-40"
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                    Previous
+                  </button>
+                  <button
+                    onClick={() => {
+                      if (currentIndex === session.items.length - 1) return;
+                      setCurrentIndex(previous =>
+                        Math.min(previous + 1, session.items.length - 1)
+                      );
+                    }}
+                    disabled={currentIndex === session.items.length - 1}
+                    className="touch-pill order-first col-span-2 inline-flex items-center justify-center gap-2 rounded-full bg-t1-blue px-4 text-sm font-semibold text-white disabled:opacity-40 md:order-none md:col-span-1"
+                  >
+                    <CheckCircle2 className="h-4 w-4" />
+                    Mark done
+                  </button>
+                  <button
+                    onClick={() =>
+                      setCurrentIndex(previous =>
+                        Math.min(previous + 1, session.items.length - 1)
+                      )
+                    }
+                    disabled={currentIndex === session.items.length - 1}
+                    className="touch-pill inline-flex items-center justify-center gap-2 rounded-full border border-t1-border bg-t1-bg px-4 text-sm font-semibold text-t1-text disabled:opacity-40"
+                  >
+                    Next
+                    <ChevronRight className="h-4 w-4" />
+                  </button>
+                </div>
+              </div>
             </div>
           </section>
 
@@ -364,25 +371,19 @@ export default function OnCourtMode() {
               <p className="section-kicker">Session intent</p>
               <div className="mt-3 space-y-4">
                 <div className="rounded-[1.5rem] border border-t1-border bg-t1-bg p-4">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-muted">
-                    Objective
-                  </p>
-                  <p className="mt-2 text-sm leading-6 text-t1-text">
+                  <p className="meta-label">Objective</p>
+                  <p className="support-copy-strong mt-2 text-sm leading-6">
                     {session.objective}
                   </p>
                 </div>
                 <div className="rounded-[1.5rem] border border-t1-border bg-t1-bg p-4">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-muted">
-                    Source
-                  </p>
-                  <p className="mt-2 text-sm leading-6 text-t1-text">
+                  <p className="meta-label">Source</p>
+                  <p className="support-copy-strong mt-2 text-sm leading-6">
                     {session.sourceLabel}
                   </p>
                 </div>
                 <div className="rounded-[1.5rem] border border-t1-border bg-t1-bg p-4">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-muted">
-                    Hold them to
-                  </p>
+                  <p className="meta-label">Hold them to</p>
                   <div className="mt-3 space-y-2">
                     {session.checklist.slice(0, 4).map(item => (
                       <div
@@ -420,7 +421,7 @@ export default function OnCourtMode() {
                     <button
                       key={item.id}
                       onClick={() => setCurrentIndex(index)}
-                      className={`w-full rounded-[1.5rem] border px-4 py-3 text-left transition-colors ${
+                      className={`touch-pill w-full min-h-[5rem] rounded-[1.5rem] border px-4 py-3 text-left transition-colors ${
                         active
                           ? "border-t1-blue/30 bg-t1-blue/8"
                           : completed
@@ -430,9 +431,7 @@ export default function OnCourtMode() {
                     >
                       <div className="flex items-start justify-between gap-3">
                         <div>
-                          <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-muted">
-                            {item.label}
-                          </p>
+                          <p className="meta-label">{item.label}</p>
                           <p className="mt-1 text-sm font-semibold text-t1-text">
                             {item.title}
                           </p>
@@ -449,7 +448,7 @@ export default function OnCourtMode() {
                           {index + 1}
                         </span>
                       </div>
-                      <p className="mt-2 text-sm leading-6 text-t1-muted">
+                      <p className="support-copy mt-2 text-sm leading-6">
                         {item.durationLabel}
                       </p>
                     </button>

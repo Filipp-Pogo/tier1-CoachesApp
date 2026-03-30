@@ -671,9 +671,9 @@ export default function DrillLibrary() {
             <section className="premium-card rounded-[2rem] p-5 sm:p-7">
               <p className="section-kicker">Drills</p>
               <h1 className="mt-3 font-display text-4xl font-semibold uppercase tracking-[0.1em] text-t1-text sm:text-5xl">
-                Find the right drill fast
+                Pick the class. Find the drill.
               </h1>
-              <p className="mt-4 max-w-2xl text-sm leading-7 text-t1-text/72 sm:text-base">
+              <p className="support-copy-strong mt-4 max-w-2xl text-sm leading-7 sm:text-base">
                 Start with the class, then add a problem or intent only when the
                 next rep is not obvious.
               </p>
@@ -694,7 +694,7 @@ export default function DrillLibrary() {
                   {searchQuery && (
                     <button
                       onClick={() => setSearchQuery("")}
-                      className="absolute right-4 top-1/2 -translate-y-1/2 text-t1-muted"
+                      className="touch-icon absolute right-2 top-1/2 inline-flex -translate-y-1/2 items-center justify-center rounded-full text-t1-muted"
                     >
                       <X className="h-4 w-4" />
                     </button>
@@ -703,30 +703,16 @@ export default function DrillLibrary() {
               </div>
 
               <div className="mt-5 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-                <div className="flex flex-wrap gap-2">
-                  <button
-                    onClick={() =>
-                      launchBench(filteredBenchDrills, "Filtered drill library")
-                    }
-                    disabled={filteredBenchDrills.length === 0}
-                    className="inline-flex min-h-[48px] items-center justify-center gap-2 rounded-full bg-t1-blue px-5 text-sm font-semibold text-white disabled:opacity-40"
-                  >
-                    <PlayCircle className="h-4 w-4" />
-                    Send to On-Court
-                  </button>
-                  <button
-                    onClick={() => {
-                      setActiveTab(previous =>
-                        previous === "favorites" ? "all" : "favorites"
-                      );
-                      setVisibleCount(DRILLS_PER_PAGE);
-                    }}
-                    className="inline-flex min-h-[48px] items-center justify-center gap-2 rounded-full border border-t1-border bg-t1-surface px-5 text-sm font-semibold text-t1-text"
-                  >
-                    <Star className="h-4 w-4 text-amber-400" />
-                    {activeTab === "favorites" ? "All drills" : "My drills"}
-                  </button>
-                </div>
+                <button
+                  onClick={() =>
+                    launchBench(filteredBenchDrills, "Filtered drill library")
+                  }
+                  disabled={filteredBenchDrills.length === 0}
+                  className="touch-pill inline-flex items-center justify-center gap-2 rounded-full bg-t1-blue px-5 text-sm font-semibold text-white disabled:opacity-40"
+                >
+                  <PlayCircle className="h-4 w-4" />
+                  Send to On-Court
+                </button>
 
                 <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
                   <button
@@ -734,7 +720,7 @@ export default function DrillLibrary() {
                       setActiveTab("all");
                       setVisibleCount(DRILLS_PER_PAGE);
                     }}
-                    className={`inline-flex min-h-[42px] items-center rounded-full px-4 text-xs font-semibold uppercase tracking-[0.22em] ${
+                    className={`touch-pill inline-flex items-center rounded-full px-4 text-sm font-semibold uppercase tracking-[0.18em] ${
                       activeTab === "all"
                         ? "bg-t1-blue text-white"
                         : "border border-t1-border bg-t1-surface text-t1-muted"
@@ -747,7 +733,7 @@ export default function DrillLibrary() {
                       setActiveTab("favorites");
                       setVisibleCount(DRILLS_PER_PAGE);
                     }}
-                    className={`inline-flex min-h-[42px] items-center gap-2 rounded-full px-4 text-xs font-semibold uppercase tracking-[0.22em] ${
+                    className={`touch-pill inline-flex items-center gap-2 rounded-full px-4 text-sm font-semibold uppercase tracking-[0.18em] ${
                       activeTab === "favorites"
                         ? "bg-amber-500/15 text-amber-600 dark:text-amber-300"
                         : "border border-t1-border bg-t1-surface text-t1-muted"
@@ -775,15 +761,13 @@ export default function DrillLibrary() {
 
               <div className="mt-5 space-y-3">
                 <div className="rounded-[1.5rem] border border-t1-border bg-t1-bg p-4">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-muted">
-                    Class
-                  </p>
+                  <p className="meta-label">Class</p>
                   <p className="mt-2 text-base font-semibold text-t1-text">
                     {selectedStage
                       ? `${selectedStage.shortName} selected`
                       : "All classes"}
                   </p>
-                  <p className="mt-2 text-sm leading-6 text-t1-text/72">
+                  <p className="support-copy mt-2 text-sm leading-6">
                     {selectedBrand
                       ? selectedBrand.summary
                       : "Pick a class first when the group and pace are clear."}
@@ -791,14 +775,12 @@ export default function DrillLibrary() {
                 </div>
 
                 <div className="rounded-[1.5rem] border border-t1-border bg-t1-bg p-4">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-muted">
-                    Problem + intent
-                  </p>
+                  <p className="meta-label">Problem + intent</p>
                   <p className="mt-2 text-base font-semibold text-t1-text">
                     {selectedProblem?.name ?? "No problem filter"}
                     {selectedIntent ? ` • ${selectedIntent.name}` : ""}
                   </p>
-                  <p className="mt-2 text-sm leading-6 text-t1-text/72">
+                  <p className="support-copy mt-2 text-sm leading-6">
                     {selectedProblem?.description ??
                       selectedIntent?.description ??
                       "Add one more lens only when you need a tighter decision path."}
@@ -806,13 +788,11 @@ export default function DrillLibrary() {
                 </div>
 
                 <div className="rounded-[1.5rem] border border-t1-border bg-t1-bg p-4">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-muted">
-                    Ready now
-                  </p>
+                  <p className="meta-label">Ready now</p>
                   <p className="mt-2 text-3xl font-semibold text-t1-text">
                     {filteredDrills.length}
                   </p>
-                  <p className="mt-1 text-sm text-t1-text/72">
+                  <p className="support-copy mt-1 text-sm">
                     drill{filteredDrills.length !== 1 ? "s" : ""} ready
                     {deferredSearchQuery.trim() &&
                       ` for "${deferredSearchQuery}"`}
@@ -830,13 +810,13 @@ export default function DrillLibrary() {
             <div>
               <p className="section-kicker">Narrow fast</p>
               <h2 className="mt-2 font-display text-2xl font-semibold uppercase tracking-[0.1em] text-t1-text">
-                Pick the class, then tighten only if needed
+                Start wide. Tighten only when needed.
               </h2>
             </div>
             {hasActiveFilters && (
               <button
                 onClick={clearFilters}
-                className="text-sm font-semibold text-t1-blue"
+                className="touch-pill inline-flex items-center justify-center rounded-full border border-t1-border bg-t1-surface px-4 text-sm font-semibold text-t1-text"
               >
                 Reset all filters
               </button>
@@ -850,9 +830,7 @@ export default function DrillLibrary() {
                   1
                 </span>
                 <div>
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-muted">
-                    Class
-                  </p>
+                  <p className="meta-label">Class</p>
                   <h3 className="mt-1 text-lg font-semibold text-t1-text">
                     Start with the class
                   </h3>
@@ -876,7 +854,7 @@ export default function DrillLibrary() {
                         setVisibleCount(DRILLS_PER_PAGE);
                         setActiveTab("all");
                       }}
-                      className={`inline-flex min-h-[42px] items-center gap-2 rounded-full border px-4 text-xs font-semibold uppercase tracking-[0.2em] ${
+                      className={`touch-pill inline-flex items-center gap-2 rounded-full border px-4 text-sm font-semibold uppercase tracking-[0.18em] ${
                         active
                           ? `${brand.badgeClassName} shadow-sm`
                           : "border-t1-border bg-t1-surface text-t1-muted"
@@ -902,9 +880,7 @@ export default function DrillLibrary() {
                     2
                   </span>
                   <div>
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-muted">
-                      Problem
-                    </p>
+                    <p className="meta-label">Problem</p>
                     <h3 className="mt-1 text-lg font-semibold text-t1-text">
                       Fix the right thing
                     </h3>
@@ -921,7 +897,7 @@ export default function DrillLibrary() {
                         );
                         setVisibleCount(DRILLS_PER_PAGE);
                       }}
-                      className={`inline-flex min-h-[40px] items-center rounded-full border px-4 text-xs font-semibold uppercase tracking-[0.2em] ${
+                      className={`touch-pill inline-flex items-center rounded-full border px-4 text-sm font-semibold uppercase tracking-[0.18em] ${
                         problemFilter === problem.id
                           ? "border-t1-blue/25 bg-t1-blue text-white"
                           : "border-t1-border bg-t1-surface text-t1-muted"
@@ -939,9 +915,7 @@ export default function DrillLibrary() {
                     3
                   </span>
                   <div>
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-muted">
-                      Intent
-                    </p>
+                    <p className="meta-label">Intent</p>
                     <h3 className="mt-1 text-lg font-semibold text-t1-text">
                       Set the rep feel
                     </h3>
@@ -958,7 +932,7 @@ export default function DrillLibrary() {
                         );
                         setVisibleCount(DRILLS_PER_PAGE);
                       }}
-                      className={`inline-flex min-h-[40px] items-center gap-2 rounded-full border px-4 text-xs font-semibold uppercase tracking-[0.2em] ${
+                      className={`touch-pill inline-flex items-center gap-2 rounded-full border px-4 text-sm font-semibold uppercase tracking-[0.18em] ${
                         intentFilter === intent.id
                           ? "border-t1-blue/25 bg-t1-blue text-white"
                           : "border-t1-border bg-t1-surface text-t1-muted"
@@ -977,7 +951,7 @@ export default function DrillLibrary() {
             <div className="flex flex-wrap items-center justify-between gap-3">
               <button
                 onClick={() => setShowAdvancedFilters(previous => !previous)}
-                className={`inline-flex min-h-[40px] items-center gap-2 rounded-full border px-4 text-xs font-semibold uppercase tracking-[0.22em] ${
+                className={`touch-pill inline-flex items-center gap-2 rounded-full border px-4 text-sm font-semibold uppercase tracking-[0.18em] ${
                   showAdvancedFilters || advancedFilterCount > 0
                     ? "border-t1-blue/25 bg-t1-blue/10 text-t1-blue"
                     : "border-t1-border bg-t1-surface text-t1-muted"
@@ -995,7 +969,7 @@ export default function DrillLibrary() {
               {hasActiveFilters && (
                 <button
                   onClick={clearFilters}
-                  className="text-sm font-semibold text-t1-blue"
+                  className="touch-pill inline-flex items-center justify-center rounded-full border border-t1-border bg-t1-surface px-4 text-sm font-semibold text-t1-text"
                 >
                   Reset all
                 </button>
@@ -1006,9 +980,7 @@ export default function DrillLibrary() {
               <div className="mt-4 grid gap-4 lg:grid-cols-2">
                 <div className="space-y-4">
                   <div>
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-muted">
-                      UTR
-                    </p>
+                    <p className="meta-label">UTR</p>
                     <div className="mt-2 flex flex-wrap gap-2">
                       {availableUtrBands.map(band => (
                         <button
@@ -1019,7 +991,7 @@ export default function DrillLibrary() {
                             );
                             setVisibleCount(DRILLS_PER_PAGE);
                           }}
-                          className={`rounded-full border px-3 py-2 text-xs font-semibold uppercase tracking-[0.18em] ${
+                          className={`touch-pill rounded-full border px-3 text-sm font-semibold uppercase tracking-[0.16em] ${
                             utrFilter === band
                               ? "border-t1-blue/25 bg-t1-blue text-white"
                               : "border-t1-border bg-t1-surface text-t1-muted"
@@ -1032,9 +1004,7 @@ export default function DrillLibrary() {
                   </div>
 
                   <div>
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-muted">
-                      Block
-                    </p>
+                    <p className="meta-label">Block</p>
                     <div className="mt-2 flex flex-wrap gap-2">
                       {sessionBlocks.map(block => (
                         <button
@@ -1045,7 +1015,7 @@ export default function DrillLibrary() {
                             );
                             setVisibleCount(DRILLS_PER_PAGE);
                           }}
-                          className={`rounded-full border px-3 py-2 text-xs font-semibold uppercase tracking-[0.18em] ${
+                          className={`touch-pill rounded-full border px-3 text-sm font-semibold uppercase tracking-[0.16em] ${
                             blockFilter === block.id
                               ? "border-t1-blue/25 bg-t1-blue text-white"
                               : "border-t1-border bg-t1-surface text-t1-muted"
@@ -1058,9 +1028,7 @@ export default function DrillLibrary() {
                   </div>
 
                   <div>
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-muted">
-                      Skill
-                    </p>
+                    <p className="meta-label">Skill</p>
                     <div className="mt-2 flex flex-wrap gap-2">
                       {drillSkillFilters.map(skill => (
                         <button
@@ -1071,7 +1039,7 @@ export default function DrillLibrary() {
                             );
                             setVisibleCount(DRILLS_PER_PAGE);
                           }}
-                          className={`rounded-full border px-3 py-2 text-xs font-semibold uppercase tracking-[0.18em] ${
+                          className={`touch-pill rounded-full border px-3 text-sm font-semibold uppercase tracking-[0.16em] ${
                             categoryFilter === skill.id
                               ? "border-t1-blue/25 bg-t1-blue text-white"
                               : "border-t1-border bg-t1-surface text-t1-muted"
@@ -1086,9 +1054,7 @@ export default function DrillLibrary() {
 
                 <div className="space-y-4">
                   <div>
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-muted">
-                      Type
-                    </p>
+                    <p className="meta-label">Type</p>
                     <div className="mt-2 flex flex-wrap gap-2">
                       {[
                         "technical",
@@ -1104,7 +1070,7 @@ export default function DrillLibrary() {
                             );
                             setVisibleCount(DRILLS_PER_PAGE);
                           }}
-                          className={`rounded-full border px-3 py-2 text-xs font-semibold uppercase tracking-[0.18em] ${
+                          className={`touch-pill rounded-full border px-3 text-sm font-semibold uppercase tracking-[0.16em] ${
                             typeFilter === type
                               ? "border-t1-blue/25 bg-t1-blue text-white"
                               : "border-t1-border bg-t1-surface text-t1-muted"
@@ -1117,9 +1083,7 @@ export default function DrillLibrary() {
                   </div>
 
                   <div>
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-muted">
-                      Ball feed
-                    </p>
+                    <p className="meta-label">Ball feed</p>
                     <div className="mt-2 flex flex-wrap gap-2">
                       {[
                         { id: "feeding", label: "Feeding" },
@@ -1134,7 +1098,7 @@ export default function DrillLibrary() {
                             );
                             setVisibleCount(DRILLS_PER_PAGE);
                           }}
-                          className={`rounded-full border px-3 py-2 text-xs font-semibold uppercase tracking-[0.18em] ${
+                          className={`touch-pill rounded-full border px-3 text-sm font-semibold uppercase tracking-[0.16em] ${
                             feedingFilter === item.id
                               ? "border-t1-blue/25 bg-t1-blue text-white"
                               : "border-t1-border bg-t1-surface text-t1-muted"
@@ -1147,9 +1111,7 @@ export default function DrillLibrary() {
                   </div>
 
                   <div>
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-muted">
-                      Format
-                    </p>
+                    <p className="meta-label">Format</p>
                     <div className="mt-2 flex flex-wrap gap-2">
                       {[
                         { id: "singles", label: "Singles" },
@@ -1164,7 +1126,7 @@ export default function DrillLibrary() {
                             );
                             setVisibleCount(DRILLS_PER_PAGE);
                           }}
-                          className={`rounded-full border px-3 py-2 text-xs font-semibold uppercase tracking-[0.18em] ${
+                          className={`touch-pill rounded-full border px-3 text-sm font-semibold uppercase tracking-[0.16em] ${
                             formatFilter === item.id
                               ? "border-t1-blue/25 bg-t1-blue text-white"
                               : "border-t1-border bg-t1-surface text-t1-muted"
@@ -1224,7 +1186,7 @@ export default function DrillLibrary() {
                         <p className="mt-3 line-clamp-2 text-sm font-semibold text-t1-text">
                           {drill.name}
                         </p>
-                        <p className="mt-1 text-sm text-t1-text/72">
+                        <p className="support-copy mt-1 text-sm">
                           {drill.recommendedTime}
                         </p>
                       </div>
@@ -1242,7 +1204,7 @@ export default function DrillLibrary() {
               <h2 className="mt-2 font-display text-2xl font-semibold uppercase tracking-[0.08em] text-t1-text">
                 Ready drills
               </h2>
-              <p className="mt-2 text-sm text-t1-text/72">
+              <p className="support-copy mt-2 text-sm">
                 {filteredDrills.length} drill
                 {filteredDrills.length !== 1 ? "s" : ""} ready
                 {hasMore && ` • showing ${visibleCount}`}
@@ -1251,7 +1213,7 @@ export default function DrillLibrary() {
             {hasActiveFilters && (
               <button
                 onClick={clearFilters}
-                className="text-sm font-semibold text-t1-blue"
+                className="touch-pill inline-flex items-center justify-center rounded-full border border-t1-border bg-t1-surface px-4 text-sm font-semibold text-t1-text"
               >
                 Reset all filters
               </button>
@@ -1277,7 +1239,7 @@ export default function DrillLibrary() {
               <EmptyContent>
                 <button
                   onClick={clearFilters}
-                  className="inline-flex min-h-[48px] items-center justify-center rounded-full bg-t1-blue px-5 text-sm font-semibold text-white"
+                  className="touch-pill inline-flex items-center justify-center rounded-full bg-t1-blue px-5 text-sm font-semibold text-white"
                 >
                   Reset filters
                 </button>
@@ -1338,14 +1300,14 @@ export default function DrillLibrary() {
                             <h3 className="mt-3 text-xl font-semibold text-t1-text">
                               {drill.name}
                             </h3>
-                            <p className="mt-2 line-clamp-2 text-sm leading-6 text-t1-text/72">
+                            <p className="support-copy mt-2 line-clamp-2 text-sm leading-6">
                               {drill.objective}
                             </p>
                           </div>
 
                           <button
                             onClick={() => toggleFavorite(drill.id)}
-                            className={`inline-flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full border ${
+                            className={`touch-icon inline-flex flex-shrink-0 items-center justify-center rounded-full border ${
                               favorited
                                 ? "border-amber-500/30 bg-amber-500/12 text-amber-500"
                                 : "border-t1-border bg-t1-surface/85 text-t1-muted"
@@ -1390,35 +1352,33 @@ export default function DrillLibrary() {
 
                       {drill.coachingCues[0] && (
                         <div className="mt-4 rounded-[1.35rem] border border-t1-border bg-t1-bg px-4 py-3">
-                          <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-muted">
-                            First cue
-                          </p>
-                          <p className="mt-2 text-sm leading-6 text-t1-text">
+                          <p className="meta-label">First cue</p>
+                          <p className="support-copy-strong mt-2 text-sm leading-6">
                             {drill.coachingCues[0]}
                           </p>
                         </div>
                       )}
 
-                      <div className="mt-4 flex flex-wrap gap-2">
+                      <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-3">
+                        <button
+                          onClick={() => launchSingleDrill(drill)}
+                          className="touch-pill col-span-2 inline-flex items-center justify-center gap-2 rounded-full bg-t1-blue px-4 text-sm font-semibold text-white sm:col-span-1"
+                        >
+                          <PlayCircle className="h-4 w-4" />
+                          On-Court
+                        </button>
                         <button
                           onClick={() => {
                             setPreviewDrillId(drill.id);
                             setPreviewOpen(true);
                           }}
-                          className="inline-flex min-h-[44px] items-center justify-center rounded-full border border-t1-border bg-t1-bg px-4 text-sm font-semibold text-t1-text"
+                          className="touch-pill inline-flex items-center justify-center rounded-full border border-t1-border bg-t1-bg px-4 text-sm font-semibold text-t1-text"
                         >
                           Preview
                         </button>
-                        <button
-                          onClick={() => launchSingleDrill(drill)}
-                          className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-full bg-t1-blue px-4 text-sm font-semibold text-white"
-                        >
-                          <PlayCircle className="h-4 w-4" />
-                          On-Court
-                        </button>
                         <Link
                           href={`/drills/${drill.id}`}
-                          className="inline-flex min-h-[44px] items-center justify-center rounded-full border border-t1-border bg-t1-surface px-4 text-sm font-semibold text-t1-text no-underline"
+                          className="touch-pill inline-flex items-center justify-center rounded-full border border-t1-border bg-t1-surface px-4 text-sm font-semibold text-t1-text no-underline"
                         >
                           Details
                         </Link>
@@ -1434,7 +1394,7 @@ export default function DrillLibrary() {
                     onClick={() =>
                       setVisibleCount(previous => previous + DRILLS_PER_PAGE)
                     }
-                    className="inline-flex min-h-[48px] items-center justify-center gap-2 rounded-full border border-t1-border bg-t1-surface px-5 text-sm font-semibold text-t1-text"
+                    className="touch-pill inline-flex items-center justify-center gap-2 rounded-full border border-t1-border bg-t1-surface px-5 text-sm font-semibold text-t1-text"
                   >
                     <Zap className="h-4 w-4 text-t1-blue" />
                     Load more drills
