@@ -75,10 +75,10 @@ export default function OnCourtMode() {
         <section className="premium-card overflow-hidden rounded-[2rem] border border-t1-border bg-t1-surface p-5 sm:p-8">
           <div className="max-w-xl">
             <p className="section-kicker">On-Court Mode</p>
-            <h1 className="mt-3 font-display text-3xl font-semibold uppercase tracking-[0.12em] text-t1-text sm:text-4xl">
+            <h1 className="section-title mt-3 text-t1-text">
               No live board is loaded.
             </h1>
-            <p className="support-copy-strong mt-3 text-sm leading-6 sm:text-base">
+            <p className="support-copy-strong body-copy mt-3">
               Launch a board from the dashboard, the drill library, or session
               playbooks. This view is intentionally stripped down for live court
               use.
@@ -88,14 +88,14 @@ export default function OnCourtMode() {
           <div className="mt-6 flex flex-col gap-2 sm:flex-row">
             <Link
               href="/"
-              className="touch-pill inline-flex items-center justify-center gap-2 rounded-full bg-t1-blue px-5 text-sm font-semibold text-white no-underline"
+              className="touch-pill inline-flex items-center justify-center gap-2 rounded-full bg-t1-blue px-5 action-label text-white no-underline"
             >
               <ArrowLeft className="h-4 w-4" />
               Back to dashboard
             </Link>
             <Link
               href="/session-plans"
-              className="touch-pill inline-flex items-center justify-center gap-2 rounded-full border border-t1-border bg-t1-bg px-5 text-sm font-semibold text-t1-text no-underline"
+              className="touch-pill inline-flex items-center justify-center gap-2 rounded-full border border-t1-border bg-t1-bg px-5 action-label text-t1-text no-underline"
             >
               Open playbooks
             </Link>
@@ -110,7 +110,7 @@ export default function OnCourtMode() {
       <section className="page-hero border-b-0">
         <div className="container py-5 sm:py-8">
           <div className="grid gap-4 xl:grid-cols-[minmax(0,1.4fr)_minmax(300px,0.8fr)]">
-            <div className="premium-card rounded-[2rem] border border-t1-border bg-t1-surface p-5 sm:p-7">
+            <div className="premium-card rounded-[2rem] border border-t1-border bg-t1-surface p-5 sm:p-6 lg:p-7">
               <div className="flex flex-wrap items-center gap-2">
                 <span
                   className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] ${brand.badgeClassName}`}
@@ -131,10 +131,10 @@ export default function OnCourtMode() {
               <div className="mt-4 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
                 <div className="max-w-2xl">
                   <p className="section-kicker">On-Court Mode</p>
-                  <h1 className="mt-2 font-display text-3xl font-semibold uppercase tracking-[0.12em] text-t1-text sm:text-5xl">
+                  <h1 className="page-title mt-2 text-t1-text">
                     {session.title}
                   </h1>
-                  <p className="support-copy-strong mt-3 text-sm leading-6 sm:text-base">
+                  <p className="support-copy-strong body-copy mt-3">
                     {session.subtitle}. One cue at a time, fast next action, no
                     extra UI.
                   </p>
@@ -143,7 +143,7 @@ export default function OnCourtMode() {
                 <div className="flex flex-wrap gap-2">
                   <Link
                     href="/"
-                    className="touch-pill inline-flex items-center justify-center gap-2 rounded-full border border-t1-border bg-t1-bg px-4 text-sm font-semibold text-t1-text no-underline"
+                    className="touch-pill inline-flex items-center justify-center gap-2 rounded-full border border-t1-border bg-t1-bg px-4 action-label text-t1-text no-underline"
                   >
                     <ArrowLeft className="h-4 w-4" />
                     Exit
@@ -153,7 +153,7 @@ export default function OnCourtMode() {
                       clearOnCourtSession();
                       setSession(null);
                     }}
-                    className="touch-pill inline-flex items-center justify-center gap-2 rounded-full border border-red-500/20 bg-red-500/8 px-4 text-sm font-semibold text-red-500"
+                    className="touch-pill inline-flex items-center justify-center gap-2 rounded-full border border-red-500/20 bg-red-500/8 px-4 action-label text-red-500"
                   >
                     <Trash2 className="h-4 w-4" />
                     Clear board
@@ -166,13 +166,13 @@ export default function OnCourtMode() {
               <div className="flex items-center justify-between gap-3">
                 <div>
                   <p className="section-kicker">Session control</p>
-                  <h2 className="mt-2 font-display text-xl font-semibold uppercase tracking-[0.12em] text-t1-text">
+                  <h2 className="section-title mt-2 text-t1-text">
                     Keep the rep moving
                   </h2>
                 </div>
                 <button
                   onClick={() => setQueueOpen(previous => !previous)}
-                  className="touch-pill inline-flex items-center justify-center gap-2 rounded-full border border-t1-border bg-t1-bg px-4 text-sm font-semibold text-t1-text sm:h-11 sm:w-11 sm:px-0"
+                  className="touch-pill inline-flex items-center justify-center gap-2 rounded-full border border-t1-border bg-t1-bg px-4 action-label text-t1-text sm:h-11 sm:w-11 sm:px-0"
                   aria-label={queueOpen ? "Hide queue" : "Show queue"}
                 >
                   <ListOrdered className="h-5 w-5" />
@@ -188,7 +188,7 @@ export default function OnCourtMode() {
                   <p className="mt-2 text-3xl font-semibold text-t1-text">
                     {completionPercent}%
                   </p>
-                  <p className="support-copy mt-1 text-sm">
+                  <p className="support-copy body-copy-sm mt-1">
                     Block {currentIndex + 1} of {session.items.length}
                   </p>
                 </div>
@@ -197,7 +197,7 @@ export default function OnCourtMode() {
                   <p className="mt-2 text-3xl font-semibold text-t1-text">
                     {formatElapsed(elapsedSeconds)}
                   </p>
-                  <p className="support-copy mt-1 text-sm">
+                  <p className="support-copy body-copy-sm mt-1">
                     {timerRunning ? "Running live" : "Paused"}
                   </p>
                 </div>
@@ -206,7 +206,7 @@ export default function OnCourtMode() {
               <div className="mt-4 flex flex-col gap-2 sm:flex-row">
                 <button
                   onClick={() => setTimerRunning(previous => !previous)}
-                  className="touch-pill inline-flex flex-1 items-center justify-center gap-2 rounded-full bg-t1-blue px-4 text-sm font-semibold text-white"
+                  className="touch-pill inline-flex flex-1 items-center justify-center gap-2 rounded-full bg-t1-blue px-4 action-label text-white"
                 >
                   {timerRunning ? (
                     <>
@@ -222,7 +222,7 @@ export default function OnCourtMode() {
                 </button>
                 <button
                   onClick={() => setElapsedSeconds(0)}
-                  className="touch-pill inline-flex flex-1 items-center justify-center gap-2 rounded-full border border-t1-border bg-t1-bg px-4 text-sm font-semibold text-t1-text"
+                  className="touch-pill inline-flex flex-1 items-center justify-center gap-2 rounded-full border border-t1-border bg-t1-bg px-4 action-label text-t1-text"
                 >
                   <Clock3 className="h-4 w-4" />
                   Reset clock
@@ -239,7 +239,7 @@ export default function OnCourtMode() {
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
                 <p className="section-kicker">Current rep</p>
-                <h2 className="mt-2 font-display text-2xl font-semibold uppercase tracking-[0.12em] text-t1-text sm:text-3xl">
+                <h2 className="section-title mt-2 text-t1-text">
                   {currentItem.title}
                 </h2>
                 <div className="mt-3 flex flex-wrap items-center gap-2">
@@ -257,7 +257,7 @@ export default function OnCourtMode() {
 
               <div className="rounded-[1.5rem] border border-t1-border bg-t1-bg px-4 py-3 text-right">
                 <p className="meta-label">Hold this emphasis</p>
-                <p className="mt-2 max-w-[260px] text-sm font-semibold leading-6 text-t1-text">
+                <p className="body-copy-sm mt-2 max-w-[260px] font-semibold text-t1-text">
                   {session.emphasis}
                 </p>
               </div>
@@ -273,14 +273,14 @@ export default function OnCourtMode() {
                 className="mt-6"
               >
                 <div className="rounded-[1.75rem] border border-t1-border bg-t1-bg p-5 sm:p-6">
-                  <p className="text-base font-medium leading-7 text-t1-text sm:text-lg">
+                  <p className="body-copy-strong text-t1-text sm:text-lg">
                     {currentItem.description}
                   </p>
 
                   {currentItem.secondary && (
                     <div className="mt-4 rounded-[1.5rem] border border-t1-border bg-t1-surface px-4 py-3">
                       <p className="meta-label">Run it</p>
-                      <p className="support-copy-strong mt-2 text-sm leading-6">
+                      <p className="support-copy-strong body-copy-sm mt-2">
                         {currentItem.secondary}
                       </p>
                     </div>
@@ -289,7 +289,7 @@ export default function OnCourtMode() {
                   {currentItem.cue && (
                     <div className="coach-tip mt-4 rounded-[1.5rem] p-4">
                       <p className="meta-label text-t1-blue">Cue to coach</p>
-                      <p className="mt-2 text-sm font-semibold leading-6 text-t1-text sm:text-base">
+                      <p className="body-copy-sm mt-2 font-semibold text-t1-text sm:text-base">
                         {currentItem.cue}
                       </p>
                     </div>
@@ -300,7 +300,7 @@ export default function OnCourtMode() {
                       {currentItem.checklist.map(item => (
                         <div
                           key={item}
-                          className="inline-flex items-start gap-2 rounded-[1.25rem] border border-t1-border bg-t1-surface px-4 py-3 text-sm text-t1-text"
+                          className="inline-flex items-start gap-2 rounded-[1.25rem] border border-t1-border bg-t1-surface px-4 py-3 body-copy-sm text-t1-text"
                         >
                           <ShieldCheck className="mt-0.5 h-4 w-4 flex-shrink-0 text-t1-blue" />
                           <span>{item}</span>
@@ -316,7 +316,7 @@ export default function OnCourtMode() {
               {currentItem.tags.map(tag => (
                 <span
                   key={tag}
-                  className="inline-flex items-center rounded-full border border-t1-border bg-t1-bg px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-muted"
+                  className="chip-label inline-flex items-center rounded-full border border-t1-border bg-t1-bg px-3 py-1 text-t1-muted"
                 >
                   {tag}
                 </span>
@@ -331,7 +331,7 @@ export default function OnCourtMode() {
                       setCurrentIndex(previous => Math.max(previous - 1, 0))
                     }
                     disabled={currentIndex === 0}
-                    className="touch-pill inline-flex items-center justify-center gap-2 rounded-full border border-t1-border bg-t1-bg px-4 text-sm font-semibold text-t1-text disabled:opacity-40"
+                    className="touch-pill inline-flex items-center justify-center gap-2 rounded-full border border-t1-border bg-t1-bg px-4 action-label text-t1-text disabled:opacity-40"
                   >
                     <ChevronLeft className="h-4 w-4" />
                     Previous
@@ -344,7 +344,7 @@ export default function OnCourtMode() {
                       );
                     }}
                     disabled={currentIndex === session.items.length - 1}
-                    className="touch-pill order-first col-span-2 inline-flex items-center justify-center gap-2 rounded-full bg-t1-blue px-4 text-sm font-semibold text-white disabled:opacity-40 md:order-none md:col-span-1"
+                    className="touch-pill order-first col-span-2 inline-flex items-center justify-center gap-2 rounded-full bg-t1-blue px-4 action-label text-white disabled:opacity-40 md:order-none md:col-span-1"
                   >
                     <CheckCircle2 className="h-4 w-4" />
                     Mark done
@@ -356,7 +356,7 @@ export default function OnCourtMode() {
                       )
                     }
                     disabled={currentIndex === session.items.length - 1}
-                    className="touch-pill inline-flex items-center justify-center gap-2 rounded-full border border-t1-border bg-t1-bg px-4 text-sm font-semibold text-t1-text disabled:opacity-40"
+                    className="touch-pill inline-flex items-center justify-center gap-2 rounded-full border border-t1-border bg-t1-bg px-4 action-label text-t1-text disabled:opacity-40"
                   >
                     Next
                     <ChevronRight className="h-4 w-4" />
@@ -372,13 +372,13 @@ export default function OnCourtMode() {
               <div className="mt-3 space-y-4">
                 <div className="rounded-[1.5rem] border border-t1-border bg-t1-bg p-4">
                   <p className="meta-label">Objective</p>
-                  <p className="support-copy-strong mt-2 text-sm leading-6">
+                  <p className="support-copy-strong body-copy-sm mt-2">
                     {session.objective}
                   </p>
                 </div>
                 <div className="rounded-[1.5rem] border border-t1-border bg-t1-bg p-4">
                   <p className="meta-label">Source</p>
-                  <p className="support-copy-strong mt-2 text-sm leading-6">
+                  <p className="support-copy-strong body-copy-sm mt-2">
                     {session.sourceLabel}
                   </p>
                 </div>
@@ -388,7 +388,7 @@ export default function OnCourtMode() {
                     {session.checklist.slice(0, 4).map(item => (
                       <div
                         key={item}
-                        className="inline-flex items-start gap-2 rounded-[1.25rem] border border-t1-border bg-t1-surface px-4 py-3 text-sm text-t1-text"
+                        className="inline-flex items-start gap-2 rounded-[1.25rem] border border-t1-border bg-t1-surface px-4 py-3 body-copy-sm text-t1-text"
                       >
                         <Zap className="mt-0.5 h-4 w-4 flex-shrink-0 text-t1-blue" />
                         <span>{item}</span>
@@ -403,11 +403,11 @@ export default function OnCourtMode() {
               <div className="flex items-center justify-between gap-3">
                 <div>
                   <p className="section-kicker">Queue</p>
-                  <h3 className="mt-2 font-display text-xl font-semibold uppercase tracking-[0.12em] text-t1-text">
+                  <h3 className="section-title mt-2 text-t1-text">
                     Next actions
                   </h3>
                 </div>
-                <span className="rounded-full border border-t1-border bg-t1-bg px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-muted">
+                <span className="chip-label rounded-full border border-t1-border bg-t1-bg px-3 py-1 text-t1-muted">
                   {currentIndex + 1}/{session.items.length}
                 </span>
               </div>
@@ -432,7 +432,7 @@ export default function OnCourtMode() {
                       <div className="flex items-start justify-between gap-3">
                         <div>
                           <p className="meta-label">{item.label}</p>
-                          <p className="mt-1 text-sm font-semibold text-t1-text">
+                          <p className="mt-1 text-base font-semibold leading-tight text-t1-text">
                             {item.title}
                           </p>
                         </div>
@@ -448,7 +448,7 @@ export default function OnCourtMode() {
                           {index + 1}
                         </span>
                       </div>
-                      <p className="support-copy mt-2 text-sm leading-6">
+                      <p className="support-copy body-copy-sm mt-2">
                         {item.durationLabel}
                       </p>
                     </button>

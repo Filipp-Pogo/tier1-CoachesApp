@@ -173,7 +173,7 @@ function NavDropdown({
     >
       <button
         onClick={() => setOpen(previous => !previous)}
-        className={`inline-flex min-h-[40px] items-center gap-1.5 rounded-full px-3.5 py-2 text-sm font-semibold transition-colors ${
+        className={`inline-flex min-h-[42px] items-center gap-1.5 rounded-full px-4 py-2.5 action-label transition-colors ${
           active
             ? "bg-t1-blue text-white shadow-sm"
             : "text-t1-muted hover:bg-t1-bg hover:text-t1-text"
@@ -196,7 +196,7 @@ function NavDropdown({
                 key={child.href}
                 href={child.href}
                 onClick={() => setOpen(false)}
-                className={`flex min-h-[44px] items-center gap-3 rounded-[1.2rem] px-3 py-3 text-sm font-medium no-underline transition-colors ${
+                className={`flex min-h-[46px] items-center gap-3 rounded-[1.2rem] px-3.5 py-3 action-label no-underline transition-colors ${
                   activeChild
                     ? "bg-t1-blue/10 text-t1-blue"
                     : "text-t1-text hover:bg-t1-bg"
@@ -238,6 +238,7 @@ export default function Layout({ children }: { children: ReactNode }) {
   const [location] = useLocation();
   const { isDark } = useTheme();
   const { authEnabled, user, signOut } = useAuth();
+  const isOnCourtRoute = location.startsWith("/on-court");
 
   useEffect(() => {
     setMobileOpen(false);
@@ -268,10 +269,10 @@ export default function Layout({ children }: { children: ReactNode }) {
               />
             </div>
             <div className="flex flex-col">
-              <span className="font-display text-sm font-semibold uppercase tracking-[0.18em] text-t1-text">
+              <span className="font-display text-[0.95rem] leading-none font-semibold uppercase tracking-[0.18em] text-t1-text sm:text-sm">
                 Tier 1 Coaches
               </span>
-              <span className="hidden text-[10px] uppercase tracking-[0.22em] text-t1-muted sm:block">
+              <span className="hidden text-[11px] leading-none uppercase tracking-[0.18em] text-t1-muted sm:block">
                 Performance control panel
               </span>
             </div>
@@ -285,7 +286,7 @@ export default function Layout({ children }: { children: ReactNode }) {
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`inline-flex min-h-[40px] items-center rounded-full px-3.5 py-2 text-sm font-semibold no-underline transition-colors ${
+                  className={`inline-flex min-h-[42px] items-center rounded-full px-4 py-2.5 action-label no-underline transition-colors ${
                     isActive(item.href)
                       ? "bg-t1-blue text-white shadow-sm"
                       : "text-t1-muted hover:bg-t1-bg hover:text-t1-text"
@@ -300,7 +301,7 @@ export default function Layout({ children }: { children: ReactNode }) {
           <div className="flex items-center gap-2">
             <Link
               href="/on-court"
-              className="hidden min-h-[40px] items-center gap-2 rounded-full bg-t1-blue px-4 text-sm font-semibold text-white no-underline xl:inline-flex"
+              className="hidden min-h-[42px] items-center gap-2 rounded-full bg-t1-blue px-4 action-label text-white no-underline xl:inline-flex"
             >
               <PlayCircle className="h-4 w-4" />
               On Court
@@ -311,16 +312,16 @@ export default function Layout({ children }: { children: ReactNode }) {
             {authEnabled && user && (
               <div className="hidden items-center gap-2 lg:flex">
                 <div className="hidden xl:block text-right">
-                  <p className="text-xs font-semibold text-t1-text">
+                  <p className="max-w-[220px] truncate text-sm font-semibold text-t1-text">
                     {user.email}
                   </p>
-                  <p className="text-[10px] uppercase tracking-[0.22em] text-t1-muted">
+                  <p className="text-[11px] uppercase tracking-[0.18em] text-t1-muted">
                     Cloud sync on
                   </p>
                 </div>
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
-                    <button className="inline-flex min-h-[40px] items-center gap-2 rounded-full border border-t1-border bg-t1-surface/80 px-4 text-sm font-semibold text-t1-muted transition-colors hover:text-t1-text">
+                    <button className="inline-flex min-h-[42px] items-center gap-2 rounded-full border border-t1-border bg-t1-surface/80 px-4 action-label text-t1-muted transition-colors hover:text-t1-text">
                       <LogOut className="h-4 w-4" />
                       Sign Out
                     </button>
@@ -358,10 +359,10 @@ export default function Layout({ children }: { children: ReactNode }) {
         <div className="fixed inset-0 z-[60] flex flex-col bg-t1-bg/96 backdrop-blur-xl lg:hidden">
           <div className="flex h-14 items-center justify-between border-b border-t1-border px-4">
             <div>
-              <p className="font-display text-sm font-semibold uppercase tracking-[0.18em] text-t1-text">
+              <p className="font-display text-[0.95rem] leading-none font-semibold uppercase tracking-[0.18em] text-t1-text">
                 Quick navigation
               </p>
-              <p className="text-[10px] uppercase tracking-[0.22em] text-t1-muted">
+              <p className="mt-1 text-[11px] uppercase tracking-[0.18em] text-t1-muted">
                 Action-first routes
               </p>
             </div>
@@ -381,7 +382,7 @@ export default function Layout({ children }: { children: ReactNode }) {
           <div className="flex-1 overflow-y-auto px-4 py-4">
             {mobileSections.map(section => (
               <section key={section.label} className="mb-5">
-                <p className="mb-2 px-2 text-[10px] font-semibold uppercase tracking-[0.26em] text-t1-muted">
+                <p className="mb-2 px-2 chip-label text-t1-muted">
                   {section.label}
                 </p>
                 <div className="space-y-2">
@@ -393,7 +394,7 @@ export default function Layout({ children }: { children: ReactNode }) {
                       <Link
                         key={item.href}
                         href={item.href}
-                        className={`flex min-h-[54px] items-center gap-4 rounded-[1.4rem] border px-4 py-3 text-base font-semibold no-underline transition-colors ${
+                        className={`flex min-h-[54px] items-center gap-4 rounded-[1.4rem] border px-4 py-3 text-[0.97rem] leading-tight font-semibold no-underline transition-colors ${
                           active
                             ? "border-t1-blue/25 bg-t1-blue/10 text-t1-blue"
                             : "border-t1-border bg-t1-surface/80 text-t1-text"
@@ -416,7 +417,7 @@ export default function Layout({ children }: { children: ReactNode }) {
             {authEnabled && user && (
               <AlertDialog>
                 <AlertDialogTrigger asChild>
-                  <button className="mb-3 inline-flex min-h-[48px] w-full items-center justify-center gap-2 rounded-full border border-t1-border bg-t1-surface px-4 text-sm font-semibold text-t1-text">
+                  <button className="mb-3 inline-flex min-h-[48px] w-full items-center justify-center gap-2 rounded-full border border-t1-border bg-t1-surface px-4 action-label text-t1-text">
                     <LogOut className="h-4 w-4" />
                     Sign Out
                   </button>
@@ -446,14 +447,16 @@ export default function Layout({ children }: { children: ReactNode }) {
               </AlertDialog>
             )}
 
-            <p className="text-center text-[10px] uppercase tracking-[0.26em] text-t1-muted">
+            <p className="text-center text-[11px] uppercase tracking-[0.18em] text-t1-muted">
               The standard is the standard.
             </p>
           </div>
         </div>
       )}
 
-      <main className="pb-20 lg:pb-12">{children}</main>
+      <main className={isOnCourtRoute ? "pb-6 lg:pb-12" : "pb-20 lg:pb-12"}>
+        {children}
+      </main>
 
       <footer className="hidden border-t border-t1-border bg-t1-bg/84 lg:block">
         <div className="container flex items-center justify-between py-5">
@@ -465,47 +468,53 @@ export default function Layout({ children }: { children: ReactNode }) {
                 className={`h-4 w-auto opacity-70 ${isDark ? "" : "brightness-0"}`}
               />
             </div>
-            <span className="text-xs text-t1-muted">
+            <span className="text-sm text-t1-muted">
               Tier 1 Coaches App. Build faster, coach cleaner.
             </span>
           </div>
-          <p className="text-[10px] uppercase tracking-[0.24em] text-t1-muted">
+          <p className="text-[11px] uppercase tracking-[0.18em] text-t1-muted">
             Action first. Details on demand.
           </p>
         </div>
       </footer>
 
-      <nav className="safe-area-bottom fixed bottom-0 left-0 right-0 z-50 border-t border-t1-border bg-t1-bg/94 backdrop-blur-xl lg:hidden">
-        <div className="grid h-16 grid-cols-5">
-          {bottomNavItems.map(item => {
-            const active = isActive(item.href);
-            const Icon = item.icon;
+      {!isOnCourtRoute && (
+        <nav className="safe-area-bottom fixed bottom-0 left-0 right-0 z-50 border-t border-t1-border bg-t1-bg/94 backdrop-blur-xl lg:hidden">
+          <div className="grid h-[4.25rem] grid-cols-5">
+            {bottomNavItems.map(item => {
+              const active = isActive(item.href);
+              const Icon = item.icon;
 
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={`flex flex-col items-center justify-center gap-1 no-underline transition-colors ${
-                  active ? "text-t1-blue" : "text-t1-muted"
-                }`}
-              >
-                <Icon className="h-5 w-5" strokeWidth={active ? 2.4 : 1.9} />
-                <span className="text-[10px] font-semibold">{item.label}</span>
-              </Link>
-            );
-          })}
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={`flex flex-col items-center justify-center gap-1.5 no-underline transition-colors ${
+                    active ? "text-t1-blue" : "text-t1-muted"
+                  }`}
+                >
+                  <Icon className="h-5 w-5" strokeWidth={active ? 2.4 : 1.9} />
+                  <span className="text-[11.5px] leading-none font-semibold">
+                    {item.label}
+                  </span>
+                </Link>
+              );
+            })}
 
-          <button
-            onClick={() => setMobileOpen(true)}
-            className={`flex flex-col items-center justify-center gap-1 ${
-              mobileOpen ? "text-t1-blue" : "text-t1-muted"
-            }`}
-          >
-            <Menu className="h-5 w-5" />
-            <span className="text-[10px] font-semibold">More</span>
-          </button>
-        </div>
-      </nav>
+            <button
+              onClick={() => setMobileOpen(true)}
+              className={`flex flex-col items-center justify-center gap-1.5 ${
+                mobileOpen ? "text-t1-blue" : "text-t1-muted"
+              }`}
+            >
+              <Menu className="h-5 w-5" />
+              <span className="text-[11.5px] leading-none font-semibold">
+                More
+              </span>
+            </button>
+          </div>
+        </nav>
+      )}
     </div>
   );
 }

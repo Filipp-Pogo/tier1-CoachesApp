@@ -408,26 +408,130 @@ select:focus-visible,
 
   .section-kicker {
     color: color-mix(in srgb, var(--t1-blue) 84%, var(--t1-text));
-    font-size: 0.74rem;
+    font-size: 0.76rem;
     font-weight: 700;
+    line-height: 1.2;
     letter-spacing: 0.24em;
     text-transform: uppercase;
+    text-wrap: balance;
   }
 
   .support-copy {
     color: color-mix(in srgb, var(--t1-text) 84%, var(--t1-muted));
+    text-wrap: pretty;
   }
 
   .support-copy-strong {
     color: color-mix(in srgb, var(--t1-text) 90%, var(--t1-muted));
+    text-wrap: pretty;
   }
 
   .meta-label {
     color: color-mix(in srgb, var(--t1-muted) 92%, var(--t1-text));
+    font-size: 0.74rem;
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+  }
+
+  .page-title {
+    font-family: "Sora", "Oswald", system-ui, sans-serif;
+    font-size: clamp(2rem, 5vw, 3.45rem);
+    font-weight: 600;
+    line-height: 1.02;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    text-wrap: balance;
+  }
+
+  .section-title {
+    font-family: "Sora", "Oswald", system-ui, sans-serif;
+    font-size: clamp(1.42rem, 2.35vw, 2rem);
+    font-weight: 600;
+    line-height: 1.08;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    text-wrap: balance;
+  }
+
+  .card-title {
+    font-size: clamp(1.12rem, 1.45vw, 1.55rem);
+    font-weight: 600;
+    line-height: 1.18;
+    text-wrap: balance;
+  }
+
+  .body-copy,
+  .body-copy-strong {
+    font-size: 0.95rem;
+    line-height: 1.65;
+    text-wrap: pretty;
+  }
+
+  .body-copy-strong {
+    font-weight: 500;
+  }
+
+  .body-copy-sm {
+    font-size: 0.9rem;
+    line-height: 1.6;
+    text-wrap: pretty;
+  }
+
+  .chip-label {
     font-size: 0.72rem;
     font-weight: 700;
-    letter-spacing: 0.2em;
+    line-height: 1;
+    letter-spacing: 0.18em;
     text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .chip-count {
+    font-size: 0.7rem;
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .action-label {
+    font-size: 0.94rem;
+    font-weight: 600;
+    line-height: 1.15;
+  }
+
+  .search-field {
+    min-height: 3.25rem;
+    width: 100%;
+    border: 1px solid var(--t1-border-strong);
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--t1-surface) 94%, transparent);
+    color: var(--t1-text);
+    padding-left: 2.875rem;
+    padding-right: 2.875rem;
+    font-size: 0.95rem;
+    line-height: 1.4;
+    transition:
+      border-color 0.2s ease,
+      box-shadow 0.2s ease,
+      background-color 0.2s ease;
+  }
+
+  .search-field::placeholder {
+    color: color-mix(in srgb, var(--t1-muted) 74%, transparent);
+  }
+
+  .search-field:focus {
+    outline: none;
+    border-color: color-mix(
+      in srgb,
+      var(--t1-blue) 35%,
+      var(--t1-border-strong)
+    );
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--t1-blue) 12%, transparent);
   }
 
   .touch-pill {
@@ -466,6 +570,27 @@ select:focus-visible,
 }
 
 @media (min-width: 640px) {
+  .section-kicker {
+    font-size: 0.78rem;
+  }
+
+  .meta-label {
+    font-size: 0.75rem;
+  }
+
+  .body-copy,
+  .body-copy-strong {
+    font-size: 1rem;
+  }
+
+  .body-copy-sm {
+    font-size: 0.95rem;
+  }
+
+  .chip-label {
+    font-size: 0.74rem;
+  }
+
   .touch-pill {
     min-height: 2.875rem;
   }

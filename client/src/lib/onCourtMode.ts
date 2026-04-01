@@ -4,6 +4,7 @@ import {
   type Drill,
   type PathwayStageId,
 } from "./data";
+import { buildDrillCoachGuide } from "./drillGuidance";
 import type { SessionPlanCardData } from "./customPlans";
 
 const ON_COURT_SESSION_KEY = "tier1-on-court-session";
@@ -193,21 +194,25 @@ export function createOnCourtSessionFromDrills({
     const blockMeta = sessionBlocks.find(
       block => block.id === drill.sessionBlock
     );
+    const guide = buildDrillCoachGuide(drill);
 
     return {
       id: drill.id,
       label: blockMeta?.shortName ?? "Drill",
       title: drill.name,
-      description: drill.objective,
+      description: guide.whatThisIs,
       durationLabel: drill.recommendedTime,
-      cue: drill.coachingCues[0],
-      secondary: `Setup: ${drill.setup}`,
+      cue: guide.whatToCoach[0] ?? drill.coachingCues[0],
+      secondary: `Run it: ${guide.howToRun[0] ?? drill.setup}`,
       tags: normalizeList([
         ...drill.level,
         drill.type,
         drill.feedingStyle.replace("-", " "),
       ]),
-      checklist: normalizeList(drill.standards),
+      checklist: normalizeList([
+        ...guide.whatToCoach.slice(1, 3),
+        ...drill.standards.slice(0, 2),
+      ]),
     };
   });
 

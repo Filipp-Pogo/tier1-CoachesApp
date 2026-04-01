@@ -267,10 +267,10 @@ function PlanCard({
 
             <div className="mt-4 flex items-start gap-3">
               <button onClick={onToggle} className="min-w-0 flex-1 text-left">
-                <h3 className="font-display text-2xl font-semibold text-t1-text">
+                <h3 className="card-title font-display text-t1-text">
                   {plan.name}
                 </h3>
-                <p className="support-copy mt-2 line-clamp-2 text-sm leading-6">
+                <p className="support-copy body-copy-sm mt-2 line-clamp-2">
                   {plan.objective}
                 </p>
               </button>
@@ -296,19 +296,19 @@ function PlanCard({
               {plan.blocks.slice(0, 4).map(block => (
                 <span
                   key={`${plan.id}-${block.label}`}
-                  className="inline-flex items-center rounded-full border border-t1-border bg-t1-surface/85 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-t1-muted"
+                  className="chip-label inline-flex items-center rounded-full border border-t1-border bg-t1-surface/85 px-3 py-1 text-t1-muted"
                 >
                   {block.label}
                 </span>
               ))}
               {plan.blocks.length > 4 && (
-                <span className="inline-flex items-center rounded-full border border-t1-border bg-t1-surface/85 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-t1-muted">
+                <span className="chip-label inline-flex items-center rounded-full border border-t1-border bg-t1-surface/85 px-3 py-1 text-t1-muted">
                   +{plan.blocks.length - 4}
                 </span>
               )}
             </div>
 
-            <p className="mt-4 text-sm leading-6 text-t1-text">
+            <p className="body-copy-sm mt-4 text-t1-text">
               <span className="meta-label mr-2 text-t1-muted">Focus</span>
               {plan.coachingEmphasis}
             </p>
@@ -319,14 +319,14 @@ function PlanCard({
       <div className="mt-4 grid grid-cols-2 gap-2 xl:max-w-[340px]">
         <button
           onClick={onLaunchOnCourt}
-          className="touch-pill col-span-2 inline-flex items-center justify-center gap-2 rounded-full bg-t1-blue px-4 text-sm font-semibold text-white"
+          className="touch-pill col-span-2 inline-flex items-center justify-center gap-2 rounded-full bg-t1-blue px-4 action-label text-white"
         >
           <PlayCircle className="h-4 w-4" />
           On-Court
         </button>
         <button
           onClick={onPrimaryAction}
-          className="touch-pill inline-flex items-center justify-center gap-2 rounded-full border border-t1-border bg-t1-bg px-4 text-sm font-semibold text-t1-text"
+          className="touch-pill inline-flex items-center justify-center gap-2 rounded-full border border-t1-border bg-t1-bg px-4 action-label text-t1-text"
         >
           <Edit3 className="h-4 w-4 text-t1-blue" />
           {primaryActionLabel ??
@@ -334,7 +334,7 @@ function PlanCard({
         </button>
         <button
           onClick={onToggle}
-          className="touch-pill inline-flex items-center justify-center rounded-full border border-t1-border bg-t1-bg px-4 text-sm font-semibold text-t1-text"
+          className="touch-pill inline-flex items-center justify-center rounded-full border border-t1-border bg-t1-bg px-4 action-label text-t1-text"
         >
           {isExpanded ? "Hide details" : "Details"}
         </button>
@@ -360,7 +360,7 @@ function PlanCard({
                           {block.label}
                         </p>
                       </div>
-                      <p className="support-copy mt-2 text-sm leading-6">
+                      <p className="support-copy body-copy-sm mt-2">
                         {block.content}
                       </p>
                     </div>
@@ -402,7 +402,7 @@ function PlanCard({
 
               <div className="rounded-[1.25rem] border border-t1-border bg-t1-bg px-4 py-4">
                 <p className="meta-label">Match transfer</p>
-                <p className="support-copy-strong mt-2 text-sm leading-6">
+                <p className="support-copy-strong body-copy-sm mt-2">
                   {plan.matchPlayTransfer}
                 </p>
               </div>
@@ -412,7 +412,7 @@ function PlanCard({
           <div className="mt-4 flex flex-wrap gap-2">
             <button
               onClick={copyPlanText}
-              className="touch-pill inline-flex items-center justify-center gap-2 rounded-full border border-t1-border bg-t1-bg px-4 text-sm font-semibold text-t1-text"
+              className="touch-pill inline-flex items-center justify-center gap-2 rounded-full border border-t1-border bg-t1-bg px-4 action-label text-t1-text"
             >
               {copied ? (
                 <Check className="h-4 w-4 text-emerald-500" />
@@ -423,7 +423,7 @@ function PlanCard({
             </button>
             <button
               onClick={handlePrint}
-              className="touch-pill inline-flex items-center justify-center gap-2 rounded-full border border-t1-border bg-t1-bg px-4 text-sm font-semibold text-t1-text"
+              className="touch-pill inline-flex items-center justify-center gap-2 rounded-full border border-t1-border bg-t1-bg px-4 action-label text-t1-text"
             >
               <Printer className="h-4 w-4" />
               Print
@@ -431,7 +431,7 @@ function PlanCard({
             {onDelete && (
               <AlertDialog>
                 <AlertDialogTrigger asChild>
-                  <button className="touch-pill inline-flex items-center justify-center gap-2 rounded-full border border-red-500/20 bg-red-500/8 px-4 text-sm font-semibold text-red-500">
+                  <button className="touch-pill inline-flex items-center justify-center gap-2 rounded-full border border-red-500/20 bg-red-500/8 px-4 action-label text-red-500">
                     <Trash2 className="h-4 w-4" />
                     Delete
                   </button>
@@ -817,7 +817,7 @@ export default function SessionPlans() {
           <EmptyContent>
             <Link
               href="/session-builder"
-              className="touch-pill inline-flex items-center justify-center rounded-full bg-t1-blue px-5 text-sm font-semibold text-white no-underline"
+              className="touch-pill inline-flex items-center justify-center rounded-full bg-t1-blue px-5 action-label text-white no-underline"
             >
               Open builder
             </Link>
@@ -847,7 +847,7 @@ export default function SessionPlans() {
           <EmptyContent>
             <Link
               href="/session-builder"
-              className="touch-pill inline-flex items-center justify-center rounded-full bg-t1-blue px-5 text-sm font-semibold text-white no-underline"
+              className="touch-pill inline-flex items-center justify-center rounded-full bg-t1-blue px-5 action-label text-white no-underline"
             >
               Create a shared playbook
             </Link>
@@ -877,7 +877,7 @@ export default function SessionPlans() {
           <EmptyContent>
             <button
               onClick={() => setActiveTab("all")}
-              className="touch-pill inline-flex items-center justify-center rounded-full bg-t1-blue px-5 text-sm font-semibold text-white"
+              className="touch-pill inline-flex items-center justify-center rounded-full bg-t1-blue px-5 action-label text-white"
             >
               Browse stock playbooks
             </button>
@@ -903,7 +903,7 @@ export default function SessionPlans() {
         <EmptyContent>
           <button
             onClick={() => setActiveTab("all")}
-            className="touch-pill inline-flex items-center justify-center rounded-full bg-t1-blue px-5 text-sm font-semibold text-white"
+            className="touch-pill inline-flex items-center justify-center rounded-full bg-t1-blue px-5 action-label text-white"
           >
             Browse stock playbooks
           </button>
@@ -917,12 +917,12 @@ export default function SessionPlans() {
       <section className="page-hero">
         <div className="container py-5 sm:py-8">
           <div className="grid gap-4 xl:grid-cols-[minmax(0,1.32fr)_minmax(320px,0.82fr)]">
-            <section className="premium-card rounded-[2rem] p-5 sm:p-7">
+            <section className="premium-card rounded-[2rem] p-5 sm:p-6 lg:p-7">
               <p className="section-kicker">Playbooks</p>
-              <h1 className="mt-3 font-display text-4xl font-semibold uppercase tracking-[0.1em] text-t1-text sm:text-5xl">
+              <h1 className="page-title mt-3 text-t1-text">
                 Pick the playbook. Send it to court.
               </h1>
-              <p className="support-copy-strong mt-4 max-w-2xl text-sm leading-7 sm:text-base">
+              <p className="support-copy-strong body-copy mt-4 max-w-2xl">
                 Start from stock structure, open the right playbook, and send it
                 straight to court without extra menu work.
               </p>
@@ -935,7 +935,7 @@ export default function SessionPlans() {
                     value={searchQuery}
                     onChange={event => setSearchQuery(event.target.value)}
                     placeholder="Search by name, block, or focus"
-                    className="h-[54px] w-full rounded-full border border-t1-border-strong bg-t1-surface pl-11 pr-10 text-sm text-t1-text placeholder:text-t1-muted/55 focus:border-t1-blue/35 focus:outline-none"
+                    className="search-field"
                   />
                   {searchQuery && (
                     <button
@@ -952,7 +952,7 @@ export default function SessionPlans() {
                 {onCourtSession ? (
                   <Link
                     href="/on-court"
-                    className="touch-pill inline-flex items-center justify-center gap-2 rounded-full border border-t1-border bg-t1-surface px-5 text-sm font-semibold text-t1-text no-underline"
+                    className="touch-pill inline-flex items-center justify-center gap-2 rounded-full border border-t1-border bg-t1-surface px-5 action-label text-t1-text no-underline"
                   >
                     <PlayCircle className="h-4 w-4 text-t1-blue" />
                     Resume On-Court
@@ -964,7 +964,7 @@ export default function SessionPlans() {
                       launchPlanOnCourt(filteredStockPlans[0])
                     }
                     disabled={filteredStockPlans.length === 0}
-                    className="touch-pill inline-flex items-center justify-center gap-2 rounded-full border border-t1-border bg-t1-surface px-5 text-sm font-semibold text-t1-text disabled:opacity-40"
+                    className="touch-pill inline-flex items-center justify-center gap-2 rounded-full border border-t1-border bg-t1-surface px-5 action-label text-t1-text disabled:opacity-40"
                   >
                     <PlayCircle className="h-4 w-4 text-t1-blue" />
                     Top plan to court
@@ -972,14 +972,14 @@ export default function SessionPlans() {
                 )}
                 <Link
                   href="/session-builder"
-                  className="touch-pill inline-flex items-center justify-center gap-2 rounded-full bg-t1-blue px-5 text-sm font-semibold text-white no-underline"
+                  className="touch-pill inline-flex items-center justify-center gap-2 rounded-full bg-t1-blue px-5 action-label text-white no-underline"
                 >
                   <Edit3 className="h-4 w-4" />
                   Builder
                 </Link>
                 <Link
                   href="/compare-plans"
-                  className="touch-pill inline-flex items-center justify-center gap-2 rounded-full border border-t1-border bg-t1-surface px-5 text-sm font-semibold text-t1-text no-underline"
+                  className="touch-pill inline-flex items-center justify-center gap-2 rounded-full border border-t1-border bg-t1-surface px-5 action-label text-t1-text no-underline"
                 >
                   <ArrowLeftRight className="h-4 w-4 text-t1-blue" />
                   Compare
@@ -987,9 +987,9 @@ export default function SessionPlans() {
               </div>
             </section>
 
-            <section className="premium-card rounded-[2rem] p-5 sm:p-6">
+            <section className="premium-card rounded-[2rem] p-5 sm:p-6 lg:p-7">
               <p className="section-kicker">Library status</p>
-              <h2 className="mt-3 font-display text-2xl font-semibold uppercase tracking-[0.1em] text-t1-text">
+              <h2 className="section-title mt-3 text-t1-text">
                 Stock, custom, shared
               </h2>
 
@@ -1019,7 +1019,7 @@ export default function SessionPlans() {
                 <p className="mt-2 text-base font-semibold text-t1-text">
                   {activeTabSummary}
                 </p>
-                <p className="support-copy mt-2 text-sm leading-6">
+                <p className="support-copy body-copy-sm mt-2">
                   {deferredSearchQuery.trim()
                     ? `Searching for "${deferredSearchQuery}".`
                     : "Stock first. Customize second. Share only when another coach can run the version clean."}
@@ -1034,7 +1034,7 @@ export default function SessionPlans() {
         <section className="panel-surface p-5 sm:p-6">
           <div>
             <p className="section-kicker">Browse</p>
-            <h2 className="mt-2 font-display text-2xl font-semibold uppercase tracking-[0.1em] text-t1-text">
+            <h2 className="section-title mt-2 text-t1-text">
               Stock, favorites, recent, and team plans
             </h2>
           </div>
@@ -1075,7 +1075,7 @@ export default function SessionPlans() {
               <button
                 key={tab.key}
                 onClick={() => setActiveTab(tab.key)}
-                className={`touch-pill inline-flex items-center gap-2 rounded-full border px-4 text-sm font-semibold uppercase tracking-[0.18em] ${
+                className={`touch-pill inline-flex items-center gap-2 rounded-full border px-4 chip-label ${
                   activeTab === tab.key
                     ? "border-t1-blue/25 bg-t1-blue text-white"
                     : "border-t1-border bg-t1-surface text-t1-muted"
@@ -1084,7 +1084,7 @@ export default function SessionPlans() {
                 <tab.icon className="h-3.5 w-3.5" />
                 {tab.label}
                 <span
-                  className={`rounded-full px-2 py-0.5 text-[10px] ${
+                  className={`chip-count rounded-full px-2 py-0.5 ${
                     activeTab === tab.key
                       ? "bg-white/20 text-white"
                       : "bg-t1-bg text-t1-muted"
@@ -1102,14 +1102,14 @@ export default function SessionPlans() {
                 <div className="flex items-center justify-between gap-3">
                   <div>
                     <p className="meta-label">Class filter</p>
-                    <h3 className="mt-1 text-lg font-semibold text-t1-text">
+                    <h3 className="card-title mt-1 text-t1-text">
                       Pick the lane before the playbook
                     </h3>
                   </div>
                   {hasStockFilters && (
                     <button
                       onClick={clearStockFilters}
-                      className="touch-pill inline-flex items-center justify-center rounded-full border border-t1-border bg-t1-surface px-4 text-sm font-semibold text-t1-text"
+                      className="touch-pill inline-flex items-center justify-center rounded-full border border-t1-border bg-t1-surface px-4 action-label text-t1-text"
                     >
                       Clear filters
                     </button>
@@ -1123,7 +1123,7 @@ export default function SessionPlans() {
                       setActiveSubBand(null);
                       setExpandedPlan(null);
                     }}
-                    className={`touch-pill inline-flex items-center gap-2 rounded-full border px-4 text-sm font-semibold uppercase tracking-[0.18em] ${
+                    className={`touch-pill inline-flex items-center gap-2 rounded-full border px-4 chip-label ${
                       activeLevel === "all"
                         ? "border-t1-blue/25 bg-t1-blue text-white"
                         : "border-t1-border bg-t1-surface text-t1-muted"
@@ -1131,7 +1131,7 @@ export default function SessionPlans() {
                   >
                     All
                     <span
-                      className={`rounded-full px-2 py-0.5 text-[10px] ${
+                      className={`chip-count rounded-full px-2 py-0.5 ${
                         activeLevel === "all"
                           ? "bg-white/20 text-white"
                           : "bg-t1-bg text-t1-muted"
@@ -1152,7 +1152,7 @@ export default function SessionPlans() {
                           setActiveSubBand(null);
                           setExpandedPlan(null);
                         }}
-                        className={`touch-pill inline-flex items-center gap-2 rounded-full border px-4 text-sm font-semibold uppercase tracking-[0.18em] ${
+                        className={`touch-pill inline-flex items-center gap-2 rounded-full border px-4 chip-label ${
                           activeLevel === stage.id
                             ? `${brand.badgeClassName} shadow-sm`
                             : "border-t1-border bg-t1-surface text-t1-muted"
@@ -1162,7 +1162,7 @@ export default function SessionPlans() {
                           className={`h-2.5 w-2.5 rounded-full ${brand.dotClassName}`}
                         />
                         {stage.shortName}
-                        <span className="text-[10px] opacity-75">
+                        <span className="chip-count opacity-75">
                           {stockLevelCounts[stage.id]}
                         </span>
                       </button>
@@ -1180,7 +1180,7 @@ export default function SessionPlans() {
                         setActiveSubBand(null);
                         setExpandedPlan(null);
                       }}
-                      className={`touch-pill rounded-full border px-3 text-sm font-semibold uppercase tracking-[0.16em] ${
+                      className={`touch-pill rounded-full border px-3 chip-label ${
                         !activeSubBand
                           ? "border-t1-blue/25 bg-t1-blue text-white"
                           : "border-t1-border bg-t1-surface text-t1-muted"
@@ -1195,7 +1195,7 @@ export default function SessionPlans() {
                           setActiveSubBand(group.subBand);
                           setExpandedPlan(null);
                         }}
-                        className={`touch-pill rounded-full border px-3 text-sm font-semibold uppercase tracking-[0.16em] ${
+                        className={`touch-pill rounded-full border px-3 chip-label ${
                           activeSubBand === group.subBand
                             ? "border-t1-blue/25 bg-t1-blue text-white"
                             : "border-t1-border bg-t1-surface text-t1-muted"
@@ -1216,7 +1216,7 @@ export default function SessionPlans() {
                       setDurationFilter(null);
                       setExpandedPlan(null);
                     }}
-                    className={`touch-pill rounded-full border px-3 text-sm font-semibold uppercase tracking-[0.16em] ${
+                    className={`touch-pill rounded-full border px-3 chip-label ${
                       durationFilter == null
                         ? "border-t1-blue/25 bg-t1-blue text-white"
                         : "border-t1-border bg-t1-surface text-t1-muted"
@@ -1231,7 +1231,7 @@ export default function SessionPlans() {
                         setDurationFilter(duration);
                         setExpandedPlan(null);
                       }}
-                      className={`touch-pill rounded-full border px-3 text-sm font-semibold uppercase tracking-[0.16em] ${
+                      className={`touch-pill rounded-full border px-3 chip-label ${
                         durationFilter === duration
                           ? "border-t1-blue/25 bg-t1-blue text-white"
                           : "border-t1-border bg-t1-surface text-t1-muted"
@@ -1267,7 +1267,7 @@ export default function SessionPlans() {
                 <EmptyContent>
                   <button
                     onClick={clearStockFilters}
-                    className="touch-pill inline-flex items-center justify-center rounded-full bg-t1-blue px-5 text-sm font-semibold text-white"
+                    className="touch-pill inline-flex items-center justify-center rounded-full bg-t1-blue px-5 action-label text-white"
                   >
                     Reset filters
                   </button>
@@ -1289,7 +1289,7 @@ export default function SessionPlans() {
                             />
                             {group.label}
                           </span>
-                          <p className="support-copy mt-2 text-sm">
+                          <p className="support-copy body-copy-sm mt-2">
                             {group.plans.length} playbook
                             {group.plans.length !== 1 ? "s" : ""}
                           </p>
@@ -1323,7 +1323,7 @@ export default function SessionPlans() {
           <>
             {loadingCustomPlans &&
             (activeTab === "custom" || activeTab === "shared") ? (
-              <div className="panel-muted rounded-[1.6rem] p-8 text-center text-sm text-t1-muted">
+              <div className="panel-muted rounded-[1.6rem] p-8 text-center body-copy-sm text-t1-muted">
                 Loading synced playbooks…
               </div>
             ) : (
@@ -1358,7 +1358,7 @@ export default function SessionPlans() {
                         <EmptyContent>
                           <button
                             onClick={() => setSearchQuery("")}
-                            className="touch-pill inline-flex items-center justify-center rounded-full bg-t1-blue px-5 text-sm font-semibold text-white"
+                            className="touch-pill inline-flex items-center justify-center rounded-full bg-t1-blue px-5 action-label text-white"
                           >
                             Clear search
                           </button>

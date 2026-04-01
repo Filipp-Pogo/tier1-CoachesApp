@@ -27,9 +27,13 @@ function safeParseJson<T>(value: string | null, fallback: T): T {
 
 export function readLocalCoachAppState(): CoachAppStateSnapshot {
   if (typeof window === 'undefined') return emptyCoachAppState();
+  const coachClass =
+    (window.localStorage.getItem(STORAGE_KEYS.coachClass) as CoachAppStateSnapshot['coachClass'] | null) ??
+    'jasa';
 
   return {
     favorites: safeParseArray(window.localStorage.getItem(STORAGE_KEYS.favorites)),
+    coachClass,
     onboardingProgress: safeParseJson(window.localStorage.getItem(STORAGE_KEYS.onboardingProgress), {
       completedLessons: [],
       completedModules: [],
@@ -46,8 +50,10 @@ export function readLocalCoachAppState(): CoachAppStateSnapshot {
 
 export function writeLocalCoachAppState(snapshot: CoachAppStateSnapshot) {
   if (typeof window === 'undefined') return;
+  const coachClass = snapshot.coachClass ?? 'jasa';
 
   window.localStorage.setItem(STORAGE_KEYS.favorites, JSON.stringify(snapshot.favorites));
+  window.localStorage.setItem(STORAGE_KEYS.coachClass, coachClass);
   window.localStorage.setItem(STORAGE_KEYS.onboardingProgress, JSON.stringify(snapshot.onboardingProgress));
   window.localStorage.setItem(STORAGE_KEYS.onboardingQuiz, JSON.stringify(snapshot.onboardingQuiz));
   window.localStorage.setItem(STORAGE_KEYS.sessionHistory, JSON.stringify(snapshot.sessionHistory));
@@ -66,8 +72,11 @@ export function clearLocalCoachAppState() {
 }
 
 function hasMeaningfulData(snapshot: CoachAppStateSnapshot) {
+  const coachClass = snapshot.coachClass ?? 'jasa';
+
   return (
     snapshot.favorites.length > 0 ||
+    coachClass !== 'jasa' ||
     snapshot.onboardingProgress.completedLessons.length > 0 ||
     snapshot.onboardingProgress.completedModules.length > 0 ||
     snapshot.onboardingQuiz.length > 0 ||

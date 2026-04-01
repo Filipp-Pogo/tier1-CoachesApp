@@ -1,5 +1,5 @@
-import { useCallback, useState } from 'react';
-import { Link } from 'wouter';
+import { useCallback, useState } from "react";
+import { Link } from "wouter";
 import {
   AlertTriangle,
   Check,
@@ -10,29 +10,35 @@ import {
   ListChecks,
   Star,
   X,
-} from 'lucide-react';
+} from "lucide-react";
 import {
   Drawer,
   DrawerClose,
   DrawerContent,
   DrawerHeader,
   DrawerTitle,
-} from '@/components/ui/drawer';
+} from "@/components/ui/drawer";
 import {
   Sheet,
   SheetClose,
   SheetContent,
   SheetHeader,
   SheetTitle,
-} from '@/components/ui/sheet';
-import { useIsMobile } from '@/hooks/useMobile';
-import { useFavorites } from '@/hooks/useFavorites';
-import { drills, pathwayStages, sessionBlocks } from '@/lib/data';
+} from "@/components/ui/sheet";
+import { useIsMobile } from "@/hooks/useMobile";
+import { useFavorites } from "@/hooks/useFavorites";
+import { drills, pathwayStages, sessionBlocks } from "@/lib/data";
 import {
   buildDrillClipboardText,
   buildDrillCoachGuide,
-} from '@/lib/drillGuidance';
-import { formatSubBand } from '@/lib/customPlans';
+} from "@/lib/drillGuidance";
+import { formatSubBand } from "@/lib/customPlans";
+import {
+  drillCoachingGoalFilters,
+  drillTrainingFocusFilters,
+  getPrimaryDrillCoachingGoal,
+  getPrimaryDrillTrainingFocus,
+} from "@/lib/drillFilters";
 
 interface DrillQuickPreviewProps {
   detailHref?: string;
@@ -66,6 +72,12 @@ export function DrillQuickPreview({
   const block = sessionBlocks.find(item => item.id === drill.sessionBlock);
   const favorited = isFavorite(drill.id);
   const guide = buildDrillCoachGuide(drill);
+  const leadFocus = drillTrainingFocusFilters.find(
+    item => item.id === getPrimaryDrillTrainingFocus(drill)
+  );
+  const leadGoal = drillCoachingGoalFilters.find(
+    item => item.id === getPrimaryDrillCoachingGoal(drill)
+  );
 
   const content = (
     <div className="flex h-full flex-col">
@@ -75,19 +87,24 @@ export function DrillQuickPreview({
             {drill.level.map(level => (
               <span
                 key={level}
-                className="rounded bg-t1-blue/10 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wider text-t1-blue"
+                className="chip-label rounded bg-t1-blue/10 px-2 py-1 text-t1-blue"
               >
                 {pathwayStages.find(stage => stage.id === level)?.shortName}
               </span>
             ))}
-            <span className="rounded bg-secondary px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wider text-t1-muted">
+            <span className="chip-label rounded bg-secondary px-2 py-1 text-t1-muted">
               {block?.shortName}
             </span>
-            <span className="flex items-center gap-1 text-[10px] text-t1-muted">
+            {leadFocus && (
+              <span className="chip-label rounded bg-secondary px-2 py-1 text-t1-muted">
+                {leadFocus.name}
+              </span>
+            )}
+            <span className="chip-label flex items-center gap-1 text-t1-muted">
               <Clock className="h-3 w-3" /> {drill.recommendedTime}
             </span>
             {drill.subBand && (
-              <span className="rounded bg-amber-500/10 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wider text-amber-400">
+              <span className="chip-label rounded bg-amber-500/10 px-2 py-1 text-amber-400">
                 {formatSubBand(drill.subBand)}
               </span>
             )}
@@ -96,10 +113,10 @@ export function DrillQuickPreview({
           <div className="flex flex-shrink-0 items-center gap-1.5">
             <button
               onClick={handleCopy}
-              className={`flex min-h-[32px] items-center gap-1 rounded-md border px-2.5 py-1.5 text-[10px] font-semibold uppercase tracking-wider transition-all ${
+              className={`flex min-h-[38px] items-center gap-1.5 rounded-full border px-3 py-2 action-label transition-all ${
                 copied
-                  ? 'border-green-500/30 bg-green-500/15 text-green-400'
-                  : 'border-t1-border bg-t1-surface text-t1-muted active:text-t1-blue'
+                  ? "border-green-500/30 bg-green-500/15 text-green-400"
+                  : "border-t1-border bg-t1-surface text-t1-muted active:text-t1-blue"
               }`}
             >
               {copied ? (
@@ -107,35 +124,53 @@ export function DrillQuickPreview({
               ) : (
                 <Clipboard className="h-3 w-3" />
               )}
-              {copied ? 'Copied' : 'Copy'}
+              {copied ? "Copied" : "Copy"}
             </button>
             <button
               onClick={() => toggleFavorite(drill.id)}
-              className={`flex min-h-[32px] items-center gap-1 rounded-md border px-2.5 py-1.5 text-[10px] font-semibold uppercase tracking-wider transition-all ${
+              className={`flex min-h-[38px] items-center gap-1.5 rounded-full border px-3 py-2 action-label transition-all ${
                 favorited
-                  ? 'border-yellow-500/40 bg-yellow-500/15 text-yellow-400'
-                  : 'border-t1-border bg-t1-surface text-t1-muted active:text-yellow-400'
+                  ? "border-yellow-500/40 bg-yellow-500/15 text-yellow-400"
+                  : "border-t1-border bg-t1-surface text-t1-muted active:text-yellow-400"
               }`}
             >
-              <Star className={`h-3 w-3 ${favorited ? 'fill-yellow-400' : ''}`} />
+              <Star
+                className={`h-3 w-3 ${favorited ? "fill-yellow-400" : ""}`}
+              />
             </button>
           </div>
         </div>
       </div>
 
       <div className="-mx-1 flex-1 space-y-3 overflow-y-auto px-1 pb-4">
-        <div className="rounded-lg border border-t1-border bg-t1-surface p-3 sm:p-4">
-          <h3 className="mb-2.5 flex items-center gap-2 font-display text-xs font-semibold uppercase tracking-wider text-t1-text">
-            <Info className="h-3.5 w-3.5 text-t1-blue" />
-            What This Drill Is
-          </h3>
-          <p className="text-xs leading-relaxed text-t1-text/80 sm:text-sm">
-            {guide.whatThisIs}
-          </p>
+        <div className="grid gap-3 sm:grid-cols-2">
+          <div className="rounded-lg border border-t1-border bg-t1-surface p-3 sm:p-4">
+            <p className="meta-label">How to start</p>
+            <p className="support-copy-strong body-copy-sm mt-2 text-t1-text">
+              {guide.howToRun[0] ?? drill.setup}
+            </p>
+          </div>
+
+          <div className="rounded-lg border border-t1-blue/20 bg-t1-blue/5 p-3 sm:p-4">
+            <p className="meta-label text-t1-blue">Coach first</p>
+            <p className="support-copy-strong body-copy-sm mt-2 text-t1-text">
+              {guide.whatToCoach[0] ??
+                leadGoal?.description ??
+                drill.coachingCues[0]}
+            </p>
+          </div>
         </div>
 
         <div className="rounded-lg border border-t1-border bg-t1-surface p-3 sm:p-4">
-          <h3 className="mb-2.5 flex items-center gap-2 font-display text-xs font-semibold uppercase tracking-wider text-t1-text">
+          <h3 className="chip-label mb-3 flex items-center gap-2 font-display text-t1-text">
+            <Info className="h-3.5 w-3.5 text-t1-blue" />
+            What This Drill Is
+          </h3>
+          <p className="body-copy-sm text-t1-text/80">{guide.whatThisIs}</p>
+        </div>
+
+        <div className="rounded-lg border border-t1-border bg-t1-surface p-3 sm:p-4">
+          <h3 className="chip-label mb-3 flex items-center gap-2 font-display text-t1-text">
             <ListChecks className="h-3.5 w-3.5 text-t1-blue" />
             How To Run It
           </h3>
@@ -145,16 +180,14 @@ export function DrillQuickPreview({
                 <span className="mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-t1-blue text-[10px] font-bold text-white">
                   {index + 1}
                 </span>
-                <span className="text-xs leading-relaxed text-t1-text/80 sm:text-sm">
-                  {step}
-                </span>
+                <span className="body-copy-sm text-t1-text/80">{step}</span>
               </li>
             ))}
           </ol>
         </div>
 
         <div className="rounded-lg border border-t1-blue/20 bg-t1-blue/5 p-3 sm:p-4">
-          <h3 className="mb-2.5 font-display text-xs font-semibold uppercase tracking-wider text-t1-blue">
+          <h3 className="chip-label mb-3 font-display text-t1-blue">
             What To Coach
           </h3>
           <ul className="space-y-2">
@@ -163,16 +196,14 @@ export function DrillQuickPreview({
                 <span className="mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-t1-blue text-[10px] font-bold text-white">
                   {index + 1}
                 </span>
-                <span className="text-xs leading-relaxed text-t1-text/80 sm:text-sm">
-                  {cue}
-                </span>
+                <span className="body-copy-sm text-t1-text/80">{cue}</span>
               </li>
             ))}
           </ul>
         </div>
 
         <div className="rounded-lg border border-t1-red/15 bg-t1-red/5 p-3 sm:p-4">
-          <h3 className="mb-2.5 flex items-center gap-2 font-display text-xs font-semibold uppercase tracking-wider text-t1-red">
+          <h3 className="chip-label mb-3 flex items-center gap-2 font-display text-t1-red">
             <AlertTriangle className="h-3.5 w-3.5" />
             Watch For
           </h3>
@@ -180,7 +211,7 @@ export function DrillQuickPreview({
             {guide.watchFor.map(item => (
               <li
                 key={item}
-                className="flex items-start gap-2 text-xs leading-relaxed text-t1-text/80 sm:text-sm"
+                className="flex items-start gap-2 body-copy-sm text-t1-text/80"
               >
                 <span className="mt-1 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-t1-red" />
                 <span>{item}</span>
@@ -190,14 +221,14 @@ export function DrillQuickPreview({
         </div>
 
         <div className="rounded-lg border border-t1-border bg-t1-surface p-3 sm:p-4">
-          <h3 className="mb-2.5 font-display text-xs font-semibold uppercase tracking-wider text-t1-text">
+          <h3 className="chip-label mb-3 font-display text-t1-text">
             Best Fit
           </h3>
           <ul className="space-y-2">
             {guide.bestFit.map(item => (
               <li
                 key={item}
-                className="flex items-start gap-2 text-xs leading-relaxed text-t1-text/80 sm:text-sm"
+                className="flex items-start gap-2 body-copy-sm text-t1-text/80"
               >
                 <span className="mt-1 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-t1-blue" />
                 <span>{item}</span>
@@ -210,11 +241,11 @@ export function DrillQuickPreview({
       <div className="mt-auto flex-shrink-0 border-t border-t1-border pt-3">
         <Link
           href={detailHref ?? `/drills/${drill.id}`}
-          className="flex min-h-[44px] w-full items-center justify-center gap-2 rounded-lg bg-t1-blue/10 py-3 text-xs font-semibold uppercase tracking-wider text-t1-blue no-underline transition-colors active:bg-t1-blue/20"
+          className="flex min-h-[44px] w-full items-center justify-center gap-2 rounded-full bg-t1-blue/10 py-3 action-label text-t1-blue no-underline transition-colors active:bg-t1-blue/20"
           onClick={() => onOpenChange(false)}
         >
           <ExternalLink className="h-3.5 w-3.5" />
-          Full Drill Details
+          Open full breakdown
         </Link>
       </div>
     </div>
