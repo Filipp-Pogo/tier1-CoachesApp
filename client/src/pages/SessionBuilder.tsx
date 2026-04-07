@@ -828,7 +828,7 @@ export default function SessionBuilder() {
                     <label className="text-[10px] font-semibold uppercase tracking-wider text-t1-muted mb-1 block">
                       Drill
                       {favs.length > 0 && (
-                        <span className="ml-1.5 text-yellow-400 normal-case tracking-normal">
+                        <span className="ml-1.5 text-amber-600 normal-case tracking-normal">
                           ★ {favs.length} saved
                         </span>
                       )}
@@ -939,7 +939,7 @@ export default function SessionBuilder() {
               <span
                 className={`px-2 py-0.5 rounded-full text-[10px] uppercase tracking-wider border ${
                   planVisibility === "shared"
-                    ? "bg-green-500/10 text-green-400 border-green-500/20"
+                    ? "bg-emerald-50 text-emerald-700 border-emerald-200"
                     : "bg-t1-bg text-t1-muted border-t1-border"
                 }`}
               >
@@ -978,7 +978,7 @@ export default function SessionBuilder() {
                     </span>
                     <span className="text-t1-muted flex items-center gap-1 truncate min-w-0">
                       {isFav && (
-                        <Star className="w-3 h-3 text-yellow-400 fill-yellow-400 flex-shrink-0" />
+                        <Star className="w-3 h-3 text-amber-500 fill-amber-500 flex-shrink-0" />
                       )}
                       {drill?.name || block.notes || info?.description}
                     </span>
@@ -1028,7 +1028,7 @@ export default function SessionBuilder() {
                 disabled={savedToHistory}
                 className={`inline-flex items-center gap-1.5 text-xs font-medium min-h-[36px] transition-colors ${
                   savedToHistory
-                    ? "text-green-400"
+                    ? "text-emerald-700"
                     : "text-t1-muted hover:text-t1-text"
                 }`}
               >

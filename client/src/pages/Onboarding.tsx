@@ -186,7 +186,7 @@ export default function Onboarding() {
                 </span>
               )}
             </div>
-            <h1 className="font-display font-bold text-3xl md:text-4xl text-t1-text uppercase tracking-tight">
+            <h1 className="font-display font-bold text-3xl md:text-4xl text-t1-text">
               {activeLesson.title}
             </h1>
           </div>
@@ -219,7 +219,7 @@ export default function Onboarding() {
           <div className="bg-t1-surface border border-t1-border rounded-xl p-6 mb-10">
             <div className="flex items-center gap-2 mb-4">
               <Lightbulb className="w-5 h-5 text-amber-400" />
-              <h3 className="font-display font-bold text-lg text-t1-text uppercase tracking-wide">
+              <h3 className="font-display font-bold text-lg text-t1-text">
                 Key Takeaways
               </h3>
             </div>
@@ -341,7 +341,7 @@ export default function Onboarding() {
                   </span>
                 )}
               </div>
-              <h1 className="font-display font-bold text-3xl text-t1-text uppercase tracking-tight">
+              <h1 className="font-display font-bold text-3xl text-t1-text">
                 {activeModule.title}
               </h1>
               <p className="text-t1-muted mt-1">{activeModule.subtitle}</p>
@@ -389,7 +389,7 @@ export default function Onboarding() {
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <h3 className="font-display font-bold text-lg text-t1-text uppercase tracking-wide group-hover:text-t1-accent transition-colors">
+                      <h3 className="font-display font-bold text-lg text-t1-text group-hover:text-t1-accent transition-colors">
                         {lesson.title}
                       </h3>
                       <p className="text-sm text-t1-muted mt-0.5 line-clamp-1">
@@ -423,7 +423,7 @@ export default function Onboarding() {
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-3">
             <GraduationCap className="w-8 h-8 text-t1-accent" />
-            <h1 className="font-display font-bold text-4xl md:text-5xl text-t1-text uppercase tracking-tight">
+            <h1 className="font-display font-bold text-4xl md:text-5xl text-t1-text">
               Coach Onboarding
             </h1>
           </div>
@@ -440,7 +440,7 @@ export default function Onboarding() {
               <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-accent">
                 Recommended Flow
               </p>
-              <h2 className="mt-2 font-display text-xl font-bold uppercase tracking-wide text-t1-text">
+              <h2 className="mt-2 font-display text-xl font-bold text-t1-text">
                 Use onboarding like pre-court prep
               </h2>
               <p className="mt-2 text-sm leading-relaxed text-t1-muted">
@@ -591,7 +591,7 @@ export default function Onboarding() {
                         <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
                       )}
                     </div>
-                    <h3 className="font-display font-bold text-lg text-t1-text uppercase tracking-wide group-hover:text-t1-accent transition-colors">
+                    <h3 className="font-display font-bold text-lg text-t1-text group-hover:text-t1-accent transition-colors">
                       {mod.title}
                     </h3>
                     <p className="text-sm text-t1-muted mt-0.5">
@@ -632,7 +632,7 @@ export default function Onboarding() {
               )}
             </div>
             <div className="flex-1">
-              <h3 className="font-display font-bold text-xl text-t1-text uppercase tracking-wide">
+              <h3 className="font-display font-bold text-xl text-t1-text">
                 Onboarding Quiz
               </h3>
               <p className="text-sm text-t1-muted mt-1">
@@ -679,7 +679,7 @@ export default function Onboarding() {
                   <div className="w-10 h-10 rounded-full bg-red-500/15 flex items-center justify-center">
                     <AlertTriangle className="w-5 h-5 text-red-400" />
                   </div>
-                  <AlertDialogTitle className="font-display text-lg uppercase tracking-wide text-t1-text">
+                  <AlertDialogTitle className="font-display text-lg text-t1-text">
                     Reset All Progress
                   </AlertDialogTitle>
                 </div>
