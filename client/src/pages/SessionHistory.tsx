@@ -161,10 +161,10 @@ function HistoryCard({ entry, isExpanded, onToggle, onDelete }: HistoryCardProps
           <div className="flex items-center justify-end pt-1 border-t border-t1-border/50">
             {confirmDelete ? (
               <div className="flex items-center gap-2">
-                <span className="text-xs text-red-400">Delete this entry?</span>
+                <span className="text-xs text-red-700">Delete this entry?</span>
                 <button
                   onClick={() => { onDelete(); setConfirmDelete(false); }}
-                  className="px-2.5 py-1 text-xs font-medium bg-red-500/15 text-red-400 border border-red-500/20 rounded-md hover:bg-red-500/25 transition-colors"
+                  className="px-2.5 py-1 text-xs font-medium bg-red-50 text-red-700 border border-red-200 rounded-md hover:bg-red-100 transition-colors"
                 >
                   Yes, delete
                 </button>
@@ -178,7 +178,7 @@ function HistoryCard({ entry, isExpanded, onToggle, onDelete }: HistoryCardProps
             ) : (
               <button
                 onClick={() => setConfirmDelete(true)}
-                className="flex items-center gap-1 text-xs text-t1-muted/60 hover:text-red-400 transition-colors"
+                className="flex items-center gap-1 text-xs text-t1-muted/60 hover:text-red-700 transition-colors"
               >
                 <Trash2 className="w-3.5 h-3.5" />
                 Remove
@@ -291,7 +291,7 @@ export default function SessionHistory() {
             <AlertDialog>
               <AlertDialogTrigger asChild>
                 <button
-                  className="flex items-center gap-1 text-[11px] text-t1-muted/60 hover:text-red-400 transition-colors"
+                  className="flex items-center gap-1 text-[11px] text-t1-muted/60 hover:text-red-700 transition-colors"
                 >
                   <Trash2 className="w-3 h-3" />
                   Clear
@@ -300,8 +300,8 @@ export default function SessionHistory() {
               <AlertDialogContent className="bg-t1-surface border-t1-border">
                 <AlertDialogHeader>
                   <div className="flex items-center gap-2 mb-1">
-                    <div className="w-10 h-10 rounded-full bg-red-500/15 flex items-center justify-center">
-                      <AlertTriangle className="w-5 h-5 text-red-400" />
+                    <div className="w-10 h-10 rounded-full bg-red-50 flex items-center justify-center">
+                      <AlertTriangle className="w-5 h-5 text-red-700" />
                     </div>
                     <AlertDialogTitle className="font-display text-lg text-t1-text">
                       Clear All History

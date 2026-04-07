@@ -260,7 +260,7 @@ function PlanCard({
                 </span>
               )}
               {draft && (
-                <span className="inline-flex items-center rounded-full border border-amber-500/20 bg-amber-500/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-amber-700">
+                <span className="inline-flex items-center rounded-full border border-amber-500/20 bg-amber-50 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-amber-700">
                   Draft
                 </span>
               )}
@@ -439,7 +439,7 @@ function PlanCard({
                 </AlertDialogTrigger>
                 <AlertDialogContent className="border-t1-border bg-t1-surface">
                   <AlertDialogHeader>
-                    <AlertDialogTitle className="font-display text-lg uppercase tracking-[0.14em] text-t1-text">
+                    <AlertDialogTitle className="font-display text-lg text-t1-text">
                       Delete this custom plan?
                     </AlertDialogTitle>
                     <AlertDialogDescription className="text-sm text-t1-muted">
@@ -808,7 +808,7 @@ export default function SessionPlans() {
             <EmptyMedia variant="icon" className="bg-t1-accent/10 text-t1-accent">
               <Edit3 className="size-5" />
             </EmptyMedia>
-            <EmptyTitle className="font-display text-xl font-semibold uppercase tracking-[0.12em] text-t1-text">
+            <EmptyTitle className="font-display text-xl font-semibold text-t1-text">
               {authEnabled ? "My playbooks are empty" : "Cloud sync is off"}
             </EmptyTitle>
             <EmptyDescription className="max-w-lg text-sm leading-6 text-t1-muted">
@@ -836,7 +836,7 @@ export default function SessionPlans() {
             <EmptyMedia variant="icon" className="bg-t1-accent/10 text-t1-accent">
               <Users className="size-5" />
             </EmptyMedia>
-            <EmptyTitle className="font-display text-xl font-semibold uppercase tracking-[0.12em] text-t1-text">
+            <EmptyTitle className="font-display text-xl font-semibold text-t1-text">
               {authEnabled
                 ? "No shared playbooks yet"
                 : "Sign in for team shared"}
@@ -865,11 +865,11 @@ export default function SessionPlans() {
           <EmptyHeader className="gap-3">
             <EmptyMedia
               variant="icon"
-              className="bg-amber-500/10 text-amber-400"
+              className="bg-amber-50 text-amber-700"
             >
               <Star className="size-5 fill-current" />
             </EmptyMedia>
-            <EmptyTitle className="font-display text-xl font-semibold uppercase tracking-[0.12em] text-t1-text">
+            <EmptyTitle className="font-display text-xl font-semibold text-t1-text">
               Favorite playbooks show up here
             </EmptyTitle>
             <EmptyDescription className="max-w-lg text-sm leading-6 text-t1-muted">
@@ -895,7 +895,7 @@ export default function SessionPlans() {
           <EmptyMedia variant="icon" className="bg-t1-accent/10 text-t1-accent">
             <History className="size-5" />
           </EmptyMedia>
-          <EmptyTitle className="font-display text-xl font-semibold uppercase tracking-[0.12em] text-t1-text">
+          <EmptyTitle className="font-display text-xl font-semibold text-t1-text">
             No recent playbooks yet
           </EmptyTitle>
           <EmptyDescription className="max-w-lg text-sm leading-6 text-t1-muted">
@@ -1260,7 +1260,7 @@ export default function SessionPlans() {
                   >
                     <ClipboardList className="size-5" />
                   </EmptyMedia>
-                  <EmptyTitle className="font-display text-xl font-semibold uppercase tracking-[0.12em] text-t1-text">
+                  <EmptyTitle className="font-display text-xl font-semibold text-t1-text">
                     No stock playbooks match right now
                   </EmptyTitle>
                   <EmptyDescription className="max-w-lg text-sm leading-6 text-t1-muted">
@@ -1351,7 +1351,7 @@ export default function SessionPlans() {
                           >
                             <Search className="size-5" />
                           </EmptyMedia>
-                          <EmptyTitle className="font-display text-xl font-semibold uppercase tracking-[0.12em] text-t1-text">
+                          <EmptyTitle className="font-display text-xl font-semibold text-t1-text">
                             No playbooks match this search
                           </EmptyTitle>
                           <EmptyDescription className="max-w-lg text-sm leading-6 text-t1-muted">

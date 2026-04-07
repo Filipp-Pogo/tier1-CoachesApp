@@ -625,7 +625,7 @@ export default function Dashboard() {
                         {drill.objective}
                       </p>
                     </div>
-                    <Star className="mt-1 h-4 w-4 flex-shrink-0 fill-amber-400 text-amber-400" />
+                    <Star className="mt-1 h-4 w-4 flex-shrink-0 fill-amber-500 text-amber-500" />
                   </Link>
                 ))
               ) : (
@@ -689,7 +689,7 @@ export default function Dashboard() {
                         </p>
                       </div>
                       {isFavoritePlan ? (
-                        <Star className="mt-1 h-4 w-4 flex-shrink-0 fill-amber-400 text-amber-400" />
+                        <Star className="mt-1 h-4 w-4 flex-shrink-0 fill-amber-500 text-amber-500" />
                       ) : (
                         <Clock3 className="mt-1 h-4 w-4 flex-shrink-0 text-t1-muted" />
                       )}

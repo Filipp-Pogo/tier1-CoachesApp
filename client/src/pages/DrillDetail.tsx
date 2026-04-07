@@ -266,7 +266,7 @@ export default function DrillDetail() {
                   <Clock className="h-3 w-3" /> {drill.recommendedTime}
                 </span>
                 {drill.subBand && (
-                  <span className="chip-label rounded bg-amber-500/10 px-2.5 py-1 text-amber-700">
+                  <span className="chip-label rounded bg-amber-50 px-2.5 py-1 text-amber-700">
                     {formatSubBand(drill.subBand)}
                   </span>
                 )}

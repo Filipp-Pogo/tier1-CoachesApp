@@ -1278,7 +1278,7 @@ export default function DrillLibrary() {
                 >
                   <BookOpen className="size-5" />
                 </EmptyMedia>
-                <EmptyTitle className="font-display text-xl font-semibold uppercase tracking-[0.12em] text-t1-text">
+                <EmptyTitle className="font-display text-xl font-semibold text-t1-text">
                   No drills match this filter
                 </EmptyTitle>
                 <EmptyDescription className="max-w-lg text-sm leading-6 text-t1-muted">
@@ -1351,7 +1351,7 @@ export default function DrillLibrary() {
                                 {drill.recommendedTime}
                               </span>
                               {drill.subBand && (
-                                <span className="rounded-full border border-amber-500/20 bg-amber-500/10 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-amber-700">
+                                <span className="rounded-full border border-amber-500/20 bg-amber-50 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-amber-700">
                                   {formatSubBand(drill.subBand)}
                                 </span>
                               )}

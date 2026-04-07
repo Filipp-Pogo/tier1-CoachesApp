@@ -387,7 +387,7 @@ export default function SessionBuilder() {
     <div>
       <section className="page-hero">
         <div className="container py-4 sm:py-6">
-          <h1 className="font-display text-xl sm:text-4xl font-bold text-t1-text uppercase tracking-wide">
+          <h1 className="font-display text-xl sm:text-4xl font-bold text-t1-text">
             Session Builder
           </h1>
           <p className="mt-1 text-t1-muted text-xs sm:text-sm">
@@ -404,7 +404,7 @@ export default function SessionBuilder() {
               <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-accent">
                 Builder Workflow
               </p>
-              <h2 className="mt-1 font-display text-sm sm:text-base font-bold uppercase tracking-wide text-t1-text">
+              <h2 className="mt-1 font-display text-sm sm:text-base font-bold text-t1-text">
                 Template first. Scratch build when the session is truly custom.
               </h2>
               <p className="mt-1 text-xs leading-relaxed text-t1-muted">
@@ -502,7 +502,7 @@ export default function SessionBuilder() {
         <div className="panel-surface p-3 sm:p-5 space-y-3">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <h2 className="font-display text-xs sm:text-sm font-semibold uppercase tracking-wider text-t1-text">
+              <h2 className="font-display text-xs sm:text-sm font-semibold text-t1-text">
                 Custom Plan Details
               </h2>
               <p className="text-[10px] text-t1-muted mt-1">
@@ -644,7 +644,7 @@ export default function SessionBuilder() {
           </div>
 
           {!authEnabled && (
-            <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs text-amber-200">
+            <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800">
               Supabase isn’t configured yet, so save/update is disabled. Builder
               still works locally.
             </div>
@@ -680,7 +680,7 @@ export default function SessionBuilder() {
           <div className="panel-surface p-3 sm:p-5">
             <div className="flex items-center justify-between mb-3 gap-2">
               <div>
-                <h2 className="font-display text-xs sm:text-sm font-semibold uppercase tracking-wider text-t1-text">
+                <h2 className="font-display text-xs sm:text-sm font-semibold text-t1-text">
                   Start from a Template
                 </h2>
                 <p className="mt-1 text-[10px] text-t1-muted">
@@ -708,7 +708,7 @@ export default function SessionBuilder() {
                   onClick={() => loadTemplate(template.id)}
                   className="text-left min-h-[52px] rounded-xl border border-t1-border bg-t1-bg/70 p-3 transition-all active:bg-t1-accent/5 sm:p-4"
                 >
-                  <h3 className="font-display text-xs sm:text-sm font-semibold uppercase tracking-wide text-t1-text">
+                  <h3 className="font-display text-xs sm:text-sm font-semibold text-t1-text">
                     {template.name}
                   </h3>
                   <p className="text-[10px] text-t1-muted mt-0.5">
@@ -746,7 +746,7 @@ export default function SessionBuilder() {
               <EmptyMedia variant="icon" className="bg-t1-accent/10 text-t1-accent">
                 <Plus className="size-5" />
               </EmptyMedia>
-              <EmptyTitle className="font-display text-base font-bold uppercase tracking-wide text-t1-text">
+              <EmptyTitle className="font-display text-base font-bold text-t1-text">
                 Build from scratch with 3 moves
               </EmptyTitle>
               <EmptyDescription className="text-xs sm:text-sm text-t1-muted">
@@ -799,7 +799,7 @@ export default function SessionBuilder() {
                     <span className="w-6 h-6 rounded-full bg-t1-accent text-white text-[10px] font-bold flex items-center justify-center flex-shrink-0">
                       {index + 1}
                     </span>
-                    <h3 className="font-display text-sm font-semibold uppercase tracking-wide text-t1-text">
+                    <h3 className="font-display text-sm font-semibold text-t1-text">
                       {blockInfo?.name}
                     </h3>
                   </div>
@@ -913,7 +913,7 @@ export default function SessionBuilder() {
         {blocks.length > 0 && (
           <div className="panel-surface p-3 sm:p-5">
             <div className="flex items-center justify-between mb-3 gap-2">
-              <h2 className="font-display text-xs sm:text-sm font-semibold uppercase tracking-wider text-t1-text flex items-center gap-2">
+              <h2 className="font-display text-xs sm:text-sm font-semibold text-t1-text flex items-center gap-2">
                 <Dumbbell className="w-4 h-4 text-t1-accent" /> Summary
               </h2>
               <button

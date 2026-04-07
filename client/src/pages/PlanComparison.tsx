@@ -79,7 +79,7 @@ function PlanSelector({ slot, selectedPlan, onSelect, onClear, otherPlanId }: Pl
           </span>
           <button
             onClick={onClear}
-            className="text-t1-muted hover:text-red-400 transition-colors"
+            className="text-t1-muted hover:text-red-700 transition-colors"
             aria-label="Clear selection"
           >
             <X className="w-4 h-4" />
@@ -309,10 +309,10 @@ export default function PlanComparison() {
                     Duration
                   </h4>
                   <div className="grid grid-cols-[1fr_1fr] gap-2">
-                    <span className={`text-sm font-semibold ${planA!.totalTime !== planB!.totalTime ? 'text-amber-400' : 'text-t1-text'}`}>
+                    <span className={`text-sm font-semibold ${planA!.totalTime !== planB!.totalTime ? 'text-amber-700' : 'text-t1-text'}`}>
                       {planA!.totalTime} min
                     </span>
-                    <span className={`text-sm font-semibold ${planA!.totalTime !== planB!.totalTime ? 'text-amber-400' : 'text-t1-text'}`}>
+                    <span className={`text-sm font-semibold ${planA!.totalTime !== planB!.totalTime ? 'text-amber-700' : 'text-t1-text'}`}>
                       {planB!.totalTime} min
                     </span>
                   </div>

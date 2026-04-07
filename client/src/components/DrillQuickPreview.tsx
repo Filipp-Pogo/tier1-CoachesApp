@@ -107,7 +107,7 @@ export function DrillQuickPreview({
               <Clock className="h-3 w-3" /> {drill.recommendedTime}
             </span>
             {drill.subBand && (
-              <span className="chip-label rounded bg-amber-500/10 px-2 py-1 text-amber-400">
+              <span className="chip-label rounded bg-amber-50 px-2 py-1 text-amber-700">
                 {formatSubBand(drill.subBand)}
               </span>
             )}
@@ -118,7 +118,7 @@ export function DrillQuickPreview({
               onClick={handleCopy}
               className={`flex min-h-[38px] items-center gap-1.5 rounded-full border px-3 py-2 action-label transition-all ${
                 copied
-                  ? "border-green-500/30 bg-green-500/15 text-green-400"
+                  ? "border-emerald-200 bg-emerald-50 text-emerald-700"
                   : "border-t1-border bg-t1-surface text-t1-muted active:text-t1-accent"
               }`}
             >
@@ -133,12 +133,12 @@ export function DrillQuickPreview({
               onClick={() => toggleFavorite(drill.id)}
               className={`flex min-h-[38px] items-center gap-1.5 rounded-full border px-3 py-2 action-label transition-all ${
                 favorited
-                  ? "border-yellow-500/40 bg-yellow-500/15 text-yellow-400"
-                  : "border-t1-border bg-t1-surface text-t1-muted active:text-yellow-400"
+                  ? "border-amber-300 bg-amber-50 text-amber-700"
+                  : "border-t1-border bg-t1-surface text-t1-muted active:text-amber-700"
               }`}
             >
               <Star
-                className={`h-3 w-3 ${favorited ? "fill-yellow-400" : ""}`}
+                className={`h-3 w-3 ${favorited ? "fill-amber-500" : ""}`}
               />
             </button>
           </div>
@@ -260,7 +260,7 @@ export function DrillQuickPreview({
         <DrawerContent className="max-h-[90vh] border-t1-border bg-t1-bg">
           <DrawerHeader className="px-4 pb-0">
             <div className="flex items-center justify-between">
-              <DrawerTitle className="font-display text-base font-bold uppercase tracking-wide text-t1-text">
+              <DrawerTitle className="font-display text-base font-bold text-t1-text">
                 {drill.name}
               </DrawerTitle>
               <DrawerClose className="flex h-8 w-8 items-center justify-center text-t1-muted hover:text-t1-text">
@@ -282,7 +282,7 @@ export function DrillQuickPreview({
       >
         <SheetHeader className="px-5 pb-0 pt-5">
           <div className="flex items-center justify-between">
-            <SheetTitle className="font-display text-lg font-bold uppercase tracking-wide text-t1-text">
+            <SheetTitle className="font-display text-lg font-bold text-t1-text">
               {drill.name}
             </SheetTitle>
             <SheetClose className="text-t1-muted hover:text-t1-text">

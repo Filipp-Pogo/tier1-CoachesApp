@@ -74,7 +74,7 @@ export default function AuthPage() {
             <div className="flex items-center gap-3">
               <img src={TIER1_LOGO_WHITE} alt="Tier 1" className="h-8 w-auto" />
               <div>
-                <p className="font-display text-sm font-bold uppercase tracking-wide text-t1-text">
+                <p className="font-display text-sm font-bold text-t1-text">
                   Tier 1 Coaches App
                 </p>
                 <p className="text-xs text-t1-muted">
@@ -128,7 +128,7 @@ export default function AuthPage() {
           </div>
 
           {!authEnabled && (
-            <div className="mt-4 rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-amber-200">
+            <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
               Supabase is not configured yet. Add <code>VITE_SUPABASE_URL</code>{" "}
               and <code>VITE_SUPABASE_ANON_KEY</code> to enable login + cloud
               sync.
@@ -240,7 +240,7 @@ export default function AuthPage() {
             <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-accent">
               Coach Setup
             </p>
-            <h2 className="mt-2 font-display text-2xl font-bold uppercase tracking-wide text-t1-text">
+            <h2 className="mt-2 font-display text-2xl font-bold text-t1-text">
               Sign in once. Coach faster all week.
             </h2>
             <p className="mt-2 text-sm leading-relaxed text-t1-muted">
