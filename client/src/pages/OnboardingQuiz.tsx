@@ -122,15 +122,15 @@ export default function OnboardingQuiz() {
       <div className="min-h-screen bg-t1-bg transition-colors duration-200">
         <div className="max-w-3xl mx-auto px-4 py-8">
           {/* Result Header */}
-          <div className={`rounded-xl p-8 mb-8 text-center border ${passed ? 'bg-emerald-500/10 border-emerald-500/30' : 'bg-red-500/10 border-red-500/30'}`}>
-            <div className={`w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4 ${passed ? 'bg-emerald-500/20' : 'bg-red-500/20'}`}>
+          <div className={`rounded-xl p-8 mb-8 text-center border ${passed ? 'bg-emerald-50 border-emerald-200' : 'bg-red-50 border-red-200'}`}>
+            <div className={`w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4 ${passed ? 'bg-emerald-100' : 'bg-red-100'}`}>
               {passed ? (
-                <Trophy className="w-10 h-10 text-emerald-400" />
+                <Trophy className="w-10 h-10 text-emerald-700" />
               ) : (
-                <AlertTriangle className="w-10 h-10 text-red-400" />
+                <AlertTriangle className="w-10 h-10 text-red-700" />
               )}
             </div>
-            <h1 className="font-display font-bold text-4xl text-t1-text uppercase tracking-tight mb-2">
+            <h1 className="font-display font-bold text-4xl text-t1-text mb-2">
               {passed ? 'Quiz Passed!' : 'Not Yet'}
             </h1>
             <p className="text-t1-muted mb-6">
@@ -143,7 +143,7 @@ export default function OnboardingQuiz() {
             {/* Score */}
             <div className="flex items-center justify-center gap-8">
               <div>
-                <div className={`text-5xl font-bold ${passed ? 'text-emerald-400' : 'text-red-400'}`}>
+                <div className={`text-5xl font-bold ${passed ? 'text-emerald-700' : 'text-red-700'}`}>
                   {result.percentage}%
                 </div>
                 <div className="text-sm text-t1-muted mt-1">Score</div>
@@ -168,14 +168,14 @@ export default function OnboardingQuiz() {
           {/* Incorrect Questions Review */}
           {incorrectQuestions.length > 0 && (
             <div className="mb-8">
-              <h2 className="font-display font-bold text-xl text-t1-text uppercase tracking-wide mb-4">
+              <h2 className="font-display font-bold text-xl text-t1-text mb-4">
                 Review Incorrect Answers
               </h2>
               {Object.entries(incorrectByModule).map(([moduleId, questions]) => (
                 <div key={moduleId} className="mb-6">
                   <div className="flex items-center gap-2 mb-3">
-                    <BookOpen className="w-4 h-4 text-t1-blue" />
-                    <span className="text-sm font-medium text-t1-blue">{getModuleName(moduleId)}</span>
+                    <BookOpen className="w-4 h-4 text-t1-accent" />
+                    <span className="text-sm font-medium text-t1-accent">{getModuleName(moduleId)}</span>
                   </div>
                   <div className="space-y-3">
                     {questions.map(iq => (
@@ -190,16 +190,16 @@ export default function OnboardingQuiz() {
                                 key={i}
                                 className={`flex items-center gap-3 p-3 rounded-lg text-sm ${
                                   isCorrect
-                                    ? 'bg-emerald-500/10 border border-emerald-500/30 text-emerald-300'
+                                    ? 'bg-emerald-50 border border-emerald-200 text-emerald-700'
                                     : isSelected
-                                      ? 'bg-red-500/10 border border-red-500/30 text-red-300'
+                                      ? 'bg-red-50 border border-red-200 text-red-700'
                                       : 'bg-t1-bg text-t1-muted'
                                 }`}
                               >
                                 {isCorrect ? (
-                                  <CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+                                  <CheckCircle2 className="w-4 h-4 text-emerald-700 flex-shrink-0" />
                                 ) : isSelected ? (
-                                  <XCircle className="w-4 h-4 text-red-400 flex-shrink-0" />
+                                  <XCircle className="w-4 h-4 text-red-700 flex-shrink-0" />
                                 ) : (
                                   <div className="w-4 h-4 rounded-full border border-t1-border flex-shrink-0" />
                                 )}
@@ -208,7 +208,7 @@ export default function OnboardingQuiz() {
                             );
                           })}
                         </div>
-                        <div className="bg-t1-navy rounded-lg p-3 text-sm text-t1-blue-light">
+                        <div className="bg-t1-accent/10 rounded-lg p-3 text-sm text-t1-accent/80">
                           {iq.question.explanation}
                         </div>
                       </div>
@@ -226,7 +226,7 @@ export default function OnboardingQuiz() {
               className={`flex-1 flex items-center justify-center gap-2 font-semibold py-3 px-6 rounded-lg transition-colors ${
                 passed
                   ? 'bg-t1-surface hover:bg-secondary text-t1-text border border-t1-border'
-                  : 'bg-t1-blue hover:bg-t1-blue-light text-white'
+                  : 'bg-t1-accent hover:bg-t1-accent/80 text-white'
               }`}
             >
               <RotateCcw className="w-5 h-5" />
@@ -244,7 +244,7 @@ export default function OnboardingQuiz() {
           {/* Quiz History */}
           {quizResults.length > 1 && (
             <div className="mt-8 bg-t1-surface border border-t1-border rounded-xl p-5">
-              <h3 className="font-display font-bold text-lg text-t1-text uppercase tracking-wide mb-3">
+              <h3 className="font-display font-bold text-lg text-t1-text mb-3">
                 Quiz History
               </h3>
               <div className="space-y-2">
@@ -252,16 +252,16 @@ export default function OnboardingQuiz() {
                   <div key={r.id} className="flex items-center justify-between py-2 border-b border-t1-border/50 last:border-0">
                     <div className="flex items-center gap-3">
                       {r.passed ? (
-                        <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                        <CheckCircle2 className="w-4 h-4 text-emerald-700" />
                       ) : (
-                        <XCircle className="w-4 h-4 text-red-400" />
+                        <XCircle className="w-4 h-4 text-red-700" />
                       )}
                       <span className="text-sm text-t1-muted">
                         {new Date(r.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                       </span>
                     </div>
                     <div className="flex items-center gap-3">
-                      <span className={`text-sm font-bold ${r.passed ? 'text-emerald-400' : 'text-red-400'}`}>
+                      <span className={`text-sm font-bold ${r.passed ? 'text-emerald-700' : 'text-red-700'}`}>
                         {r.percentage}%
                       </span>
                       <span className="text-xs text-t1-muted">{r.score}/{r.total}</span>
@@ -297,7 +297,7 @@ export default function OnboardingQuiz() {
             </div>
             <div className="h-2 bg-t1-surface rounded-full overflow-hidden">
               <div
-                className="h-full bg-t1-blue rounded-full transition-all duration-300"
+                className="h-full bg-t1-accent rounded-full transition-all duration-300"
                 style={{ width: `${progressPercent}%` }}
               />
             </div>
@@ -305,8 +305,8 @@ export default function OnboardingQuiz() {
 
           {/* Module Tag */}
           <div className="flex items-center gap-2 mb-4">
-            <Target className="w-4 h-4 text-t1-blue" />
-            <span className="text-xs font-medium tracking-wider text-t1-blue uppercase">
+            <Target className="w-4 h-4 text-t1-accent" />
+            <span className="text-xs font-medium tracking-wider text-t1-accent uppercase">
               {moduleName}
             </span>
           </div>
@@ -322,18 +322,18 @@ export default function OnboardingQuiz() {
               const isSelected = selectedAnswer === i;
               const isCorrectOption = i === currentQuestion.correctIndex;
 
-              let optionStyle = 'bg-t1-surface border-t1-border hover:bg-secondary hover:border-t1-blue/30 text-t1-text cursor-pointer';
+              let optionStyle = 'bg-t1-surface border-t1-border hover:bg-secondary hover:border-t1-accent/30 text-t1-text cursor-pointer';
 
               if (showExplanation) {
                 if (isCorrectOption) {
-                  optionStyle = 'bg-emerald-500/10 border-emerald-500/40 text-emerald-300';
+                  optionStyle = 'bg-emerald-50 border-emerald-300 text-emerald-700';
                 } else if (isSelected && !isCorrectOption) {
-                  optionStyle = 'bg-red-500/10 border-red-500/40 text-red-300';
+                  optionStyle = 'bg-red-50 border-red-300 text-red-700';
                 } else {
                   optionStyle = 'bg-t1-surface border-t1-border/50 text-t1-muted opacity-60';
                 }
               } else if (isSelected) {
-                optionStyle = 'bg-t1-blue/10 border-t1-blue/40 text-t1-text';
+                optionStyle = 'bg-t1-accent/10 border-t1-accent/40 text-t1-text';
               }
 
               return (
@@ -345,9 +345,9 @@ export default function OnboardingQuiz() {
                 >
                   <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 text-sm font-bold ${
                     showExplanation && isCorrectOption
-                      ? 'bg-emerald-500/20 text-emerald-400'
+                      ? 'bg-emerald-100 text-emerald-700'
                       : showExplanation && isSelected && !isCorrectOption
-                        ? 'bg-red-500/20 text-red-400'
+                        ? 'bg-red-100 text-red-700'
                         : 'bg-t1-bg text-t1-muted'
                   }`}>
                     {showExplanation && isCorrectOption ? (
@@ -373,12 +373,12 @@ export default function OnboardingQuiz() {
             }`}>
               <div className="flex items-start gap-3">
                 {isCorrect ? (
-                  <CheckCircle2 className="w-5 h-5 text-emerald-400 flex-shrink-0 mt-0.5" />
+                  <CheckCircle2 className="w-5 h-5 text-emerald-700 flex-shrink-0 mt-0.5" />
                 ) : (
-                  <AlertTriangle className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5" />
+                  <AlertTriangle className="w-5 h-5 text-amber-700 flex-shrink-0 mt-0.5" />
                 )}
                 <div>
-                  <p className={`font-semibold mb-1 ${isCorrect ? 'text-emerald-400' : 'text-amber-400'}`}>
+                  <p className={`font-semibold mb-1 ${isCorrect ? 'text-emerald-700' : 'text-amber-700'}`}>
                     {isCorrect ? 'Correct!' : 'Not quite.'}
                   </p>
                   <p className="text-sm text-t1-text/80 leading-relaxed">
@@ -407,7 +407,7 @@ export default function OnboardingQuiz() {
             {showExplanation && (
               <button
                 onClick={nextQuestion}
-                className="flex items-center gap-2 bg-t1-blue hover:bg-t1-blue-light text-white font-semibold py-2.5 px-6 rounded-lg transition-colors"
+                className="flex items-center gap-2 bg-t1-accent hover:bg-t1-accent/80 text-white font-semibold py-2.5 px-6 rounded-lg transition-colors"
               >
                 {currentIdx < totalQuestions - 1 ? (
                   <>Next <ChevronRight className="w-4 h-4" /></>
@@ -427,17 +427,17 @@ export default function OnboardingQuiz() {
     <div className="min-h-screen bg-t1-bg transition-colors duration-200">
       <div className="max-w-3xl mx-auto px-4 py-8">
         {/* Back Link */}
-        <Link href="/onboarding" className="flex items-center gap-2 text-sm text-t1-muted hover:text-t1-blue transition-colors mb-8">
+        <Link href="/onboarding" className="flex items-center gap-2 text-sm text-t1-muted hover:text-t1-accent transition-colors mb-8">
           <ArrowLeft className="w-4 h-4" />
           Back to Onboarding
         </Link>
 
         {/* Header */}
         <div className="text-center mb-10">
-          <div className="w-20 h-20 rounded-2xl bg-t1-blue/20 flex items-center justify-center mx-auto mb-6">
-            <GraduationCap className="w-10 h-10 text-t1-blue" />
+          <div className="w-20 h-20 rounded-2xl bg-t1-accent/20 flex items-center justify-center mx-auto mb-6">
+            <GraduationCap className="w-10 h-10 text-t1-accent" />
           </div>
-          <h1 className="font-display font-bold text-4xl md:text-5xl text-t1-text uppercase tracking-tight mb-3">
+          <h1 className="font-display font-bold text-4xl md:text-5xl text-t1-text mb-3">
             Onboarding Quiz
           </h1>
           <p className="text-t1-muted max-w-lg mx-auto">
@@ -453,7 +453,7 @@ export default function OnboardingQuiz() {
               <div className="text-sm text-t1-muted mt-1">Questions</div>
             </div>
             <div>
-              <div className="text-3xl font-bold text-t1-blue">{PASS_THRESHOLD}%</div>
+              <div className="text-3xl font-bold text-t1-accent">{PASS_THRESHOLD}%</div>
               <div className="text-sm text-t1-muted mt-1">Pass Threshold</div>
             </div>
             <div>
@@ -465,7 +465,7 @@ export default function OnboardingQuiz() {
 
         {/* Module Breakdown */}
         <div className="bg-t1-surface border border-t1-border rounded-xl p-6 mb-8">
-          <h3 className="font-display font-bold text-lg text-t1-text uppercase tracking-wide mb-4">
+          <h3 className="font-display font-bold text-lg text-t1-text mb-4">
             Questions By Module
           </h3>
           <div className="space-y-3">
@@ -482,25 +482,25 @@ export default function OnboardingQuiz() {
         </div>
 
         {/* Rules */}
-        <div className="bg-t1-navy border border-t1-blue/20 rounded-xl p-6 mb-8">
-          <h3 className="font-display font-bold text-lg text-t1-text uppercase tracking-wide mb-3">
+        <div className="bg-t1-accent/10 border border-t1-accent/20 rounded-xl p-6 mb-8">
+          <h3 className="font-display font-bold text-lg text-t1-text mb-3">
             Quiz Rules
           </h3>
-          <ul className="space-y-2 text-sm text-t1-blue-light">
+          <ul className="space-y-2 text-sm text-t1-accent/80">
             <li className="flex items-start gap-2">
-              <CheckCircle2 className="w-4 h-4 text-t1-blue flex-shrink-0 mt-0.5" />
+              <CheckCircle2 className="w-4 h-4 text-t1-accent flex-shrink-0 mt-0.5" />
               Questions are randomized each attempt
             </li>
             <li className="flex items-start gap-2">
-              <CheckCircle2 className="w-4 h-4 text-t1-blue flex-shrink-0 mt-0.5" />
+              <CheckCircle2 className="w-4 h-4 text-t1-accent flex-shrink-0 mt-0.5" />
               You will see the correct answer and explanation after each question
             </li>
             <li className="flex items-start gap-2">
-              <CheckCircle2 className="w-4 h-4 text-t1-blue flex-shrink-0 mt-0.5" />
+              <CheckCircle2 className="w-4 h-4 text-t1-accent flex-shrink-0 mt-0.5" />
               You need {PASS_THRESHOLD}% ({Math.ceil(quizQuestions.length * PASS_THRESHOLD / 100)}/{quizQuestions.length}) correct answers to pass
             </li>
             <li className="flex items-start gap-2">
-              <CheckCircle2 className="w-4 h-4 text-t1-blue flex-shrink-0 mt-0.5" />
+              <CheckCircle2 className="w-4 h-4 text-t1-accent flex-shrink-0 mt-0.5" />
               You can retake the quiz as many times as needed
             </li>
           </ul>
@@ -512,14 +512,14 @@ export default function OnboardingQuiz() {
             <div className="flex items-center justify-between">
               <div>
                 <span className="text-sm text-t1-muted">Your Best Score</span>
-                <div className={`text-2xl font-bold ${bestQuizResult.passed ? 'text-emerald-400' : 'text-amber-400'}`}>
+                <div className={`text-2xl font-bold ${bestQuizResult.passed ? 'text-emerald-700' : 'text-amber-700'}`}>
                   {bestQuizResult.percentage}%
                 </div>
               </div>
               {hasPassed && (
-                <div className="flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/30 rounded-lg px-4 py-2">
-                  <Trophy className="w-5 h-5 text-emerald-400" />
-                  <span className="text-sm font-semibold text-emerald-400">PASSED</span>
+                <div className="flex items-center gap-2 bg-emerald-50 border border-emerald-200 rounded-lg px-4 py-2">
+                  <Trophy className="w-5 h-5 text-emerald-700" />
+                  <span className="text-sm font-semibold text-emerald-700">PASSED</span>
                 </div>
               )}
             </div>
@@ -529,7 +529,7 @@ export default function OnboardingQuiz() {
         {/* Start Button */}
         <button
           onClick={startQuiz}
-          className="w-full flex items-center justify-center gap-3 bg-t1-blue hover:bg-t1-blue-light text-white font-bold py-4 px-8 rounded-xl transition-colors text-lg"
+          className="w-full flex items-center justify-center gap-3 bg-t1-accent hover:bg-t1-accent/80 text-white font-bold py-4 px-8 rounded-xl transition-colors text-lg"
         >
           <GraduationCap className="w-6 h-6" />
           {hasPassed ? 'Retake Quiz' : bestQuizResult ? 'Try Again' : 'Start Quiz'}

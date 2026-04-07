@@ -1,23 +1,25 @@
 /*
-  PATHWAY PAGE: Tier 1 Performance — Cold Dark Brand
+  PATHWAY PAGE: Tier 1 Performance — Playbook Aesthetic
   MOBILE-FIRST: Compact hero, horizontal stage flow, large touch targets.
 */
 import { Link } from 'wouter';
 import { ChevronRight, ArrowRight } from 'lucide-react';
-import { pathwayStages } from '@/lib/data';
+import { usePathwayStages } from '@/hooks/useContentData';
 
 const PATHWAY_IMG = 'https://d2xsxph8kpxj0f.cloudfront.net/310519663356767696/ELbCQXq8c7BR3Zt5VxeR2S/pathway-hero-Xdykqbm6PopwUPUpgsQCLe.webp';
 
 const stageColors: Record<string, { bg: string; border: string; dot: string; text: string }> = {
-  foundations: { bg: 'bg-red-500/10', border: 'border-red-500/30', dot: 'bg-red-500', text: 'text-red-400' },
-  prep: { bg: 'bg-green-500/10', border: 'border-green-500/30', dot: 'bg-green-500', text: 'text-green-400' },
-  jasa: { bg: 'bg-yellow-500/10', border: 'border-yellow-500/30', dot: 'bg-yellow-500', text: 'text-yellow-400' },
-  hs: { bg: 'bg-blue-500/10', border: 'border-blue-500/30', dot: 'bg-blue-500', text: 'text-blue-400' },
-  asa: { bg: 'bg-purple-500/10', border: 'border-purple-500/30', dot: 'bg-purple-500', text: 'text-purple-400' },
+  foundations: { bg: 'bg-red-50', border: 'border-red-200', dot: 'bg-red-500', text: 'text-red-700' },
+  prep: { bg: 'bg-emerald-50', border: 'border-emerald-200', dot: 'bg-emerald-500', text: 'text-emerald-700' },
+  jasa: { bg: 'bg-amber-50', border: 'border-amber-200', dot: 'bg-amber-500', text: 'text-amber-700' },
+  hs: { bg: 'bg-blue-50', border: 'border-blue-200', dot: 'bg-blue-500', text: 'text-blue-700' },
+  asa: { bg: 'bg-purple-50', border: 'border-purple-200', dot: 'bg-purple-500', text: 'text-purple-700' },
   fta: { bg: 'bg-t1-text/5', border: 'border-t1-text/20', dot: 'bg-t1-text', text: 'text-t1-text' },
 };
 
 export default function Pathway() {
+  const { data: pathwayStages } = usePathwayStages();
+
   return (
     <div>
       {/* Hero — compact on mobile */}
@@ -25,7 +27,7 @@ export default function Pathway() {
         <img src={PATHWAY_IMG} alt="Tier 1 development pathway" className="absolute inset-0 w-full h-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-r from-t1-bg/95 via-t1-bg/80 to-t1-bg/40" />
         <div className="relative container h-full flex flex-col justify-center">
-          <h1 className="font-display text-2xl sm:text-4xl font-bold text-white uppercase tracking-wide">
+          <h1 className="font-display text-2xl sm:text-4xl font-bold text-t1-text">
             Development Pathway
           </h1>
           <p className="mt-1 sm:mt-2 text-t1-muted text-xs sm:text-sm max-w-lg">
@@ -66,7 +68,7 @@ export default function Pathway() {
               <Link
                 key={stage.id}
                 href={`/stage/${stage.id}`}
-                className="group block bg-t1-surface border border-t1-border rounded-lg overflow-hidden active:bg-t1-blue/5 transition-all no-underline"
+                className="group block bg-t1-surface border border-t1-border rounded-lg overflow-hidden active:bg-t1-accent/5 transition-all no-underline"
               >
                 <div className="flex">
                   {/* Left color bar */}
@@ -76,16 +78,16 @@ export default function Pathway() {
                     <div className="flex items-start justify-between gap-2">
                       <div className="min-w-0">
                         <div className="flex items-center gap-2 mb-1 sm:mb-2 flex-wrap">
-                          <h2 className="font-display text-base sm:text-xl font-bold uppercase tracking-wide text-t1-text group-hover:text-t1-blue transition-colors">
+                          <h2 className="font-display text-base sm:text-xl font-bold text-t1-text group-hover:text-t1-accent transition-colors">
                             {stage.name}
                           </h2>
                           {stage.contentStatus === 'placeholder' && (
-                            <span className="text-[9px] sm:text-[10px] bg-t1-navy text-t1-blue px-1.5 py-0.5 rounded font-medium uppercase tracking-wider">
+                            <span className="text-[9px] sm:text-[10px] bg-t1-accent/10 text-t1-accent px-1.5 py-0.5 rounded font-medium uppercase tracking-wider">
                               Outline
                             </span>
                           )}
                           {stage.contentStatus === 'partial' && (
-                            <span className="text-[9px] sm:text-[10px] bg-yellow-500/10 text-yellow-400 px-1.5 py-0.5 rounded font-medium uppercase tracking-wider">
+                            <span className="text-[9px] sm:text-[10px] bg-amber-50 text-amber-700 px-1.5 py-0.5 rounded font-medium uppercase tracking-wider">
                               Partial
                             </span>
                           )}
@@ -93,7 +95,7 @@ export default function Pathway() {
                         <p className="text-[10px] sm:text-xs text-t1-muted uppercase tracking-wider mb-1 sm:mb-3">{stage.subtitle}</p>
                         <p className="text-xs sm:text-sm text-t1-text/80 leading-relaxed line-clamp-2 sm:line-clamp-3">{stage.purpose}</p>
                       </div>
-                      <ChevronRight className="w-5 h-5 text-t1-muted group-hover:text-t1-blue transition-colors flex-shrink-0 mt-1" />
+                      <ChevronRight className="w-5 h-5 text-t1-muted group-hover:text-t1-accent transition-colors flex-shrink-0 mt-1" />
                     </div>
 
                     {/* Key Priorities — fewer on mobile */}

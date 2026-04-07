@@ -1,5 +1,5 @@
 /*
-  SESSION HISTORY: Tier 1 Performance — Cold Dark Brand
+  SESSION HISTORY: Tier 1 Performance — Playbook Aesthetic
   MOBILE-FIRST: Log of completed/saved sessions with date, level, duration, and notes.
   Coaches can track what they ran and when.
 */
@@ -18,12 +18,12 @@ import { useSessionHistory, type SessionHistoryEntry } from '@/hooks/useSessionH
 import type { PathwayStageId } from '@/lib/data';
 
 const levelColors: Record<string, string> = {
-  foundations: 'bg-red-500/15 text-red-400 border-red-500/20',
-  prep: 'bg-green-500/15 text-green-400 border-green-500/20',
-  jasa: 'bg-yellow-500/15 text-yellow-400 border-yellow-500/20',
-  hs: 'bg-purple-500/15 text-purple-400 border-purple-500/20',
-  asa: 'bg-blue-500/15 text-blue-400 border-blue-500/20',
-  fta: 'bg-orange-500/15 text-orange-400 border-orange-500/20',
+  foundations: 'bg-red-50 text-red-700 border-red-200',
+  prep: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+  jasa: 'bg-amber-50 text-amber-700 border-amber-200',
+  hs: 'bg-purple-50 text-purple-700 border-purple-200',
+  asa: 'bg-blue-50 text-blue-700 border-blue-200',
+  fta: 'bg-orange-50 text-orange-700 border-orange-200',
 };
 
 const levelBorderColors: Record<string, string> = {
@@ -105,7 +105,7 @@ function HistoryCard({ entry, isExpanded, onToggle, onDelete }: HistoryCardProps
                 {entry.blockCount} blocks
               </span>
             </div>
-            <h3 className="font-display text-sm sm:text-base font-bold text-t1-text uppercase tracking-wide leading-tight">
+            <h3 className="font-display text-sm sm:text-base font-bold text-t1-text leading-tight">
               {entry.planName}
             </h3>
             <div className="flex items-center gap-2 mt-1">
@@ -150,7 +150,7 @@ function HistoryCard({ entry, isExpanded, onToggle, onDelete }: HistoryCardProps
           {entry.planId && (
             <Link
               href="/session-plans"
-              className="inline-flex items-center gap-1.5 text-xs text-t1-blue hover:underline no-underline"
+              className="inline-flex items-center gap-1.5 text-xs text-t1-accent hover:underline no-underline"
             >
               <ClipboardList className="w-3.5 h-3.5" />
               View original plan
@@ -161,10 +161,10 @@ function HistoryCard({ entry, isExpanded, onToggle, onDelete }: HistoryCardProps
           <div className="flex items-center justify-end pt-1 border-t border-t1-border/50">
             {confirmDelete ? (
               <div className="flex items-center gap-2">
-                <span className="text-xs text-red-400">Delete this entry?</span>
+                <span className="text-xs text-red-700">Delete this entry?</span>
                 <button
                   onClick={() => { onDelete(); setConfirmDelete(false); }}
-                  className="px-2.5 py-1 text-xs font-medium bg-red-500/15 text-red-400 border border-red-500/20 rounded-md hover:bg-red-500/25 transition-colors"
+                  className="px-2.5 py-1 text-xs font-medium bg-red-50 text-red-700 border border-red-200 rounded-md hover:bg-red-100 transition-colors"
                 >
                   Yes, delete
                 </button>
@@ -178,7 +178,7 @@ function HistoryCard({ entry, isExpanded, onToggle, onDelete }: HistoryCardProps
             ) : (
               <button
                 onClick={() => setConfirmDelete(true)}
-                className="flex items-center gap-1 text-xs text-t1-muted/60 hover:text-red-400 transition-colors"
+                className="flex items-center gap-1 text-xs text-t1-muted/60 hover:text-red-700 transition-colors"
               >
                 <Trash2 className="w-3.5 h-3.5" />
                 Remove
@@ -224,9 +224,9 @@ export default function SessionHistory() {
   return (
     <div>
       {/* Header */}
-      <section className="bg-t1-navy border-b border-t1-border">
+      <section className="bg-t1-accent/10 border-b border-t1-border">
         <div className="container py-4 sm:py-6">
-          <h1 className="font-display text-xl sm:text-4xl font-bold text-t1-text dark:text-white uppercase tracking-wide">
+          <h1 className="font-display text-xl sm:text-4xl font-bold text-t1-text">
             Session History
           </h1>
           <p className="mt-1 text-t1-muted text-xs sm:text-sm">
@@ -250,7 +250,7 @@ export default function SessionHistory() {
               <p className="text-[10px] sm:text-xs text-t1-muted uppercase tracking-wider">Total Time</p>
             </div>
             <div className="bg-t1-surface border border-t1-border rounded-lg p-3 text-center">
-              <p className="font-display text-lg sm:text-2xl font-bold text-t1-blue">{stats.thisWeek}</p>
+              <p className="font-display text-lg sm:text-2xl font-bold text-t1-accent">{stats.thisWeek}</p>
               <p className="text-[10px] sm:text-xs text-t1-muted uppercase tracking-wider">This Week</p>
             </div>
           </div>
@@ -265,7 +265,7 @@ export default function SessionHistory() {
                 onClick={() => setLevelFilter(null)}
                 className={`px-2 py-1 rounded-full text-[11px] font-medium border transition-colors ${
                   !levelFilter
-                    ? 'bg-t1-blue text-white border-t1-blue'
+                    ? 'bg-t1-accent text-white border-t1-accent'
                     : 'bg-t1-bg border-t1-border text-t1-muted'
                 }`}
               >
@@ -279,7 +279,7 @@ export default function SessionHistory() {
                     onClick={() => setLevelFilter(level)}
                     className={`px-2 py-1 rounded-full text-[11px] font-medium border transition-colors ${
                       levelFilter === level
-                        ? 'bg-t1-blue text-white border-t1-blue'
+                        ? 'bg-t1-accent text-white border-t1-accent'
                         : 'bg-t1-bg border-t1-border text-t1-muted'
                     }`}
                   >
@@ -291,7 +291,7 @@ export default function SessionHistory() {
             <AlertDialog>
               <AlertDialogTrigger asChild>
                 <button
-                  className="flex items-center gap-1 text-[11px] text-t1-muted/60 hover:text-red-400 transition-colors"
+                  className="flex items-center gap-1 text-[11px] text-t1-muted/60 hover:text-red-700 transition-colors"
                 >
                   <Trash2 className="w-3 h-3" />
                   Clear
@@ -300,10 +300,10 @@ export default function SessionHistory() {
               <AlertDialogContent className="bg-t1-surface border-t1-border">
                 <AlertDialogHeader>
                   <div className="flex items-center gap-2 mb-1">
-                    <div className="w-10 h-10 rounded-full bg-red-500/15 flex items-center justify-center">
-                      <AlertTriangle className="w-5 h-5 text-red-400" />
+                    <div className="w-10 h-10 rounded-full bg-red-50 flex items-center justify-center">
+                      <AlertTriangle className="w-5 h-5 text-red-700" />
                     </div>
-                    <AlertDialogTitle className="font-display text-lg uppercase tracking-wide text-t1-text">
+                    <AlertDialogTitle className="font-display text-lg text-t1-text">
                       Clear All History
                     </AlertDialogTitle>
                   </div>
@@ -332,7 +332,7 @@ export default function SessionHistory() {
         {filteredEntries.length === 0 ? (
           <div className="bg-t1-surface border border-t1-border rounded-lg p-8 sm:p-12 text-center">
             <History className="w-10 h-10 text-t1-muted/30 mx-auto mb-3" />
-            <h2 className="font-display text-base font-semibold text-t1-text uppercase tracking-wide mb-1">
+            <h2 className="font-display text-base font-semibold text-t1-text mb-1">
               No sessions logged yet
             </h2>
             <p className="text-xs text-t1-muted max-w-sm mx-auto">
@@ -342,7 +342,7 @@ export default function SessionHistory() {
             <div className="flex flex-col sm:flex-row items-center justify-center gap-2 mt-4">
               <Link
                 href="/session-builder"
-                className="inline-flex items-center gap-1.5 px-4 py-2 bg-t1-blue text-white text-xs font-semibold rounded-lg no-underline hover:bg-t1-blue/90 transition-colors"
+                className="inline-flex items-center gap-1.5 px-4 py-2 bg-t1-accent text-white text-xs font-semibold rounded-lg no-underline hover:bg-t1-accent/90 transition-colors"
               >
                 <ClipboardList className="w-3.5 h-3.5" />
                 Open Session Builder

@@ -23,7 +23,7 @@ import {
   TrendingUp,
   Video,
 } from "lucide-react";
-import { drills, pathwayStages, sessionBlocks } from "@/lib/data";
+import { useDrills, usePathwayStages, useSessionBlocks } from "@/hooks/useContentData";
 import { useFavorites } from "@/hooks/useFavorites";
 import { useRecentDrills } from "@/hooks/useRecentDrills";
 import {
@@ -61,7 +61,7 @@ function getEmbedUrl(url: string): string | null {
   return null;
 }
 
-function getBackNavigation(search: string) {
+function getBackNavigation(search: string, pathwayStages: { id: string; shortName: string }[]) {
   if (!search) {
     return {
       href: "/drills",
@@ -94,20 +94,20 @@ function DetailPanel({
 }) {
   const toneClassName =
     tone === "coach"
-      ? "border-t1-blue/20 bg-t1-blue/5"
+      ? "border-t1-accent/20 bg-t1-accent/5"
       : tone === "alert"
         ? "border-t1-red/15 bg-t1-red/5"
         : "border-t1-border bg-t1-surface";
   const titleClassName =
     tone === "coach"
-      ? "text-t1-blue"
+      ? "text-t1-accent"
       : tone === "alert"
         ? "text-t1-red"
         : "text-t1-text";
 
   return (
     <section
-      className={`rounded-[1.25rem] border p-4 sm:p-5 lg:p-6 ${toneClassName}`}
+      className={`rounded-xl border p-4 sm:p-5 lg:p-6 ${toneClassName}`}
     >
       <h2
         className={`chip-label mb-4 flex items-center gap-2 font-display ${titleClassName}`}
@@ -121,6 +121,9 @@ function DetailPanel({
 }
 
 export default function DrillDetail() {
+  const { data: drills } = useDrills();
+  const { data: pathwayStages } = usePathwayStages();
+  const { data: sessionBlocks } = useSessionBlocks();
   const { id } = useParams<{ id: string }>();
   const drill = drills.find(item => item.id === id);
   const { isFavorite, toggleFavorite } = useFavorites();
@@ -129,9 +132,10 @@ export default function DrillDetail() {
   const backNavigation = useMemo(
     () =>
       getBackNavigation(
-        typeof window === "undefined" ? "" : window.location.search
+        typeof window === "undefined" ? "" : window.location.search,
+        pathwayStages
       ),
-    []
+    [pathwayStages]
   );
 
   useEffect(() => {
@@ -155,12 +159,12 @@ export default function DrillDetail() {
   if (!drill) {
     return (
       <div className="container py-16 text-center">
-        <h1 className="font-display text-2xl font-bold uppercase text-t1-text">
+        <h1 className="font-display text-2xl font-bold text-t1-text">
           Drill Not Found
         </h1>
         <Link
           href={backNavigation.href}
-          className="mt-4 inline-block text-t1-blue"
+          className="mt-4 inline-block text-t1-accent"
         >
           {backNavigation.label}
         </Link>
@@ -193,7 +197,7 @@ export default function DrillDetail() {
         <div className="container flex items-center justify-between py-2">
           <Link
             href={backNavigation.href}
-            className="flex min-h-[40px] items-center gap-1.5 text-[0.92rem] font-medium text-t1-muted no-underline active:text-t1-blue"
+            className="flex min-h-[40px] items-center gap-1.5 text-[0.92rem] font-medium text-t1-muted no-underline active:text-t1-accent"
           >
             <ArrowLeft className="h-4 w-4" /> {backNavigation.label}
           </Link>
@@ -202,8 +206,8 @@ export default function DrillDetail() {
               onClick={handleCopy}
               className={`flex min-h-[40px] items-center gap-1.5 rounded-full border px-3.5 py-2 action-label transition-all ${
                 copied
-                  ? "border-green-500/30 bg-green-500/15 text-green-400"
-                  : "border-t1-border bg-t1-surface text-t1-muted active:bg-t1-blue/10"
+                  ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+                  : "border-t1-border bg-t1-surface text-t1-muted active:bg-t1-accent/10"
               }`}
             >
               {copied ? (
@@ -217,12 +221,12 @@ export default function DrillDetail() {
               onClick={() => toggleFavorite(drill.id)}
               className={`flex min-h-[40px] items-center gap-1.5 rounded-full border px-3.5 py-2 action-label transition-all ${
                 favorited
-                  ? "border-yellow-500/40 bg-yellow-500/15 text-yellow-400"
-                  : "border-t1-border bg-t1-surface text-t1-muted active:bg-yellow-500/10"
+                  ? "border-amber-300 bg-amber-50 text-amber-700"
+                  : "border-t1-border bg-t1-surface text-t1-muted active:bg-amber-50"
               }`}
             >
               <Star
-                className={`h-3.5 w-3.5 ${favorited ? "fill-yellow-400" : ""}`}
+                className={`h-3.5 w-3.5 ${favorited ? "fill-amber-500" : ""}`}
               />
               {favorited ? "Saved" : "Save"}
             </button>
@@ -233,7 +237,7 @@ export default function DrillDetail() {
       <div className="container py-4 sm:py-6">
         <Link
           href={backNavigation.href}
-          className="mb-6 hidden items-center gap-1.5 text-sm text-t1-muted no-underline hover:text-t1-blue lg:inline-flex"
+          className="mb-6 hidden items-center gap-1.5 text-sm text-t1-muted no-underline hover:text-t1-accent lg:inline-flex"
         >
           <ArrowLeft className="h-4 w-4" /> {backNavigation.label}
         </Link>
@@ -245,7 +249,7 @@ export default function DrillDetail() {
                 {drill.level.map(level => (
                   <span
                     key={level}
-                    className="chip-label rounded bg-t1-blue/10 px-2.5 py-1 text-t1-blue"
+                    className="chip-label rounded bg-t1-accent/10 px-2.5 py-1 text-t1-accent"
                   >
                     {pathwayStages.find(stage => stage.id === level)?.shortName}
                   </span>
@@ -262,7 +266,7 @@ export default function DrillDetail() {
                   <Clock className="h-3 w-3" /> {drill.recommendedTime}
                 </span>
                 {drill.subBand && (
-                  <span className="chip-label rounded bg-amber-500/10 px-2.5 py-1 text-amber-600 dark:text-amber-300">
+                  <span className="chip-label rounded bg-amber-50 px-2.5 py-1 text-amber-700">
                     {formatSubBand(drill.subBand)}
                   </span>
                 )}
@@ -274,7 +278,7 @@ export default function DrillDetail() {
               </p>
 
               <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-                <div className="rounded-[1.2rem] border border-t1-border bg-t1-bg px-4 py-3">
+                <div className="rounded-xl border border-t1-border bg-t1-bg px-4 py-3">
                   <p className="meta-label">Class fit</p>
                   <p className="mt-2 text-sm font-semibold text-t1-text">
                     {drill.level
@@ -288,21 +292,21 @@ export default function DrillDetail() {
                   </p>
                 </div>
 
-                <div className="rounded-[1.2rem] border border-t1-border bg-t1-bg px-4 py-3">
+                <div className="rounded-xl border border-t1-border bg-t1-bg px-4 py-3">
                   <p className="meta-label">Session block</p>
                   <p className="mt-2 text-sm font-semibold text-t1-text">
                     {block?.name ?? "General court work"}
                   </p>
                 </div>
 
-                <div className="rounded-[1.2rem] border border-t1-border bg-t1-bg px-4 py-3">
+                <div className="rounded-xl border border-t1-border bg-t1-bg px-4 py-3">
                   <p className="meta-label">Training focus</p>
                   <p className="mt-2 text-sm font-semibold text-t1-text">
                     {leadFocus?.name ?? primaryStage?.shortName ?? "All-court"}
                   </p>
                 </div>
 
-                <div className="rounded-[1.2rem] border border-t1-border bg-t1-bg px-4 py-3">
+                <div className="rounded-xl border border-t1-border bg-t1-bg px-4 py-3">
                   <p className="meta-label">Rep profile</p>
                   <p className="mt-2 text-sm font-semibold text-t1-text">
                     {[leadGoal?.name, intensity?.name, complexity?.name]
@@ -313,14 +317,14 @@ export default function DrillDetail() {
               </div>
 
               <div className="mt-4 grid gap-3 md:grid-cols-2">
-                <div className="rounded-[1.2rem] border border-t1-border bg-t1-bg px-4 py-3">
+                <div className="rounded-xl border border-t1-border bg-t1-bg px-4 py-3">
                   <p className="meta-label">How to start</p>
                   <p className="support-copy-strong body-copy-sm mt-2 text-t1-text">
                     {guide.howToRun[0] ?? drill.setup}
                   </p>
                 </div>
-                <div className="rounded-[1.2rem] border border-t1-blue/20 bg-t1-blue/5 px-4 py-3">
-                  <p className="meta-label text-t1-blue">Coach first</p>
+                <div className="rounded-xl border border-t1-accent/20 bg-t1-accent/5 px-4 py-3">
+                  <p className="meta-label text-t1-accent">Coach first</p>
                   <p className="support-copy-strong body-copy-sm mt-2 text-t1-text">
                     {guide.whatToCoach[0] ?? drill.coachingCues[0]}
                   </p>
@@ -333,8 +337,8 @@ export default function DrillDetail() {
                 onClick={handleCopy}
                 className={`flex items-center gap-1.5 rounded-full border px-3.5 py-2 action-label transition-all ${
                   copied
-                    ? "border-green-500/30 bg-green-500/15 text-green-400"
-                    : "border-t1-border bg-t1-surface text-t1-muted hover:border-t1-blue/40 hover:text-t1-blue"
+                    ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+                    : "border-t1-border bg-t1-surface text-t1-muted hover:border-t1-accent/40 hover:text-t1-accent"
                 }`}
               >
                 {copied ? (
@@ -348,12 +352,12 @@ export default function DrillDetail() {
                 onClick={() => toggleFavorite(drill.id)}
                 className={`flex items-center gap-1.5 rounded-full border px-3.5 py-2 action-label transition-all ${
                   favorited
-                    ? "border-yellow-500/40 bg-yellow-500/15 text-yellow-400"
-                    : "border-t1-border bg-t1-surface text-t1-muted hover:border-yellow-500/40 hover:text-yellow-400"
+                    ? "border-amber-300 bg-amber-50 text-amber-700"
+                    : "border-t1-border bg-t1-surface text-t1-muted hover:border-amber-300 hover:text-amber-700"
                 }`}
               >
                 <Star
-                  className={`h-3.5 w-3.5 ${favorited ? "fill-yellow-400" : ""}`}
+                  className={`h-3.5 w-3.5 ${favorited ? "fill-amber-500" : ""}`}
                 />
                 {favorited ? "Saved" : "Save"}
               </button>
@@ -379,7 +383,7 @@ export default function DrillDetail() {
                   href={drill.videoUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 text-sm text-t1-blue hover:underline"
+                  className="inline-flex items-center gap-1.5 text-sm text-t1-accent hover:underline"
                 >
                   <Video className="h-4 w-4" />
                   Open demo video
@@ -394,19 +398,19 @@ export default function DrillDetail() {
           <div className="space-y-3 sm:space-y-4 lg:col-span-2">
             <DetailPanel
               title="What This Drill Is"
-              icon={<Info className="h-4 w-4 text-t1-blue" />}
+              icon={<Info className="h-4 w-4 text-t1-accent" />}
             >
               <p className="body-copy-sm text-t1-text/80">{guide.whatThisIs}</p>
             </DetailPanel>
 
             <DetailPanel
               title="How To Run It"
-              icon={<ListChecks className="h-4 w-4 text-t1-blue" />}
+              icon={<ListChecks className="h-4 w-4 text-t1-accent" />}
             >
               <ol className="space-y-3">
                 {guide.howToRun.map((step, index) => (
                   <li key={step} className="flex items-start gap-3">
-                    <span className="mt-0.5 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-t1-blue text-[10px] font-bold text-white">
+                    <span className="mt-0.5 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-t1-accent text-[10px] font-bold text-white">
                       {index + 1}
                     </span>
                     <span className="body-copy-sm text-t1-text/80">{step}</span>
@@ -417,13 +421,13 @@ export default function DrillDetail() {
 
             <DetailPanel
               title="What To Coach"
-              icon={<Target className="h-4 w-4 text-t1-blue" />}
+              icon={<Target className="h-4 w-4 text-t1-accent" />}
               tone="coach"
             >
               <ul className="space-y-2.5">
                 {guide.whatToCoach.map((cue, index) => (
                   <li key={cue} className="flex items-start gap-3">
-                    <span className="mt-0.5 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-t1-blue text-[10px] font-bold text-white">
+                    <span className="mt-0.5 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-t1-accent text-[10px] font-bold text-white">
                       {index + 1}
                     </span>
                     <span className="body-copy-sm text-t1-text/80">{cue}</span>
@@ -449,12 +453,12 @@ export default function DrillDetail() {
 
             <DetailPanel
               title="When To Use It"
-              icon={<Clock className="h-4 w-4 text-t1-blue" />}
+              icon={<Clock className="h-4 w-4 text-t1-accent" />}
             >
               <ul className="space-y-2.5">
                 {guide.bestFit.map(item => (
                   <li key={item} className="flex items-start gap-2.5">
-                    <span className="mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-t1-blue" />
+                    <span className="mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-t1-accent" />
                     <span className="body-copy-sm text-t1-text/80">{item}</span>
                   </li>
                 ))}
@@ -465,7 +469,7 @@ export default function DrillDetail() {
           <aside className="space-y-3 sm:space-y-4">
             <DetailPanel
               title="Standards"
-              icon={<Crosshair className="h-4 w-4 text-t1-blue" />}
+              icon={<Crosshair className="h-4 w-4 text-t1-accent" />}
             >
               <ul className="space-y-2">
                 {drill.standards.map(item => (
@@ -473,7 +477,7 @@ export default function DrillDetail() {
                     key={item}
                     className="flex items-start gap-2.5 body-copy-sm text-t1-text/80"
                   >
-                    <span className="mt-0.5 flex-shrink-0 text-t1-blue">
+                    <span className="mt-0.5 flex-shrink-0 text-t1-accent">
                       &#10003;
                     </span>
                     <span>{item}</span>
@@ -484,7 +488,7 @@ export default function DrillDetail() {
 
             <DetailPanel
               title="Progression"
-              icon={<TrendingUp className="h-4 w-4 text-t1-blue" />}
+              icon={<TrendingUp className="h-4 w-4 text-t1-accent" />}
             >
               <p className="body-copy-sm text-t1-text/80">
                 {drill.progression}
@@ -493,14 +497,14 @@ export default function DrillDetail() {
 
             <DetailPanel
               title="Regression"
-              icon={<TrendingDown className="h-4 w-4 text-t1-blue-light" />}
+              icon={<TrendingDown className="h-4 w-4 text-t1-accent/80" />}
             >
               <p className="body-copy-sm text-t1-text/80">{drill.regression}</p>
             </DetailPanel>
 
             <DetailPanel
               title="Competitive Variation"
-              icon={<Swords className="h-4 w-4 text-t1-blue" />}
+              icon={<Swords className="h-4 w-4 text-t1-accent" />}
             >
               <p className="body-copy-sm text-t1-text/80">
                 {drill.competitiveVariation}
@@ -509,7 +513,7 @@ export default function DrillDetail() {
 
             <DetailPanel
               title="Match Play Transfer"
-              icon={<Target className="h-4 w-4 text-t1-blue" />}
+              icon={<Target className="h-4 w-4 text-t1-accent" />}
             >
               <p className="body-copy-sm text-t1-text/80">
                 {drill.matchPlayRelevance}

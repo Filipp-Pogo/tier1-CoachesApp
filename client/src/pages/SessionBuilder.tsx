@@ -25,13 +25,11 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import {
-  pathwayStages,
-  sessionBlocks,
-  drills,
   sessionTemplates,
   type PathwayStageId,
   type SessionBlockId,
 } from "@/lib/data";
+import { useDrills, usePathwayStages, useSessionBlocks } from "@/hooks/useContentData";
 import { exportSessionPDF } from "@/lib/session-pdf";
 import {
   Empty,
@@ -108,7 +106,7 @@ function mapLabelToBlockId(label: string): SessionBlockId {
   return "feeding";
 }
 
-function blockLabelFromId(blockId: SessionBlockId) {
+function blockLabelFromId(blockId: SessionBlockId, sessionBlocks: { id: string; shortName: string }[]) {
   return (
     sessionBlocks.find(block => block.id === blockId)?.shortName ?? "Block"
   );
@@ -125,12 +123,15 @@ function stringifyListInput(values: string[]) {
   return values.join("\n");
 }
 
-function createDefaultPlanName(level: PathwayStageId) {
+function createDefaultPlanName(level: PathwayStageId, pathwayStages: { id: string; shortName: string }[]) {
   const stage = pathwayStages.find(item => item.id === level);
   return `${stage?.shortName || "Custom"} Session Plan`;
 }
 
 export default function SessionBuilder() {
+  const { data: pathwayStages } = usePathwayStages();
+  const { data: sessionBlocks } = useSessionBlocks();
+  const { data: drills } = useDrills();
   const [selectedLevel, setSelectedLevel] =
     useState<PathwayStageId>("foundations");
   const [sessionTime, setSessionTime] = useState("60");
@@ -149,7 +150,7 @@ export default function SessionBuilder() {
   const [sourcePlanId, setSourcePlanId] = useState<string | null>(null);
   const [sourceType, setSourceType] = useState<"stock" | "custom">("custom");
   const [planName, setPlanName] = useState(
-    createDefaultPlanName("foundations")
+    createDefaultPlanName("foundations", pathwayStages)
   );
   const [planObjective, setPlanObjective] = useState("");
   const [planEmphasis, setPlanEmphasis] = useState("");
@@ -198,7 +199,7 @@ export default function SessionBuilder() {
     setCustomPlanId(null);
     setSourcePlanId(null);
     setSourceType("custom");
-    setPlanName(name || createDefaultPlanName(level));
+    setPlanName(name || createDefaultPlanName(level, pathwayStages));
     setPlanObjective("");
     setPlanEmphasis("");
     setPlanVisibility("private");
@@ -309,7 +310,7 @@ export default function SessionBuilder() {
     customPlanId: customPlanId ?? undefined,
     sourcePlanId,
     sourceType,
-    name: planName.trim() || createDefaultPlanName(selectedLevel),
+    name: planName.trim() || createDefaultPlanName(selectedLevel, pathwayStages),
     level: selectedLevel,
     subBand: null,
     totalTime: parseInt(sessionTime, 10) || 60,
@@ -327,7 +328,7 @@ export default function SessionBuilder() {
         .filter(Boolean)
         .join(" — ");
       return {
-        label: blockLabelFromId(block.blockId),
+        label: blockLabelFromId(block.blockId, sessionBlocks),
         content:
           content ||
           sessionBlocks.find(item => item.id === block.blockId)?.description ||
@@ -386,7 +387,7 @@ export default function SessionBuilder() {
     <div>
       <section className="page-hero">
         <div className="container py-4 sm:py-6">
-          <h1 className="font-display text-xl sm:text-4xl font-bold text-t1-text dark:text-white uppercase tracking-wide">
+          <h1 className="font-display text-xl sm:text-4xl font-bold text-t1-text">
             Session Builder
           </h1>
           <p className="mt-1 text-t1-muted text-xs sm:text-sm">
@@ -400,10 +401,10 @@ export default function SessionBuilder() {
         <div className="coach-tip p-4">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
             <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-blue">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-accent">
                 Builder Workflow
               </p>
-              <h2 className="mt-1 font-display text-sm sm:text-base font-bold uppercase tracking-wide text-t1-text">
+              <h2 className="mt-1 font-display text-sm sm:text-base font-bold text-t1-text">
                 Template first. Scratch build when the session is truly custom.
               </h2>
               <p className="mt-1 text-xs leading-relaxed text-t1-muted">
@@ -420,10 +421,10 @@ export default function SessionBuilder() {
         </div>
 
         {sourceBanner && (
-          <div className="rounded-xl border border-t1-blue/25 bg-t1-blue/10 p-3 sm:p-4 flex items-start gap-3">
-            <ClipboardList className="w-5 h-5 text-t1-blue flex-shrink-0 mt-0.5" />
+          <div className="rounded-xl border border-t1-accent/25 bg-t1-accent/10 p-3 sm:p-4 flex items-start gap-3">
+            <ClipboardList className="w-5 h-5 text-t1-accent flex-shrink-0 mt-0.5" />
             <div className="flex-1 min-w-0">
-              <p className="text-xs font-semibold text-t1-blue uppercase tracking-wider">
+              <p className="text-xs font-semibold text-t1-accent uppercase tracking-wider">
                 {customPlanId
                   ? "Saved Custom Plan"
                   : sourceType === "stock"
@@ -460,13 +461,13 @@ export default function SessionBuilder() {
                     onClick={() => {
                       setSelectedLevel(stage.id);
                       if (!customPlanId && !sourcePlanId && !planName.trim()) {
-                        setPlanName(createDefaultPlanName(stage.id));
+                        setPlanName(createDefaultPlanName(stage.id, pathwayStages));
                       }
                     }}
                     className={`flex-shrink-0 px-2.5 py-1.5 rounded-full text-xs font-medium border transition-colors min-h-[32px] ${
                       selectedLevel === stage.id
-                        ? "bg-t1-blue text-white border-t1-blue"
-                        : "bg-t1-bg/70 border-t1-border text-t1-muted active:bg-t1-blue/10"
+                        ? "bg-t1-accent text-white border-t1-accent"
+                        : "bg-t1-bg/70 border-t1-border text-t1-muted active:bg-t1-accent/10"
                     }`}
                   >
                     {stage.shortName}
@@ -487,7 +488,7 @@ export default function SessionBuilder() {
                   type="number"
                   value={sessionTime}
                   onChange={e => setSessionTime(e.target.value)}
-                  className="w-20 rounded-xl border border-t1-border bg-t1-bg/70 px-3 py-2 text-sm text-t1-text focus:outline-none focus:ring-2 focus:ring-t1-blue/30 min-h-[36px]"
+                  className="w-20 rounded-xl border border-t1-border bg-t1-bg/70 px-3 py-2 text-sm text-t1-text focus:outline-none focus:ring-2 focus:ring-t1-accent/30 min-h-[36px]"
                   min="30"
                   max="180"
                   step="15"
@@ -501,7 +502,7 @@ export default function SessionBuilder() {
         <div className="panel-surface p-3 sm:p-5 space-y-3">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <h2 className="font-display text-xs sm:text-sm font-semibold uppercase tracking-wider text-t1-text">
+              <h2 className="font-display text-xs sm:text-sm font-semibold text-t1-text">
                 Custom Plan Details
               </h2>
               <p className="text-[10px] text-t1-muted mt-1">
@@ -514,8 +515,8 @@ export default function SessionBuilder() {
               disabled={savingPlan}
               className={`inline-flex min-h-[42px] items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-xs font-semibold uppercase tracking-wider transition-colors sm:min-h-[40px] ${
                 savingPlan
-                  ? "bg-t1-blue/50 text-white"
-                  : "bg-t1-blue text-white hover:bg-t1-blue/90"
+                  ? "bg-t1-accent/50 text-white"
+                  : "bg-t1-accent text-white hover:bg-t1-accent/90"
               }`}
             >
               {customPlanId ? (
@@ -540,7 +541,7 @@ export default function SessionBuilder() {
                 value={planName}
                 onChange={e => setPlanName(e.target.value)}
                 placeholder="Prep Green Heavy Topspin Day"
-                className="w-full rounded-xl border border-t1-border bg-t1-bg/70 px-3 py-2 text-sm text-t1-text placeholder:text-t1-muted/50 focus:outline-none focus:ring-2 focus:ring-t1-blue/30 min-h-[40px]"
+                className="w-full rounded-xl border border-t1-border bg-t1-bg/70 px-3 py-2 text-sm text-t1-text placeholder:text-t1-muted/50 focus:outline-none focus:ring-2 focus:ring-t1-accent/30 min-h-[40px]"
               />
             </div>
             <div>
@@ -559,7 +560,7 @@ export default function SessionBuilder() {
                     onClick={() => setPlanVisibility(option.key)}
                     className={`flex-1 flex items-center justify-center gap-1.5 rounded-xl border px-3 py-2 text-xs font-semibold uppercase tracking-wider min-h-[40px] transition-colors ${
                       planVisibility === option.key
-                        ? "bg-t1-blue text-white border-t1-blue"
+                        ? "bg-t1-accent text-white border-t1-accent"
                         : "bg-t1-bg/70 border-t1-border text-t1-muted"
                     }`}
                   >
@@ -584,7 +585,7 @@ export default function SessionBuilder() {
               onChange={e => setPlanObjective(e.target.value)}
               rows={2}
               placeholder="What this session is actually trying to build."
-              className="w-full rounded-xl border border-t1-border bg-t1-bg/70 px-3 py-2.5 text-sm text-t1-text placeholder:text-t1-muted/50 focus:outline-none focus:ring-2 focus:ring-t1-blue/30 resize-none"
+              className="w-full rounded-xl border border-t1-border bg-t1-bg/70 px-3 py-2.5 text-sm text-t1-text placeholder:text-t1-muted/50 focus:outline-none focus:ring-2 focus:ring-t1-accent/30 resize-none"
             />
           </div>
 
@@ -596,7 +597,7 @@ export default function SessionBuilder() {
               value={planEmphasis}
               onChange={e => setPlanEmphasis(e.target.value)}
               placeholder="Spacing before power."
-              className="w-full rounded-xl border border-t1-border bg-t1-bg/70 px-3 py-2 text-sm text-t1-text placeholder:text-t1-muted/50 focus:outline-none focus:ring-2 focus:ring-t1-blue/30 min-h-[40px]"
+              className="w-full rounded-xl border border-t1-border bg-t1-bg/70 px-3 py-2 text-sm text-t1-text placeholder:text-t1-muted/50 focus:outline-none focus:ring-2 focus:ring-t1-accent/30 min-h-[40px]"
             />
           </div>
 
@@ -610,7 +611,7 @@ export default function SessionBuilder() {
                 onChange={e => setStandardsInput(e.target.value)}
                 rows={4}
                 placeholder={"Split step\nRecovery\nShape"}
-                className="w-full rounded-xl border border-t1-border bg-t1-bg/70 px-3 py-2.5 text-sm text-t1-text placeholder:text-t1-muted/50 focus:outline-none focus:ring-2 focus:ring-t1-blue/30 resize-none"
+                className="w-full rounded-xl border border-t1-border bg-t1-bg/70 px-3 py-2.5 text-sm text-t1-text placeholder:text-t1-muted/50 focus:outline-none focus:ring-2 focus:ring-t1-accent/30 resize-none"
               />
               <p className="text-[10px] text-t1-muted/60 mt-1">One per line.</p>
             </div>
@@ -623,7 +624,7 @@ export default function SessionBuilder() {
                 onChange={e => setCommonMistakesInput(e.target.value)}
                 rows={4}
                 placeholder={"Too much speed\nRandom points"}
-                className="w-full rounded-xl border border-t1-border bg-t1-bg/70 px-3 py-2.5 text-sm text-t1-text placeholder:text-t1-muted/50 focus:outline-none focus:ring-2 focus:ring-t1-blue/30 resize-none"
+                className="w-full rounded-xl border border-t1-border bg-t1-bg/70 px-3 py-2.5 text-sm text-t1-text placeholder:text-t1-muted/50 focus:outline-none focus:ring-2 focus:ring-t1-accent/30 resize-none"
               />
               <p className="text-[10px] text-t1-muted/60 mt-1">One per line.</p>
             </div>
@@ -638,12 +639,12 @@ export default function SessionBuilder() {
               onChange={e => setMatchPlayTransfer(e.target.value)}
               rows={2}
               placeholder="How this session should show up in real matches."
-              className="w-full rounded-xl border border-t1-border bg-t1-bg/70 px-3 py-2.5 text-sm text-t1-text placeholder:text-t1-muted/50 focus:outline-none focus:ring-2 focus:ring-t1-blue/30 resize-none"
+              className="w-full rounded-xl border border-t1-border bg-t1-bg/70 px-3 py-2.5 text-sm text-t1-text placeholder:text-t1-muted/50 focus:outline-none focus:ring-2 focus:ring-t1-accent/30 resize-none"
             />
           </div>
 
           {!authEnabled && (
-            <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs text-amber-200">
+            <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800">
               Supabase isn’t configured yet, so save/update is disabled. Builder
               still works locally.
             </div>
@@ -652,7 +653,7 @@ export default function SessionBuilder() {
 
         <div className="panel-surface p-3 sm:p-5">
           <div className="flex items-center gap-2 mb-1.5">
-            <StickyNote className="w-4 h-4 text-t1-blue" />
+            <StickyNote className="w-4 h-4 text-t1-accent" />
             <label
               htmlFor="session-notes"
               className="text-[10px] font-semibold uppercase tracking-wider text-t1-muted"
@@ -666,7 +667,7 @@ export default function SessionBuilder() {
             onChange={e => setSessionNotes(e.target.value)}
             placeholder="Focus areas, reminders, player notes... (auto-saved)"
             rows={2}
-            className="w-full rounded-xl border border-t1-border bg-t1-bg/70 px-3 py-2.5 text-sm text-t1-text placeholder:text-t1-muted/50 focus:border-t1-blue/40 focus:outline-none focus:ring-2 focus:ring-t1-blue/30 resize-none min-h-[44px]"
+            className="w-full rounded-xl border border-t1-border bg-t1-bg/70 px-3 py-2.5 text-sm text-t1-text placeholder:text-t1-muted/50 focus:border-t1-accent/40 focus:outline-none focus:ring-2 focus:ring-t1-accent/30 resize-none min-h-[44px]"
           />
           {sessionNotes && (
             <p className="text-[10px] text-t1-muted/60 mt-1">
@@ -679,7 +680,7 @@ export default function SessionBuilder() {
           <div className="panel-surface p-3 sm:p-5">
             <div className="flex items-center justify-between mb-3 gap-2">
               <div>
-                <h2 className="font-display text-xs sm:text-sm font-semibold uppercase tracking-wider text-t1-text">
+                <h2 className="font-display text-xs sm:text-sm font-semibold text-t1-text">
                   Start from a Template
                 </h2>
                 <p className="mt-1 text-[10px] text-t1-muted">
@@ -691,7 +692,7 @@ export default function SessionBuilder() {
                 {hasLastSession && (
                   <button
                     onClick={loadPreviousSession}
-                    className="flex items-center gap-1.5 rounded-xl bg-t1-blue/10 px-3 py-2 text-[10px] font-semibold uppercase tracking-wider text-t1-blue transition-colors min-h-[36px] flex-shrink-0 active:bg-t1-blue/20 sm:text-xs"
+                    className="flex items-center gap-1.5 rounded-xl bg-t1-accent/10 px-3 py-2 text-[10px] font-semibold uppercase tracking-wider text-t1-accent transition-colors min-h-[36px] flex-shrink-0 active:bg-t1-accent/20 sm:text-xs"
                   >
                     <RotateCcw className="w-3.5 h-3.5" />
                     <span className="hidden sm:inline">Load Last</span>
@@ -705,9 +706,9 @@ export default function SessionBuilder() {
                 <button
                   key={template.id}
                   onClick={() => loadTemplate(template.id)}
-                  className="text-left min-h-[52px] rounded-xl border border-t1-border bg-t1-bg/70 p-3 transition-all active:bg-t1-blue/5 sm:p-4"
+                  className="text-left min-h-[52px] rounded-xl border border-t1-border bg-t1-bg/70 p-3 transition-all active:bg-t1-accent/5 sm:p-4"
                 >
-                  <h3 className="font-display text-xs sm:text-sm font-semibold uppercase tracking-wide text-t1-text">
+                  <h3 className="font-display text-xs sm:text-sm font-semibold text-t1-text">
                     {template.name}
                   </h3>
                   <p className="text-[10px] text-t1-muted mt-0.5">
@@ -721,7 +722,7 @@ export default function SessionBuilder() {
             <div className="mt-3 pt-3 border-t border-t1-border">
               <Link
                 href="/session-plans"
-                className="flex min-h-[44px] w-full items-center justify-center gap-2 rounded-xl border border-t1-blue/20 bg-t1-blue/5 p-3 text-xs font-semibold uppercase tracking-wider text-t1-blue transition-colors no-underline active:bg-t1-blue/10"
+                className="flex min-h-[44px] w-full items-center justify-center gap-2 rounded-xl border border-t1-accent/20 bg-t1-accent/5 p-3 text-xs font-semibold uppercase tracking-wider text-t1-accent transition-colors no-underline active:bg-t1-accent/10"
               >
                 <ClipboardList className="w-4 h-4" />
                 Browse Session Plans
@@ -731,7 +732,7 @@ export default function SessionBuilder() {
             <div className="mt-3 text-center">
               <button
                 onClick={() => setShowTemplates(false)}
-                className="text-xs text-t1-blue font-medium hover:underline min-h-[36px]"
+                className="text-xs text-t1-accent font-medium hover:underline min-h-[36px]"
               >
                 Or build from scratch
               </button>
@@ -742,10 +743,10 @@ export default function SessionBuilder() {
         {showScratchEmptyState && (
           <Empty className="coach-empty p-6 sm:p-8">
             <EmptyHeader className="gap-3">
-              <EmptyMedia variant="icon" className="bg-t1-blue/10 text-t1-blue">
+              <EmptyMedia variant="icon" className="bg-t1-accent/10 text-t1-accent">
                 <Plus className="size-5" />
               </EmptyMedia>
-              <EmptyTitle className="font-display text-base font-bold uppercase tracking-wide text-t1-text">
+              <EmptyTitle className="font-display text-base font-bold text-t1-text">
                 Build from scratch with 3 moves
               </EmptyTitle>
               <EmptyDescription className="text-xs sm:text-sm text-t1-muted">
@@ -775,7 +776,7 @@ export default function SessionBuilder() {
               </div>
               <Link
                 href="/session-plans"
-                className="inline-flex min-h-[44px] items-center justify-center rounded-xl bg-t1-blue px-4 py-2 text-sm font-semibold text-white no-underline"
+                className="inline-flex min-h-[44px] items-center justify-center rounded-xl bg-t1-accent px-4 py-2 text-sm font-semibold text-white no-underline"
               >
                 Browse stock plans instead
               </Link>
@@ -795,10 +796,10 @@ export default function SessionBuilder() {
               <div key={block.key} className="panel-muted p-3 sm:p-4">
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-2">
-                    <span className="w-6 h-6 rounded-full bg-t1-blue text-white text-[10px] font-bold flex items-center justify-center flex-shrink-0">
+                    <span className="w-6 h-6 rounded-full bg-t1-accent text-white text-[10px] font-bold flex items-center justify-center flex-shrink-0">
                       {index + 1}
                     </span>
-                    <h3 className="font-display text-sm font-semibold uppercase tracking-wide text-t1-text">
+                    <h3 className="font-display text-sm font-semibold text-t1-text">
                       {blockInfo?.name}
                     </h3>
                   </div>
@@ -820,14 +821,14 @@ export default function SessionBuilder() {
                       onChange={e =>
                         updateBlock(index, { duration: e.target.value })
                       }
-                      className="w-full rounded-xl border border-t1-border bg-t1-bg/70 px-3 py-2 text-sm text-t1-text focus:outline-none focus:ring-1 focus:ring-t1-blue/30 min-h-[36px]"
+                      className="w-full rounded-xl border border-t1-border bg-t1-bg/70 px-3 py-2 text-sm text-t1-text focus:outline-none focus:ring-1 focus:ring-t1-accent/30 min-h-[36px]"
                     />
                   </div>
                   <div className="flex-1 min-w-0">
                     <label className="text-[10px] font-semibold uppercase tracking-wider text-t1-muted mb-1 block">
                       Drill
                       {favs.length > 0 && (
-                        <span className="ml-1.5 text-yellow-400 normal-case tracking-normal">
+                        <span className="ml-1.5 text-amber-600 normal-case tracking-normal">
                           ★ {favs.length} saved
                         </span>
                       )}
@@ -839,7 +840,7 @@ export default function SessionBuilder() {
                           drillId: e.target.value || undefined,
                         })
                       }
-                      className="w-full rounded-xl border border-t1-border bg-t1-bg/70 px-3 py-2 text-sm text-t1-text focus:outline-none focus:ring-1 focus:ring-t1-blue/30 min-h-[36px]"
+                      className="w-full rounded-xl border border-t1-border bg-t1-bg/70 px-3 py-2 text-sm text-t1-text focus:outline-none focus:ring-1 focus:ring-t1-accent/30 min-h-[36px]"
                     >
                       <option value="">Select a drill...</option>
                       {favs.length > 0 && (
@@ -875,14 +876,14 @@ export default function SessionBuilder() {
                         updateBlock(index, { notes: e.target.value })
                       }
                       placeholder={blockInfo?.description}
-                      className="w-full rounded-xl border border-t1-border bg-t1-bg/70 px-3 py-2 text-sm text-t1-text placeholder:text-t1-muted/50 focus:outline-none focus:ring-1 focus:ring-t1-blue/30 min-h-[36px]"
+                      className="w-full rounded-xl border border-t1-border bg-t1-bg/70 px-3 py-2 text-sm text-t1-text placeholder:text-t1-muted/50 focus:outline-none focus:ring-1 focus:ring-t1-accent/30 min-h-[36px]"
                     />
                   </div>
                 </div>
                 {selectedDrill && (
                   <Link
                     href={`/drills/${selectedDrill.id}`}
-                    className="mt-2 inline-flex items-center gap-1 text-[10px] text-t1-blue font-medium hover:underline no-underline"
+                    className="mt-2 inline-flex items-center gap-1 text-[10px] text-t1-accent font-medium hover:underline no-underline"
                   >
                     View drill details <ChevronRight className="w-3 h-3" />
                   </Link>
@@ -901,7 +902,7 @@ export default function SessionBuilder() {
               <button
                 key={block.id}
                 onClick={() => addBlock(block.id)}
-                className="flex flex-shrink-0 items-center gap-1.5 rounded-xl border border-t1-border bg-t1-surface/80 px-3 py-2 text-xs font-medium text-t1-muted transition-colors min-h-[36px] active:bg-t1-blue/5 active:text-t1-blue"
+                className="flex flex-shrink-0 items-center gap-1.5 rounded-xl border border-t1-border bg-t1-surface/80 px-3 py-2 text-xs font-medium text-t1-muted transition-colors min-h-[36px] active:bg-t1-accent/5 active:text-t1-accent"
               >
                 <Plus className="w-3 h-3" /> {block.shortName}
               </button>
@@ -912,12 +913,12 @@ export default function SessionBuilder() {
         {blocks.length > 0 && (
           <div className="panel-surface p-3 sm:p-5">
             <div className="flex items-center justify-between mb-3 gap-2">
-              <h2 className="font-display text-xs sm:text-sm font-semibold uppercase tracking-wider text-t1-text flex items-center gap-2">
-                <Dumbbell className="w-4 h-4 text-t1-blue" /> Summary
+              <h2 className="font-display text-xs sm:text-sm font-semibold text-t1-text flex items-center gap-2">
+                <Dumbbell className="w-4 h-4 text-t1-accent" /> Summary
               </h2>
               <button
                 onClick={handleExport}
-                className="inline-flex min-h-[40px] items-center gap-2 rounded-xl bg-t1-blue px-4 py-2.5 text-xs font-semibold uppercase tracking-wider text-white transition-colors active:bg-t1-blue-light"
+                className="inline-flex min-h-[40px] items-center gap-2 rounded-xl bg-t1-accent px-4 py-2.5 text-xs font-semibold uppercase tracking-wider text-white transition-colors active:bg-t1-accent/80"
               >
                 <Printer className="w-3.5 h-3.5" />
                 Export
@@ -931,14 +932,14 @@ export default function SessionBuilder() {
               <span>
                 {pathwayStages.find(s => s.id === selectedLevel)?.shortName}
               </span>
-              <span className="flex items-center gap-1 text-t1-blue">
+              <span className="flex items-center gap-1 text-t1-accent">
                 <ClipboardList className="w-3 h-3" />
-                {planName || createDefaultPlanName(selectedLevel)}
+                {planName || createDefaultPlanName(selectedLevel, pathwayStages)}
               </span>
               <span
                 className={`px-2 py-0.5 rounded-full text-[10px] uppercase tracking-wider border ${
                   planVisibility === "shared"
-                    ? "bg-green-500/10 text-green-400 border-green-500/20"
+                    ? "bg-emerald-50 text-emerald-700 border-emerald-200"
                     : "bg-t1-bg text-t1-muted border-t1-border"
                 }`}
               >
@@ -977,7 +978,7 @@ export default function SessionBuilder() {
                     </span>
                     <span className="text-t1-muted flex items-center gap-1 truncate min-w-0">
                       {isFav && (
-                        <Star className="w-3 h-3 text-yellow-400 fill-yellow-400 flex-shrink-0" />
+                        <Star className="w-3 h-3 text-amber-500 fill-amber-500 flex-shrink-0" />
                       )}
                       {drill?.name || block.notes || info?.description}
                     </span>
@@ -989,7 +990,7 @@ export default function SessionBuilder() {
             <div className="mt-3 pt-3 border-t border-t1-border flex flex-wrap items-center gap-3">
               <button
                 onClick={handleExport}
-                className="inline-flex items-center gap-1.5 text-xs text-t1-blue font-medium hover:underline min-h-[36px]"
+                className="inline-flex items-center gap-1.5 text-xs text-t1-accent font-medium hover:underline min-h-[36px]"
               >
                 <FileDown className="w-3.5 h-3.5" />
                 Save as PDF
@@ -999,8 +1000,8 @@ export default function SessionBuilder() {
                 disabled={savingPlan}
                 className={`inline-flex items-center gap-1.5 text-xs font-medium min-h-[36px] transition-colors ${
                   savingPlan
-                    ? "text-t1-blue/60"
-                    : "text-t1-blue hover:underline"
+                    ? "text-t1-accent/60"
+                    : "text-t1-accent hover:underline"
                 }`}
               >
                 <Save className="w-3.5 h-3.5" />
@@ -1027,7 +1028,7 @@ export default function SessionBuilder() {
                 disabled={savedToHistory}
                 className={`inline-flex items-center gap-1.5 text-xs font-medium min-h-[36px] transition-colors ${
                   savedToHistory
-                    ? "text-green-400"
+                    ? "text-emerald-700"
                     : "text-t1-muted hover:text-t1-text"
                 }`}
               >

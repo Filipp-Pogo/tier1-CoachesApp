@@ -1,5 +1,5 @@
 /*
-  PLAN COMPARISON: Tier 1 Performance — Cold Dark Brand
+  PLAN COMPARISON: Tier 1 Performance — Playbook Aesthetic
   MOBILE-FIRST: Side-by-side comparison of two session plans.
   Coaches can select two plans and compare blocks, emphasis, standards.
 */
@@ -9,21 +9,22 @@ import {
   ArrowLeftRight, ChevronDown, Clock, ClipboardList, Zap,
   Target, AlertTriangle, ArrowRight, X, Search, AlertCircle
 } from 'lucide-react';
-import { pathwayStages, type PathwayStageId } from '@/lib/data';
-import { sessionPlans, type SessionPlan } from '@/lib/sessionPlans';
+import { type PathwayStageId } from '@/lib/data';
+import { type SessionPlan } from '@/lib/sessionPlans';
+import { usePathwayStages, useSessionPlans } from '@/hooks/useContentData';
 
 const levelColors: Record<PathwayStageId, string> = {
-  foundations: 'bg-red-500/15 text-red-400 border-red-500/20',
-  prep: 'bg-green-500/15 text-green-400 border-green-500/20',
-  jasa: 'bg-yellow-500/15 text-yellow-400 border-yellow-500/20',
-  hs: 'bg-purple-500/15 text-purple-400 border-purple-500/20',
-  asa: 'bg-blue-500/15 text-blue-400 border-blue-500/20',
-  fta: 'bg-orange-500/15 text-orange-400 border-orange-500/20',
+  foundations: 'bg-red-50 text-red-700 border-red-200',
+  prep: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+  jasa: 'bg-amber-50 text-amber-700 border-amber-200',
+  hs: 'bg-purple-50 text-purple-700 border-purple-200',
+  asa: 'bg-blue-50 text-blue-700 border-blue-200',
+  fta: 'bg-orange-50 text-orange-700 border-orange-200',
 };
 
 const accentColors: Record<string, { border: string; bg: string; text: string }> = {
-  a: { border: 'border-t1-blue', bg: 'bg-t1-blue/10', text: 'text-t1-blue' },
-  b: { border: 'border-amber-500', bg: 'bg-amber-500/10', text: 'text-amber-400' },
+  a: { border: 'border-t1-accent', bg: 'bg-t1-accent/10', text: 'text-t1-accent' },
+  b: { border: 'border-amber-500', bg: 'bg-amber-50', text: 'text-amber-700' },
 };
 
 function isDraftPlan(plan: SessionPlan): boolean {
@@ -39,6 +40,8 @@ interface PlanSelectorProps {
 }
 
 function PlanSelector({ slot, selectedPlan, onSelect, onClear, otherPlanId }: PlanSelectorProps) {
+  const { data: sessionPlans } = useSessionPlans();
+  const { data: pathwayStages } = usePathwayStages();
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [levelFilter, setLevelFilter] = useState<PathwayStageId | 'all'>('all');
@@ -59,12 +62,12 @@ function PlanSelector({ slot, selectedPlan, onSelect, onClear, otherPlanId }: Pl
       );
     }
     return result;
-  }, [levelFilter, searchQuery, otherPlanId]);
+  }, [sessionPlans, levelFilter, searchQuery, otherPlanId]);
 
   const availableLevels = useMemo(() => {
     const levels = new Set(sessionPlans.map(p => p.level));
     return pathwayStages.filter(s => levels.has(s.id));
-  }, []);
+  }, [sessionPlans, pathwayStages]);
 
   if (selectedPlan) {
     const draft = isDraftPlan(selectedPlan);
@@ -76,7 +79,7 @@ function PlanSelector({ slot, selectedPlan, onSelect, onClear, otherPlanId }: Pl
           </span>
           <button
             onClick={onClear}
-            className="text-t1-muted hover:text-red-400 transition-colors"
+            className="text-t1-muted hover:text-red-700 transition-colors"
             aria-label="Clear selection"
           >
             <X className="w-4 h-4" />
@@ -91,13 +94,13 @@ function PlanSelector({ slot, selectedPlan, onSelect, onClear, otherPlanId }: Pl
             {selectedPlan.totalTime} min
           </span>
           {draft && (
-            <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-yellow-500/15 text-yellow-400 border border-yellow-500/20 flex items-center gap-1">
+            <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200 flex items-center gap-1">
               <AlertCircle className="w-3 h-3" />
               Draft
             </span>
           )}
         </div>
-        <h3 className="font-display text-sm font-bold text-t1-text uppercase tracking-wide leading-tight">
+        <h3 className="font-display text-sm font-bold text-t1-text leading-tight">
           {selectedPlan.name}
         </h3>
         <p className="text-xs text-t1-muted mt-1 line-clamp-2">{selectedPlan.objective}</p>
@@ -137,7 +140,7 @@ function PlanSelector({ slot, selectedPlan, onSelect, onClear, otherPlanId }: Pl
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
               placeholder="Search plans..."
-              className="w-full pl-8 pr-3 py-2 bg-t1-bg border border-t1-border rounded-lg text-xs text-t1-text placeholder:text-t1-muted/50 focus:outline-none focus:border-t1-blue/50"
+              className="w-full pl-8 pr-3 py-2 bg-t1-bg border border-t1-border rounded-lg text-xs text-t1-text placeholder:text-t1-muted/50 focus:outline-none focus:border-t1-accent/50"
             />
           </div>
 
@@ -147,7 +150,7 @@ function PlanSelector({ slot, selectedPlan, onSelect, onClear, otherPlanId }: Pl
               onClick={() => setLevelFilter('all')}
               className={`px-2 py-1 rounded-full text-[10px] font-medium border transition-colors ${
                 levelFilter === 'all'
-                  ? 'bg-t1-blue text-white border-t1-blue'
+                  ? 'bg-t1-accent text-white border-t1-accent'
                   : 'bg-t1-bg border-t1-border text-t1-muted'
               }`}
             >
@@ -159,7 +162,7 @@ function PlanSelector({ slot, selectedPlan, onSelect, onClear, otherPlanId }: Pl
                 onClick={() => setLevelFilter(stage.id)}
                 className={`px-2 py-1 rounded-full text-[10px] font-medium border transition-colors ${
                   levelFilter === stage.id
-                    ? 'bg-t1-blue text-white border-t1-blue'
+                    ? 'bg-t1-accent text-white border-t1-accent'
                     : 'bg-t1-bg border-t1-border text-t1-muted'
                 }`}
               >
@@ -177,7 +180,7 @@ function PlanSelector({ slot, selectedPlan, onSelect, onClear, otherPlanId }: Pl
                 <button
                   key={plan.id}
                   onClick={() => { onSelect(plan); setIsOpen(false); setSearchQuery(''); setLevelFilter('all'); }}
-                  className="w-full text-left p-2.5 rounded-lg border border-t1-border hover:border-t1-blue/30 hover:bg-t1-blue/5 transition-colors"
+                  className="w-full text-left p-2.5 rounded-lg border border-t1-border hover:border-t1-accent/30 hover:bg-t1-accent/5 transition-colors"
                 >
                   <div className="flex items-center gap-2 mb-0.5">
                     <span className={`text-[9px] font-semibold px-1.5 py-0.5 rounded-full border ${levelColors[plan.level]}`}>
@@ -205,7 +208,7 @@ interface ComparisonRowProps {
 
 function ComparisonRow({ label, valueA, valueB, highlight }: ComparisonRowProps) {
   return (
-    <div className={`grid grid-cols-[1fr_1fr] gap-2 sm:gap-3 ${highlight ? 'bg-t1-blue/5 -mx-3 px-3 py-2 rounded-lg' : ''}`}>
+    <div className={`grid grid-cols-[1fr_1fr] gap-2 sm:gap-3 ${highlight ? 'bg-t1-accent/5 -mx-3 px-3 py-2 rounded-lg' : ''}`}>
       <div className="text-xs text-t1-text">{valueA}</div>
       <div className="text-xs text-t1-text">{valueB}</div>
     </div>
@@ -240,9 +243,9 @@ export default function PlanComparison() {
   return (
     <div>
       {/* Header */}
-      <section className="bg-t1-navy border-b border-t1-border">
+      <section className="bg-t1-accent/10 border-b border-t1-border">
         <div className="container py-4 sm:py-6">
-          <h1 className="font-display text-xl sm:text-4xl font-bold text-t1-text dark:text-white uppercase tracking-wide flex items-center gap-2">
+          <h1 className="font-display text-xl sm:text-4xl font-bold text-t1-text flex items-center gap-2">
             <ArrowLeftRight className="w-6 h-6 sm:w-8 sm:h-8" />
             Compare Plans
           </h1>
@@ -306,10 +309,10 @@ export default function PlanComparison() {
                     Duration
                   </h4>
                   <div className="grid grid-cols-[1fr_1fr] gap-2">
-                    <span className={`text-sm font-semibold ${planA!.totalTime !== planB!.totalTime ? 'text-amber-400' : 'text-t1-text'}`}>
+                    <span className={`text-sm font-semibold ${planA!.totalTime !== planB!.totalTime ? 'text-amber-700' : 'text-t1-text'}`}>
                       {planA!.totalTime} min
                     </span>
-                    <span className={`text-sm font-semibold ${planA!.totalTime !== planB!.totalTime ? 'text-amber-400' : 'text-t1-text'}`}>
+                    <span className={`text-sm font-semibold ${planA!.totalTime !== planB!.totalTime ? 'text-amber-700' : 'text-t1-text'}`}>
                       {planB!.totalTime} min
                     </span>
                   </div>
@@ -329,7 +332,7 @@ export default function PlanComparison() {
 
                 {/* Session Blocks */}
                 <div>
-                  <h4 className="text-[10px] font-semibold uppercase tracking-wider text-t1-blue mb-2 flex items-center gap-1">
+                  <h4 className="text-[10px] font-semibold uppercase tracking-wider text-t1-accent mb-2 flex items-center gap-1">
                     <ClipboardList className="w-3 h-3" />
                     Session Blocks
                   </h4>
@@ -402,16 +405,16 @@ export default function PlanComparison() {
                   <div className="grid grid-cols-[1fr_1fr] gap-2">
                     <ul className="space-y-0.5">
                       {planA!.commonMistakes.map((m, i) => (
-                        <li key={i} className="text-xs text-red-400/80 flex items-start gap-1">
-                          <span className="text-red-400 mt-0.5">•</span>
+                        <li key={i} className="text-xs text-red-700/80 flex items-start gap-1">
+                          <span className="text-red-700 mt-0.5">•</span>
                           {m}
                         </li>
                       ))}
                     </ul>
                     <ul className="space-y-0.5">
                       {planB!.commonMistakes.map((m, i) => (
-                        <li key={i} className="text-xs text-red-400/80 flex items-start gap-1">
-                          <span className="text-red-400 mt-0.5">•</span>
+                        <li key={i} className="text-xs text-red-700/80 flex items-start gap-1">
+                          <span className="text-red-700 mt-0.5">•</span>
                           {m}
                         </li>
                       ))}
@@ -439,7 +442,7 @@ export default function PlanComparison() {
         {!planA && !planB && (
           <div className="bg-t1-surface border border-t1-border rounded-lg p-8 sm:p-12 text-center">
             <ArrowLeftRight className="w-10 h-10 text-t1-muted/30 mx-auto mb-3" />
-            <h2 className="font-display text-base font-semibold text-t1-text uppercase tracking-wide mb-1">
+            <h2 className="font-display text-base font-semibold text-t1-text mb-1">
               Select two plans to compare
             </h2>
             <p className="text-xs text-t1-muted max-w-sm mx-auto">

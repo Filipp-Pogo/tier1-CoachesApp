@@ -74,7 +74,7 @@ export default function AuthPage() {
             <div className="flex items-center gap-3">
               <img src={TIER1_LOGO_WHITE} alt="Tier 1" className="h-8 w-auto" />
               <div>
-                <p className="font-display text-sm font-bold uppercase tracking-wide text-t1-text">
+                <p className="font-display text-sm font-bold text-t1-text">
                   Tier 1 Coaches App
                 </p>
                 <p className="text-xs text-t1-muted">
@@ -83,13 +83,13 @@ export default function AuthPage() {
                 </p>
               </div>
             </div>
-            <span className="hidden sm:inline-flex items-center gap-1 rounded-full border border-t1-blue/20 bg-t1-blue/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.22em] text-t1-blue">
+            <span className="hidden sm:inline-flex items-center gap-1 rounded-full border border-t1-accent/20 bg-t1-accent/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.22em] text-t1-accent">
               Beta Coach Access
             </span>
           </div>
 
           <div className="coach-tip mt-5 p-4">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-blue">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-accent">
               First Login
             </p>
             <div className="mt-2 grid gap-2.5 sm:grid-cols-3">
@@ -115,7 +115,7 @@ export default function AuthPage() {
                   key={item.label}
                   className="rounded-xl border border-t1-border bg-t1-bg/55 p-3"
                 >
-                  <item.icon className="h-4 w-4 text-t1-blue" />
+                  <item.icon className="h-4 w-4 text-t1-accent" />
                   <p className="mt-2 text-xs font-semibold uppercase tracking-wide text-t1-text">
                     {item.label}
                   </p>
@@ -128,7 +128,7 @@ export default function AuthPage() {
           </div>
 
           {!authEnabled && (
-            <div className="mt-4 rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-amber-200">
+            <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
               Supabase is not configured yet. Add <code>VITE_SUPABASE_URL</code>{" "}
               and <code>VITE_SUPABASE_ANON_KEY</code> to enable login + cloud
               sync.
@@ -141,7 +141,7 @@ export default function AuthPage() {
               onClick={() => setMode("signin")}
               className={`rounded-lg px-3 py-2.5 text-sm font-medium transition ${
                 mode === "signin"
-                  ? "bg-t1-blue text-white shadow-sm"
+                  ? "bg-t1-accent text-white shadow-sm"
                   : "text-t1-muted hover:text-t1-text"
               }`}
             >
@@ -152,7 +152,7 @@ export default function AuthPage() {
               onClick={() => setMode("signup")}
               className={`rounded-lg px-3 py-2.5 text-sm font-medium transition ${
                 mode === "signup"
-                  ? "bg-t1-blue text-white shadow-sm"
+                  ? "bg-t1-accent text-white shadow-sm"
                   : "text-t1-muted hover:text-t1-text"
               }`}
             >
@@ -161,7 +161,7 @@ export default function AuthPage() {
           </div>
 
           <div className="mt-3 flex items-start gap-2 rounded-xl border border-t1-border bg-t1-bg/55 px-3 py-2.5 text-xs text-t1-muted">
-            <CheckCircle2 className="mt-0.5 h-4 w-4 flex-shrink-0 text-t1-blue" />
+            <CheckCircle2 className="mt-0.5 h-4 w-4 flex-shrink-0 text-t1-accent" />
             <span>
               {mode === "signin"
                 ? "Returning coaches can jump back into saved plans, drill collections, and session notes immediately."
@@ -237,10 +237,10 @@ export default function AuthPage() {
 
         <aside className="panel-muted flex flex-col justify-between gap-5 p-5 sm:p-7">
           <div>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-blue">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-accent">
               Coach Setup
             </p>
-            <h2 className="mt-2 font-display text-2xl font-bold uppercase tracking-wide text-t1-text">
+            <h2 className="mt-2 font-display text-2xl font-bold text-t1-text">
               Sign in once. Coach faster all week.
             </h2>
             <p className="mt-2 text-sm leading-relaxed text-t1-muted">
@@ -252,48 +252,48 @@ export default function AuthPage() {
 
           <div className="rounded-2xl border border-t1-border bg-t1-surface/75 p-4">
             <div className="mb-2 flex items-center gap-2 text-t1-text">
-              <ShieldCheck className="h-4 w-4 text-t1-blue" />
+              <ShieldCheck className="h-4 w-4 text-t1-accent" />
               <span className="text-sm font-semibold uppercase tracking-wide">
                 What syncs
               </span>
             </div>
             <ul className="space-y-2 text-sm text-t1-muted">
               <li className="flex items-start gap-2">
-                <CheckCircle2 className="mt-0.5 h-4 w-4 flex-shrink-0 text-t1-blue" />
+                <CheckCircle2 className="mt-0.5 h-4 w-4 flex-shrink-0 text-t1-accent" />
                 Favorites, recent drills, and the drill library workbench you
                 build.
               </li>
               <li className="flex items-start gap-2">
-                <CheckCircle2 className="mt-0.5 h-4 w-4 flex-shrink-0 text-t1-blue" />
+                <CheckCircle2 className="mt-0.5 h-4 w-4 flex-shrink-0 text-t1-accent" />
                 Session history, notes, and saved custom plans.
               </li>
               <li className="flex items-start gap-2">
-                <CheckCircle2 className="mt-0.5 h-4 w-4 flex-shrink-0 text-t1-blue" />
+                <CheckCircle2 className="mt-0.5 h-4 w-4 flex-shrink-0 text-t1-accent" />
                 Onboarding progress and quiz results for returning coaches.
               </li>
             </ul>
           </div>
 
-          <div className="rounded-2xl border border-t1-blue/15 bg-t1-blue/5 p-4">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-t1-blue">
+          <div className="rounded-2xl border border-t1-accent/15 bg-t1-accent/5 p-4">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-t1-accent">
               Recommended First Week
             </p>
             <ol className="mt-3 space-y-2.5 text-sm text-t1-muted">
               <li className="flex items-start gap-2">
-                <span className="mt-0.5 inline-flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-t1-blue/15 text-[11px] font-semibold text-t1-blue">
+                <span className="mt-0.5 inline-flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-t1-accent/15 text-[11px] font-semibold text-t1-accent">
                   1
                 </span>
                 Complete onboarding and pass the quiz when you have context.
               </li>
               <li className="flex items-start gap-2">
-                <span className="mt-0.5 inline-flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-t1-blue/15 text-[11px] font-semibold text-t1-blue">
+                <span className="mt-0.5 inline-flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-t1-accent/15 text-[11px] font-semibold text-t1-accent">
                   2
                 </span>
                 Save 8 to 10 reliable drills by class level so you stop
                 searching mid-practice.
               </li>
               <li className="flex items-start gap-2">
-                <span className="mt-0.5 inline-flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-t1-blue/15 text-[11px] font-semibold text-t1-blue">
+                <span className="mt-0.5 inline-flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-t1-accent/15 text-[11px] font-semibold text-t1-accent">
                   3
                 </span>
                 Customize a stock plan before you build a session from scratch.

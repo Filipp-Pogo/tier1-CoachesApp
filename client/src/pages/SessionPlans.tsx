@@ -39,8 +39,9 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/components/ui/empty";
-import { pathwayStages, type PathwayStageId } from "@/lib/data";
-import { sessionPlans, sessionPlanLevelGroups } from "@/lib/sessionPlans";
+import { type PathwayStageId } from "@/lib/data";
+import { sessionPlanLevelGroups } from "@/lib/sessionPlans";
+import { usePathwayStages, useSessionPlans } from "@/hooks/useContentData";
 import { useSessionPlanFavorites } from "@/hooks/useSessionPlanFavorites";
 import { useCoachClass } from "@/hooks/useCoachClass";
 import { useAuth } from "@/contexts/AuthContext";
@@ -64,7 +65,7 @@ import { getStageBrand } from "@/lib/stageBranding";
 
 type PlansTab = "all" | "favorites" | "recent" | "custom" | "shared";
 
-function readSessionPlansState(fallbackLevel: PathwayStageId): {
+function readSessionPlansState(fallbackLevel: PathwayStageId, pathwayStages: { id: string }[]): {
   tab: PlansTab;
   level: PathwayStageId | "all";
 } {
@@ -224,9 +225,9 @@ function PlanCard({
   };
 
   return (
-    <article className="premium-card rounded-[1.9rem] p-4 sm:p-5">
+    <article className="premium-card rounded-xl p-4 sm:p-5">
       <div
-        className={`rounded-[1.5rem] border border-t1-border bg-gradient-to-br ${brand.surfaceClassName} p-4 sm:p-5`}
+        className={`rounded-xl border border-t1-border bg-gradient-to-br ${brand.surfaceClassName} p-4 sm:p-5`}
       >
         <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
           <div className="min-w-0 flex-1">
@@ -259,7 +260,7 @@ function PlanCard({
                 </span>
               )}
               {draft && (
-                <span className="inline-flex items-center rounded-full border border-amber-500/20 bg-amber-500/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-amber-700 dark:text-amber-300">
+                <span className="inline-flex items-center rounded-full border border-amber-500/20 bg-amber-50 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-amber-700">
                   Draft
                 </span>
               )}
@@ -319,7 +320,7 @@ function PlanCard({
       <div className="mt-4 grid grid-cols-2 gap-2 xl:max-w-[340px]">
         <button
           onClick={onLaunchOnCourt}
-          className="touch-pill col-span-2 inline-flex items-center justify-center gap-2 rounded-full bg-t1-blue px-4 action-label text-white"
+          className="touch-pill col-span-2 inline-flex items-center justify-center gap-2 rounded-full bg-t1-accent px-4 action-label text-white"
         >
           <PlayCircle className="h-4 w-4" />
           On-Court
@@ -328,7 +329,7 @@ function PlanCard({
           onClick={onPrimaryAction}
           className="touch-pill inline-flex items-center justify-center gap-2 rounded-full border border-t1-border bg-t1-bg px-4 action-label text-t1-text"
         >
-          <Edit3 className="h-4 w-4 text-t1-blue" />
+          <Edit3 className="h-4 w-4 text-t1-accent" />
           {primaryActionLabel ??
             (plan.planType === "stock" ? "Customize copy" : "Edit in builder")}
         </button>
@@ -350,10 +351,10 @@ function PlanCard({
                   {plan.blocks.map((block, index) => (
                     <div
                       key={`${plan.id}-${block.label}-${index}`}
-                      className="rounded-[1.25rem] border border-t1-border bg-t1-bg px-4 py-3"
+                      className="rounded-xl border border-t1-border bg-t1-bg px-4 py-3"
                     >
                       <div className="flex items-center gap-3">
-                        <span className="inline-flex h-7 min-w-7 items-center justify-center rounded-full bg-t1-blue text-[10px] font-semibold text-white">
+                        <span className="inline-flex h-7 min-w-7 items-center justify-center rounded-full bg-t1-accent text-[10px] font-semibold text-white">
                           {index + 1}
                         </span>
                         <p className="text-sm font-semibold text-t1-text">
@@ -376,9 +377,9 @@ function PlanCard({
                   {plan.standards.map(item => (
                     <div
                       key={item}
-                      className="flex items-start gap-2 rounded-[1.15rem] border border-t1-border bg-t1-bg px-4 py-3 text-sm text-t1-text"
+                      className="flex items-start gap-2 rounded-xl border border-t1-border bg-t1-bg px-4 py-3 text-sm text-t1-text"
                     >
-                      <Zap className="mt-0.5 h-4 w-4 flex-shrink-0 text-t1-blue" />
+                      <Zap className="mt-0.5 h-4 w-4 flex-shrink-0 text-t1-accent" />
                       <span>{item}</span>
                     </div>
                   ))}
@@ -391,7 +392,7 @@ function PlanCard({
                   {plan.commonMistakes.map(item => (
                     <div
                       key={item}
-                      className="flex items-start gap-2 rounded-[1.15rem] border border-red-500/18 bg-red-500/8 px-4 py-3 text-sm text-t1-text"
+                      className="flex items-start gap-2 rounded-xl border border-red-500/18 bg-red-500/8 px-4 py-3 text-sm text-t1-text"
                     >
                       <AlertTriangle className="mt-0.5 h-4 w-4 flex-shrink-0 text-red-500" />
                       <span>{item}</span>
@@ -400,7 +401,7 @@ function PlanCard({
                 </div>
               </div>
 
-              <div className="rounded-[1.25rem] border border-t1-border bg-t1-bg px-4 py-4">
+              <div className="rounded-xl border border-t1-border bg-t1-bg px-4 py-4">
                 <p className="meta-label">Match transfer</p>
                 <p className="support-copy-strong body-copy-sm mt-2">
                   {plan.matchPlayTransfer}
@@ -438,7 +439,7 @@ function PlanCard({
                 </AlertDialogTrigger>
                 <AlertDialogContent className="border-t1-border bg-t1-surface">
                   <AlertDialogHeader>
-                    <AlertDialogTitle className="font-display text-lg uppercase tracking-[0.14em] text-t1-text">
+                    <AlertDialogTitle className="font-display text-lg text-t1-text">
                       Delete this custom plan?
                     </AlertDialogTitle>
                     <AlertDialogDescription className="text-sm text-t1-muted">
@@ -468,8 +469,10 @@ function PlanCard({
 }
 
 export default function SessionPlans() {
+  const { data: pathwayStages } = usePathwayStages();
+  const { data: sessionPlans } = useSessionPlans();
   const { selectedClass, setSelectedClass } = useCoachClass();
-  const initialState = readSessionPlansState(selectedClass);
+  const initialState = readSessionPlansState(selectedClass, pathwayStages);
   const [activeLevel, setActiveLevel] = useState<PathwayStageId | "all">(
     initialState.level
   );
@@ -496,7 +499,7 @@ export default function SessionPlans() {
 
   useEffect(() => {
     const syncFromUrl = () => {
-      const nextState = readSessionPlansState(selectedClass);
+      const nextState = readSessionPlansState(selectedClass, pathwayStages);
       setActiveTab(nextState.tab);
       setActiveLevel(nextState.level);
       setActiveSubBand(null);
@@ -570,7 +573,7 @@ export default function SessionPlans() {
 
   const stockPlanCards = useMemo(
     () => sessionPlans.map(stockPlanToCardPlan),
-    []
+    [sessionPlans]
   );
 
   const handleExpand = (planId: string) => {
@@ -669,7 +672,7 @@ export default function SessionPlans() {
   const availableLevels = useMemo(() => {
     const levels = new Set(sessionPlans.map(plan => plan.level));
     return pathwayStages.filter(stage => levels.has(stage.id));
-  }, []);
+  }, [sessionPlans, pathwayStages]);
 
   const availableSubBands = useMemo(() => {
     if (activeLevel === "all") return [];
@@ -679,7 +682,7 @@ export default function SessionPlans() {
   const availableDurations = useMemo(() => {
     const durations = new Set(sessionPlans.map(plan => plan.totalTime));
     return Array.from(durations).sort((left, right) => left - right);
-  }, []);
+  }, [sessionPlans]);
 
   const favoritePlans = useMemo(
     () => stockPlanCards.filter(plan => favorites.includes(plan.id)),
@@ -768,7 +771,7 @@ export default function SessionPlans() {
     });
 
     return counts;
-  }, [stockPlanCards]);
+  }, [stockPlanCards, pathwayStages]);
   const classFilterChanged = activeLevel !== selectedClass;
   const hasStockFilters =
     classFilterChanged || activeSubBand != null || durationFilter != null;
@@ -802,10 +805,10 @@ export default function SessionPlans() {
       return (
         <Empty className="coach-empty p-8">
           <EmptyHeader className="gap-3">
-            <EmptyMedia variant="icon" className="bg-t1-blue/10 text-t1-blue">
+            <EmptyMedia variant="icon" className="bg-t1-accent/10 text-t1-accent">
               <Edit3 className="size-5" />
             </EmptyMedia>
-            <EmptyTitle className="font-display text-xl font-semibold uppercase tracking-[0.12em] text-t1-text">
+            <EmptyTitle className="font-display text-xl font-semibold text-t1-text">
               {authEnabled ? "My playbooks are empty" : "Cloud sync is off"}
             </EmptyTitle>
             <EmptyDescription className="max-w-lg text-sm leading-6 text-t1-muted">
@@ -817,7 +820,7 @@ export default function SessionPlans() {
           <EmptyContent>
             <Link
               href="/session-builder"
-              className="touch-pill inline-flex items-center justify-center rounded-full bg-t1-blue px-5 action-label text-white no-underline"
+              className="touch-pill inline-flex items-center justify-center rounded-full bg-t1-accent px-5 action-label text-white no-underline"
             >
               Open builder
             </Link>
@@ -830,10 +833,10 @@ export default function SessionPlans() {
       return (
         <Empty className="coach-empty p-8">
           <EmptyHeader className="gap-3">
-            <EmptyMedia variant="icon" className="bg-t1-blue/10 text-t1-blue">
+            <EmptyMedia variant="icon" className="bg-t1-accent/10 text-t1-accent">
               <Users className="size-5" />
             </EmptyMedia>
-            <EmptyTitle className="font-display text-xl font-semibold uppercase tracking-[0.12em] text-t1-text">
+            <EmptyTitle className="font-display text-xl font-semibold text-t1-text">
               {authEnabled
                 ? "No shared playbooks yet"
                 : "Sign in for team shared"}
@@ -847,7 +850,7 @@ export default function SessionPlans() {
           <EmptyContent>
             <Link
               href="/session-builder"
-              className="touch-pill inline-flex items-center justify-center rounded-full bg-t1-blue px-5 action-label text-white no-underline"
+              className="touch-pill inline-flex items-center justify-center rounded-full bg-t1-accent px-5 action-label text-white no-underline"
             >
               Create a shared playbook
             </Link>
@@ -862,11 +865,11 @@ export default function SessionPlans() {
           <EmptyHeader className="gap-3">
             <EmptyMedia
               variant="icon"
-              className="bg-amber-500/10 text-amber-400"
+              className="bg-amber-50 text-amber-700"
             >
               <Star className="size-5 fill-current" />
             </EmptyMedia>
-            <EmptyTitle className="font-display text-xl font-semibold uppercase tracking-[0.12em] text-t1-text">
+            <EmptyTitle className="font-display text-xl font-semibold text-t1-text">
               Favorite playbooks show up here
             </EmptyTitle>
             <EmptyDescription className="max-w-lg text-sm leading-6 text-t1-muted">
@@ -877,7 +880,7 @@ export default function SessionPlans() {
           <EmptyContent>
             <button
               onClick={() => setActiveTab("all")}
-              className="touch-pill inline-flex items-center justify-center rounded-full bg-t1-blue px-5 action-label text-white"
+              className="touch-pill inline-flex items-center justify-center rounded-full bg-t1-accent px-5 action-label text-white"
             >
               Browse stock playbooks
             </button>
@@ -889,10 +892,10 @@ export default function SessionPlans() {
     return (
       <Empty className="coach-empty p-8">
         <EmptyHeader className="gap-3">
-          <EmptyMedia variant="icon" className="bg-t1-blue/10 text-t1-blue">
+          <EmptyMedia variant="icon" className="bg-t1-accent/10 text-t1-accent">
             <History className="size-5" />
           </EmptyMedia>
-          <EmptyTitle className="font-display text-xl font-semibold uppercase tracking-[0.12em] text-t1-text">
+          <EmptyTitle className="font-display text-xl font-semibold text-t1-text">
             No recent playbooks yet
           </EmptyTitle>
           <EmptyDescription className="max-w-lg text-sm leading-6 text-t1-muted">
@@ -903,7 +906,7 @@ export default function SessionPlans() {
         <EmptyContent>
           <button
             onClick={() => setActiveTab("all")}
-            className="touch-pill inline-flex items-center justify-center rounded-full bg-t1-blue px-5 action-label text-white"
+            className="touch-pill inline-flex items-center justify-center rounded-full bg-t1-accent px-5 action-label text-white"
           >
             Browse stock playbooks
           </button>
@@ -917,7 +920,7 @@ export default function SessionPlans() {
       <section className="page-hero">
         <div className="container py-5 sm:py-8">
           <div className="grid gap-4 xl:grid-cols-[minmax(0,1.32fr)_minmax(320px,0.82fr)]">
-            <section className="premium-card rounded-[2rem] p-5 sm:p-6 lg:p-7">
+            <section className="premium-card rounded-xl p-5 sm:p-6 lg:p-7">
               <p className="section-kicker">Playbooks</p>
               <h1 className="page-title mt-3 text-t1-text">
                 Pick the playbook. Send it to court.
@@ -954,7 +957,7 @@ export default function SessionPlans() {
                     href="/on-court"
                     className="touch-pill inline-flex items-center justify-center gap-2 rounded-full border border-t1-border bg-t1-surface px-5 action-label text-t1-text no-underline"
                   >
-                    <PlayCircle className="h-4 w-4 text-t1-blue" />
+                    <PlayCircle className="h-4 w-4 text-t1-accent" />
                     Resume On-Court
                   </Link>
                 ) : (
@@ -966,13 +969,13 @@ export default function SessionPlans() {
                     disabled={filteredStockPlans.length === 0}
                     className="touch-pill inline-flex items-center justify-center gap-2 rounded-full border border-t1-border bg-t1-surface px-5 action-label text-t1-text disabled:opacity-40"
                   >
-                    <PlayCircle className="h-4 w-4 text-t1-blue" />
+                    <PlayCircle className="h-4 w-4 text-t1-accent" />
                     Top plan to court
                   </button>
                 )}
                 <Link
                   href="/session-builder"
-                  className="touch-pill inline-flex items-center justify-center gap-2 rounded-full bg-t1-blue px-5 action-label text-white no-underline"
+                  className="touch-pill inline-flex items-center justify-center gap-2 rounded-full bg-t1-accent px-5 action-label text-white no-underline"
                 >
                   <Edit3 className="h-4 w-4" />
                   Builder
@@ -981,32 +984,32 @@ export default function SessionPlans() {
                   href="/compare-plans"
                   className="touch-pill inline-flex items-center justify-center gap-2 rounded-full border border-t1-border bg-t1-surface px-5 action-label text-t1-text no-underline"
                 >
-                  <ArrowLeftRight className="h-4 w-4 text-t1-blue" />
+                  <ArrowLeftRight className="h-4 w-4 text-t1-accent" />
                   Compare
                 </Link>
               </div>
             </section>
 
-            <section className="premium-card rounded-[2rem] p-5 sm:p-6 lg:p-7">
+            <section className="premium-card rounded-xl p-5 sm:p-6 lg:p-7">
               <p className="section-kicker">Library status</p>
               <h2 className="section-title mt-3 text-t1-text">
                 Stock, custom, shared
               </h2>
 
               <div className="mt-5 grid gap-3 sm:grid-cols-3">
-                <div className="rounded-[1.45rem] border border-t1-border bg-t1-bg p-4">
+                <div className="rounded-xl border border-t1-border bg-t1-bg p-4">
                   <p className="meta-label">Stock</p>
                   <p className="mt-2 text-3xl font-semibold text-t1-text">
                     {stockPlanCards.length}
                   </p>
                 </div>
-                <div className="rounded-[1.45rem] border border-t1-border bg-t1-bg p-4">
+                <div className="rounded-xl border border-t1-border bg-t1-bg p-4">
                   <p className="meta-label">My plans</p>
                   <p className="mt-2 text-3xl font-semibold text-t1-text">
                     {customPlans.length}
                   </p>
                 </div>
-                <div className="rounded-[1.45rem] border border-t1-border bg-t1-bg p-4">
+                <div className="rounded-xl border border-t1-border bg-t1-bg p-4">
                   <p className="meta-label">Team shared</p>
                   <p className="mt-2 text-3xl font-semibold text-t1-text">
                     {sharedPlans.length}
@@ -1014,7 +1017,7 @@ export default function SessionPlans() {
                 </div>
               </div>
 
-              <div className="mt-4 rounded-[1.45rem] border border-t1-border bg-t1-bg p-4">
+              <div className="mt-4 rounded-xl border border-t1-border bg-t1-bg p-4">
                 <p className="meta-label">Current lane</p>
                 <p className="mt-2 text-base font-semibold text-t1-text">
                   {activeTabSummary}
@@ -1077,7 +1080,7 @@ export default function SessionPlans() {
                 onClick={() => setActiveTab(tab.key)}
                 className={`touch-pill inline-flex items-center gap-2 rounded-full border px-4 chip-label ${
                   activeTab === tab.key
-                    ? "border-t1-blue/25 bg-t1-blue text-white"
+                    ? "border-t1-accent/25 bg-t1-accent text-white"
                     : "border-t1-border bg-t1-surface text-t1-muted"
                 }`}
               >
@@ -1125,7 +1128,7 @@ export default function SessionPlans() {
                     }}
                     className={`touch-pill inline-flex items-center gap-2 rounded-full border px-4 chip-label ${
                       activeLevel === "all"
-                        ? "border-t1-blue/25 bg-t1-blue text-white"
+                        ? "border-t1-accent/25 bg-t1-accent text-white"
                         : "border-t1-border bg-t1-surface text-t1-muted"
                     }`}
                   >
@@ -1182,7 +1185,7 @@ export default function SessionPlans() {
                       }}
                       className={`touch-pill rounded-full border px-3 chip-label ${
                         !activeSubBand
-                          ? "border-t1-blue/25 bg-t1-blue text-white"
+                          ? "border-t1-accent/25 bg-t1-accent text-white"
                           : "border-t1-border bg-t1-surface text-t1-muted"
                       }`}
                     >
@@ -1197,7 +1200,7 @@ export default function SessionPlans() {
                         }}
                         className={`touch-pill rounded-full border px-3 chip-label ${
                           activeSubBand === group.subBand
-                            ? "border-t1-blue/25 bg-t1-blue text-white"
+                            ? "border-t1-accent/25 bg-t1-accent text-white"
                             : "border-t1-border bg-t1-surface text-t1-muted"
                         }`}
                       >
@@ -1218,7 +1221,7 @@ export default function SessionPlans() {
                     }}
                     className={`touch-pill rounded-full border px-3 chip-label ${
                       durationFilter == null
-                        ? "border-t1-blue/25 bg-t1-blue text-white"
+                        ? "border-t1-accent/25 bg-t1-accent text-white"
                         : "border-t1-border bg-t1-surface text-t1-muted"
                     }`}
                   >
@@ -1233,7 +1236,7 @@ export default function SessionPlans() {
                       }}
                       className={`touch-pill rounded-full border px-3 chip-label ${
                         durationFilter === duration
-                          ? "border-t1-blue/25 bg-t1-blue text-white"
+                          ? "border-t1-accent/25 bg-t1-accent text-white"
                           : "border-t1-border bg-t1-surface text-t1-muted"
                       }`}
                     >
@@ -1253,11 +1256,11 @@ export default function SessionPlans() {
                 <EmptyHeader className="gap-3">
                   <EmptyMedia
                     variant="icon"
-                    className="bg-t1-blue/10 text-t1-blue"
+                    className="bg-t1-accent/10 text-t1-accent"
                   >
                     <ClipboardList className="size-5" />
                   </EmptyMedia>
-                  <EmptyTitle className="font-display text-xl font-semibold uppercase tracking-[0.12em] text-t1-text">
+                  <EmptyTitle className="font-display text-xl font-semibold text-t1-text">
                     No stock playbooks match right now
                   </EmptyTitle>
                   <EmptyDescription className="max-w-lg text-sm leading-6 text-t1-muted">
@@ -1267,7 +1270,7 @@ export default function SessionPlans() {
                 <EmptyContent>
                   <button
                     onClick={clearStockFilters}
-                    className="touch-pill inline-flex items-center justify-center rounded-full bg-t1-blue px-5 action-label text-white"
+                    className="touch-pill inline-flex items-center justify-center rounded-full bg-t1-accent px-5 action-label text-white"
                   >
                     Reset filters
                   </button>
@@ -1323,7 +1326,7 @@ export default function SessionPlans() {
           <>
             {loadingCustomPlans &&
             (activeTab === "custom" || activeTab === "shared") ? (
-              <div className="panel-muted rounded-[1.6rem] p-8 text-center body-copy-sm text-t1-muted">
+              <div className="panel-muted rounded-xl p-8 text-center body-copy-sm text-t1-muted">
                 Loading synced playbooks…
               </div>
             ) : (
@@ -1344,11 +1347,11 @@ export default function SessionPlans() {
                         <EmptyHeader className="gap-3">
                           <EmptyMedia
                             variant="icon"
-                            className="bg-t1-blue/10 text-t1-blue"
+                            className="bg-t1-accent/10 text-t1-accent"
                           >
                             <Search className="size-5" />
                           </EmptyMedia>
-                          <EmptyTitle className="font-display text-xl font-semibold uppercase tracking-[0.12em] text-t1-text">
+                          <EmptyTitle className="font-display text-xl font-semibold text-t1-text">
                             No playbooks match this search
                           </EmptyTitle>
                           <EmptyDescription className="max-w-lg text-sm leading-6 text-t1-muted">
@@ -1358,7 +1361,7 @@ export default function SessionPlans() {
                         <EmptyContent>
                           <button
                             onClick={() => setSearchQuery("")}
-                            className="touch-pill inline-flex items-center justify-center rounded-full bg-t1-blue px-5 action-label text-white"
+                            className="touch-pill inline-flex items-center justify-center rounded-full bg-t1-accent px-5 action-label text-white"
                           >
                             Clear search
                           </button>

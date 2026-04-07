@@ -158,14 +158,14 @@ export default function Onboarding() {
                 setActiveModuleId(null);
                 setActiveLessonId(null);
               }}
-              className="hover:text-t1-blue transition-colors"
+              className="hover:text-t1-accent transition-colors"
             >
               Onboarding
             </button>
             <ChevronRight className="w-3 h-3" />
             <button
               onClick={() => setActiveLessonId(null)}
-              className="hover:text-t1-blue transition-colors"
+              className="hover:text-t1-accent transition-colors"
             >
               {activeModule.title}
             </button>
@@ -176,17 +176,17 @@ export default function Onboarding() {
           {/* Lesson Header */}
           <div className="mb-8">
             <div className="flex items-center gap-3 mb-2">
-              <span className="text-xs font-medium tracking-wider text-t1-blue uppercase">
+              <span className="text-xs font-medium tracking-wider text-t1-accent uppercase">
                 {activeModule.title} — Lesson {lessonIdx + 1} of{" "}
                 {activeModule.lessons.length}
               </span>
               {isComplete && (
-                <span className="flex items-center gap-1 text-xs text-emerald-400">
+                <span className="flex items-center gap-1 text-xs text-emerald-700">
                   <CheckCircle2 className="w-3.5 h-3.5" /> Completed
                 </span>
               )}
             </div>
-            <h1 className="font-display font-bold text-3xl md:text-4xl text-t1-text uppercase tracking-tight">
+            <h1 className="font-display font-bold text-3xl md:text-4xl text-t1-text">
               {activeLesson.title}
             </h1>
           </div>
@@ -205,9 +205,9 @@ export default function Onboarding() {
 
           {/* Callout */}
           {activeLesson.callout && (
-            <div className="bg-t1-navy border-l-4 border-t1-blue rounded-r-lg p-5 mb-10">
+            <div className="bg-t1-accent/10 border-l-4 border-t1-accent rounded-r-lg p-5 mb-10">
               <div className="flex gap-3">
-                <Quote className="w-5 h-5 text-t1-blue flex-shrink-0 mt-0.5" />
+                <Quote className="w-5 h-5 text-t1-accent flex-shrink-0 mt-0.5" />
                 <p className="text-t1-text font-medium italic leading-relaxed">
                   {activeLesson.callout}
                 </p>
@@ -218,15 +218,15 @@ export default function Onboarding() {
           {/* Key Takeaways */}
           <div className="bg-t1-surface border border-t1-border rounded-xl p-6 mb-10">
             <div className="flex items-center gap-2 mb-4">
-              <Lightbulb className="w-5 h-5 text-amber-400" />
-              <h3 className="font-display font-bold text-lg text-t1-text uppercase tracking-wide">
+              <Lightbulb className="w-5 h-5 text-amber-700" />
+              <h3 className="font-display font-bold text-lg text-t1-text">
                 Key Takeaways
               </h3>
             </div>
             <ul className="space-y-3">
               {activeLesson.keyTakeaways.map((takeaway, i) => (
                 <li key={i} className="flex items-start gap-3">
-                  <CheckCircle2 className="w-4 h-4 text-t1-blue flex-shrink-0 mt-0.5" />
+                  <CheckCircle2 className="w-4 h-4 text-t1-accent flex-shrink-0 mt-0.5" />
                   <span className="text-t1-text/90 text-sm leading-relaxed">
                     {takeaway}
                   </span>
@@ -240,14 +240,14 @@ export default function Onboarding() {
             {!isComplete ? (
               <button
                 onClick={handleMarkComplete}
-                className="flex items-center justify-center gap-2 bg-t1-blue hover:bg-t1-blue-light text-white font-semibold py-3 px-6 rounded-lg transition-colors"
+                className="flex items-center justify-center gap-2 bg-t1-accent hover:bg-t1-accent/80 text-white font-semibold py-3 px-6 rounded-lg transition-colors"
               >
                 <CheckCircle2 className="w-5 h-5" />
                 Mark as Complete
                 {nextLesson ? " & Continue" : " & Finish Module"}
               </button>
             ) : (
-              <div className="flex items-center gap-2 text-emerald-400 py-3 px-6 bg-emerald-400/10 rounded-lg">
+              <div className="flex items-center gap-2 text-emerald-700 py-3 px-6 bg-emerald-50 rounded-lg">
                 <CheckCircle2 className="w-5 h-5" />
                 <span className="font-semibold">Lesson Complete</span>
               </div>
@@ -262,14 +262,14 @@ export default function Onboarding() {
                   setActiveLessonId(prevLesson.id);
                   window.scrollTo({ top: 0, behavior: "smooth" });
                 }}
-                className="text-sm text-t1-muted hover:text-t1-blue transition-colors"
+                className="text-sm text-t1-muted hover:text-t1-accent transition-colors"
               >
                 ← {prevLesson.title}
               </button>
             ) : (
               <button
                 onClick={handleBack}
-                className="text-sm text-t1-muted hover:text-t1-blue transition-colors"
+                className="text-sm text-t1-muted hover:text-t1-accent transition-colors"
               >
                 ← Back to Modules
               </button>
@@ -280,14 +280,14 @@ export default function Onboarding() {
                   setActiveLessonId(nextLesson.id);
                   window.scrollTo({ top: 0, behavior: "smooth" });
                 }}
-                className="flex items-center gap-1 text-sm text-t1-blue hover:text-t1-blue-light transition-colors"
+                className="flex items-center gap-1 text-sm text-t1-accent hover:text-t1-accent/80 transition-colors"
               >
                 {nextLesson.title} <ArrowRight className="w-4 h-4" />
               </button>
             ) : (
               <button
                 onClick={handleBack}
-                className="flex items-center gap-1 text-sm text-t1-blue hover:text-t1-blue-light transition-colors"
+                className="flex items-center gap-1 text-sm text-t1-accent hover:text-t1-accent/80 transition-colors"
               >
                 Back to Module <ArrowRight className="w-4 h-4" />
               </button>
@@ -313,7 +313,7 @@ export default function Onboarding() {
           <div className="flex items-center gap-2 text-sm text-t1-muted mb-6">
             <button
               onClick={() => setActiveModuleId(null)}
-              className="hover:text-t1-blue transition-colors"
+              className="hover:text-t1-accent transition-colors"
             >
               Onboarding
             </button>
@@ -324,10 +324,10 @@ export default function Onboarding() {
           {/* Module Header */}
           <div className="flex items-start gap-4 mb-8">
             <div
-              className={`w-14 h-14 rounded-xl flex items-center justify-center flex-shrink-0 ${modComplete ? "bg-emerald-500/20" : "bg-t1-blue/20"}`}
+              className={`w-14 h-14 rounded-xl flex items-center justify-center flex-shrink-0 ${modComplete ? "bg-emerald-100" : "bg-t1-accent/20"}`}
             >
               <Icon
-                className={`w-7 h-7 ${modComplete ? "text-emerald-400" : "text-t1-blue"}`}
+                className={`w-7 h-7 ${modComplete ? "text-emerald-700" : "text-t1-accent"}`}
               />
             </div>
             <div>
@@ -336,12 +336,12 @@ export default function Onboarding() {
                   Module {activeModule.order}
                 </span>
                 {modComplete && (
-                  <span className="flex items-center gap-1 text-xs text-emerald-400">
+                  <span className="flex items-center gap-1 text-xs text-emerald-700">
                     <CheckCircle2 className="w-3.5 h-3.5" /> Complete
                   </span>
                 )}
               </div>
-              <h1 className="font-display font-bold text-3xl text-t1-text uppercase tracking-tight">
+              <h1 className="font-display font-bold text-3xl text-t1-text">
                 {activeModule.title}
               </h1>
               <p className="text-t1-muted mt-1">{activeModule.subtitle}</p>
@@ -358,7 +358,7 @@ export default function Onboarding() {
             </div>
             <div className="h-2 bg-t1-bg rounded-full overflow-hidden">
               <div
-                className={`h-full rounded-full transition-all duration-500 ${modComplete ? "bg-emerald-500" : "bg-t1-blue"}`}
+                className={`h-full rounded-full transition-all duration-500 ${modComplete ? "bg-emerald-500" : "bg-t1-accent"}`}
                 style={{
                   width: `${(completedInModule / activeModule.lessons.length) * 100}%`,
                 }}
@@ -378,10 +378,10 @@ export default function Onboarding() {
                 >
                   <div className="flex items-center gap-4">
                     <div
-                      className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${done ? "bg-emerald-500/20" : "bg-t1-bg"}`}
+                      className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${done ? "bg-emerald-100" : "bg-t1-bg"}`}
                     >
                       {done ? (
-                        <CheckCircle2 className="w-5 h-5 text-emerald-400" />
+                        <CheckCircle2 className="w-5 h-5 text-emerald-700" />
                       ) : (
                         <span className="text-sm font-bold text-t1-muted">
                           {idx + 1}
@@ -389,14 +389,14 @@ export default function Onboarding() {
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <h3 className="font-display font-bold text-lg text-t1-text uppercase tracking-wide group-hover:text-t1-blue transition-colors">
+                      <h3 className="font-display font-bold text-lg text-t1-text group-hover:text-t1-accent transition-colors">
                         {lesson.title}
                       </h3>
                       <p className="text-sm text-t1-muted mt-0.5 line-clamp-1">
                         {lesson.keyTakeaways[0]}
                       </p>
                     </div>
-                    <ChevronRight className="w-5 h-5 text-t1-muted group-hover:text-t1-blue transition-colors flex-shrink-0" />
+                    <ChevronRight className="w-5 h-5 text-t1-muted group-hover:text-t1-accent transition-colors flex-shrink-0" />
                   </div>
                 </button>
               );
@@ -406,7 +406,7 @@ export default function Onboarding() {
           {/* Back */}
           <button
             onClick={() => setActiveModuleId(null)}
-            className="mt-8 text-sm text-t1-muted hover:text-t1-blue transition-colors"
+            className="mt-8 text-sm text-t1-muted hover:text-t1-accent transition-colors"
           >
             ← Back to All Modules
           </button>
@@ -422,8 +422,8 @@ export default function Onboarding() {
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-3">
-            <GraduationCap className="w-8 h-8 text-t1-blue" />
-            <h1 className="font-display font-bold text-4xl md:text-5xl text-t1-text uppercase tracking-tight">
+            <GraduationCap className="w-8 h-8 text-t1-accent" />
+            <h1 className="font-display font-bold text-4xl md:text-5xl text-t1-text">
               Coach Onboarding
             </h1>
           </div>
@@ -437,10 +437,10 @@ export default function Onboarding() {
         <div className="coach-tip mb-8 p-5">
           <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
             <div className="max-w-2xl">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-blue">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-t1-accent">
                 Recommended Flow
               </p>
-              <h2 className="mt-2 font-display text-xl font-bold uppercase tracking-wide text-t1-text">
+              <h2 className="mt-2 font-display text-xl font-bold text-t1-text">
                 Use onboarding like pre-court prep
               </h2>
               <p className="mt-2 text-sm leading-relaxed text-t1-muted">
@@ -504,7 +504,7 @@ export default function Onboarding() {
               </div>
               <div className="h-2 bg-t1-bg rounded-full overflow-hidden">
                 <div
-                  className="h-full bg-t1-blue rounded-full transition-all duration-500"
+                  className="h-full bg-t1-accent rounded-full transition-all duration-500"
                   style={{ width: `${progressPercent}%` }}
                 />
               </div>
@@ -528,9 +528,9 @@ export default function Onboarding() {
               <div className="text-sm text-t1-muted mb-2">Quiz Status</div>
               {hasPassed ? (
                 <div className="flex items-center gap-2">
-                  <CheckCircle2 className="w-6 h-6 text-emerald-400" />
+                  <CheckCircle2 className="w-6 h-6 text-emerald-700" />
                   <div>
-                    <div className="text-lg font-bold text-emerald-400">
+                    <div className="text-lg font-bold text-emerald-700">
                       PASSED
                     </div>
                     <div className="text-xs text-t1-muted">
@@ -540,7 +540,7 @@ export default function Onboarding() {
                 </div>
               ) : bestQuizResult ? (
                 <div>
-                  <div className="text-lg font-bold text-amber-400">
+                  <div className="text-lg font-bold text-amber-700">
                     Not Yet Passed
                   </div>
                   <div className="text-xs text-t1-muted">
@@ -572,14 +572,14 @@ export default function Onboarding() {
               <button
                 key={mod.id}
                 onClick={() => setActiveModuleId(mod.id)}
-                className="panel-muted w-full text-left p-5 transition-colors group hover:border-t1-blue/25"
+                className="panel-muted w-full text-left p-5 transition-colors group hover:border-t1-accent/25"
               >
                 <div className="flex items-center gap-4">
                   <div
-                    className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 ${modComplete ? "bg-emerald-500/20" : "bg-t1-blue/20"}`}
+                    className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 ${modComplete ? "bg-emerald-100" : "bg-t1-accent/20"}`}
                   >
                     <Icon
-                      className={`w-6 h-6 ${modComplete ? "text-emerald-400" : "text-t1-blue"}`}
+                      className={`w-6 h-6 ${modComplete ? "text-emerald-700" : "text-t1-accent"}`}
                     />
                   </div>
                   <div className="flex-1 min-w-0">
@@ -588,10 +588,10 @@ export default function Onboarding() {
                         Module {mod.order}
                       </span>
                       {modComplete && (
-                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-700" />
                       )}
                     </div>
-                    <h3 className="font-display font-bold text-lg text-t1-text uppercase tracking-wide group-hover:text-t1-blue transition-colors">
+                    <h3 className="font-display font-bold text-lg text-t1-text group-hover:text-t1-accent transition-colors">
                       {mod.title}
                     </h3>
                     <p className="text-sm text-t1-muted mt-0.5">
@@ -601,7 +601,7 @@ export default function Onboarding() {
                     <div className="mt-3 flex items-center gap-3">
                       <div className="flex-1 h-1.5 bg-t1-bg rounded-full overflow-hidden">
                         <div
-                          className={`h-full rounded-full transition-all duration-500 ${modComplete ? "bg-emerald-500" : "bg-t1-blue"}`}
+                          className={`h-full rounded-full transition-all duration-500 ${modComplete ? "bg-emerald-500" : "bg-t1-accent"}`}
                           style={{ width: `${modPercent}%` }}
                         />
                       </div>
@@ -610,7 +610,7 @@ export default function Onboarding() {
                       </span>
                     </div>
                   </div>
-                  <ChevronRight className="w-5 h-5 text-t1-muted group-hover:text-t1-blue transition-colors flex-shrink-0" />
+                  <ChevronRight className="w-5 h-5 text-t1-muted group-hover:text-t1-accent transition-colors flex-shrink-0" />
                 </div>
               </button>
             );
@@ -623,16 +623,16 @@ export default function Onboarding() {
         >
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
             <div
-              className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 ${allModulesComplete ? "bg-t1-blue/20" : "bg-t1-bg"}`}
+              className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 ${allModulesComplete ? "bg-t1-accent/20" : "bg-t1-bg"}`}
             >
               {allModulesComplete ? (
-                <GraduationCap className="w-6 h-6 text-t1-blue" />
+                <GraduationCap className="w-6 h-6 text-t1-accent" />
               ) : (
                 <Lock className="w-6 h-6 text-t1-muted" />
               )}
             </div>
             <div className="flex-1">
-              <h3 className="font-display font-bold text-xl text-t1-text uppercase tracking-wide">
+              <h3 className="font-display font-bold text-xl text-t1-text">
                 Onboarding Quiz
               </h3>
               <p className="text-sm text-t1-muted mt-1">
@@ -641,7 +641,7 @@ export default function Onboarding() {
                   : `Complete all ${onboardingModules.length} modules to unlock the quiz.`}
               </p>
               {hasPassed && (
-                <p className="text-sm text-emerald-400 mt-1">
+                <p className="text-sm text-emerald-700 mt-1">
                   You passed with {bestQuizResult?.percentage}%. You can retake
                   the quiz anytime.
                 </p>
@@ -651,7 +651,7 @@ export default function Onboarding() {
               href="/onboarding/quiz"
               className={`flex items-center gap-2 font-semibold py-3 px-6 rounded-lg transition-colors whitespace-nowrap ${
                 allModulesComplete
-                  ? "bg-t1-blue hover:bg-t1-blue-light text-white"
+                  ? "bg-t1-accent hover:bg-t1-accent/80 text-white"
                   : "bg-t1-bg text-t1-muted cursor-not-allowed pointer-events-none"
               }`}
               onClick={e => {
@@ -668,7 +668,7 @@ export default function Onboarding() {
         <div className="mt-8 flex justify-end">
           <AlertDialog>
             <AlertDialogTrigger asChild>
-              <button className="flex items-center gap-2 text-xs text-t1-muted hover:text-red-400 transition-colors">
+              <button className="flex items-center gap-2 text-xs text-t1-muted hover:text-red-700 transition-colors">
                 <RotateCcw className="w-3.5 h-3.5" />
                 Reset Progress
               </button>
@@ -676,10 +676,10 @@ export default function Onboarding() {
             <AlertDialogContent className="bg-t1-surface border-t1-border">
               <AlertDialogHeader>
                 <div className="flex items-center gap-2 mb-1">
-                  <div className="w-10 h-10 rounded-full bg-red-500/15 flex items-center justify-center">
-                    <AlertTriangle className="w-5 h-5 text-red-400" />
+                  <div className="w-10 h-10 rounded-full bg-red-50 flex items-center justify-center">
+                    <AlertTriangle className="w-5 h-5 text-red-700" />
                   </div>
-                  <AlertDialogTitle className="font-display text-lg uppercase tracking-wide text-t1-text">
+                  <AlertDialogTitle className="font-display text-lg text-t1-text">
                     Reset All Progress
                   </AlertDialogTitle>
                 </div>
