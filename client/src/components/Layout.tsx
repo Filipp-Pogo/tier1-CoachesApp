@@ -18,17 +18,14 @@ import {
   LayoutDashboard,
   LogOut,
   Menu,
-  Moon,
   PlayCircle,
   Route as RouteIcon,
   Shield,
-  Sun,
   Target,
   TrendingUp,
   Wrench,
   X,
 } from "lucide-react";
-import { useTheme } from "@/contexts/ThemeContext";
 import { useAuth } from "@/contexts/AuthContext";
 import {
   AlertDialog,
@@ -174,9 +171,9 @@ function NavDropdown({
     >
       <button
         onClick={() => setOpen(previous => !previous)}
-        className={`inline-flex min-h-[42px] items-center gap-1.5 rounded-full px-4 py-2.5 action-label transition-colors ${
+        className={`inline-flex min-h-[42px] items-center gap-1.5 rounded-lg px-3.5 py-2 action-label transition-colors ${
           active
-            ? "bg-t1-blue text-white shadow-sm"
+            ? "bg-t1-accent text-white shadow-sm"
             : "text-t1-muted hover:bg-t1-bg hover:text-t1-text"
         }`}
       >
@@ -187,7 +184,7 @@ function NavDropdown({
       </button>
 
       {open && (
-        <div className="absolute left-0 top-full z-50 mt-2 min-w-60 rounded-[1.5rem] border border-t1-border bg-t1-surface/96 p-2 shadow-[0_24px_60px_rgba(15,23,42,0.14)] backdrop-blur-xl">
+        <div className="absolute left-0 top-full z-50 mt-2 min-w-60 rounded-lg border border-t1-border bg-t1-surface p-2 shadow-md">
           {item.children?.map(child => {
             const Icon = child.icon;
             const activeChild = isActive(child.href);
@@ -197,14 +194,14 @@ function NavDropdown({
                 key={child.href}
                 href={child.href}
                 onClick={() => setOpen(false)}
-                className={`flex min-h-[46px] items-center gap-3 rounded-[1.2rem] px-3.5 py-3 action-label no-underline transition-colors ${
+                className={`flex min-h-[46px] items-center gap-3 rounded-lg px-3.5 py-3 action-label no-underline transition-colors ${
                   activeChild
-                    ? "bg-t1-blue/10 text-t1-blue"
+                    ? "bg-t1-accent/10 text-t1-accent"
                     : "text-t1-text hover:bg-t1-bg"
                 }`}
               >
                 <Icon
-                  className={`h-4 w-4 flex-shrink-0 ${activeChild ? "text-t1-blue" : "text-t1-muted"}`}
+                  className={`h-4 w-4 flex-shrink-0 ${activeChild ? "text-t1-accent" : "text-t1-muted"}`}
                 />
                 <span>{child.label}</span>
                 <ChevronRight className="ml-auto h-4 w-4 text-t1-muted/60" />
@@ -217,27 +214,9 @@ function NavDropdown({
   );
 }
 
-function ThemeToggle({ size = "sm" }: { size?: "sm" | "md" }) {
-  const { isDark, toggleTheme } = useTheme();
-  const buttonSize = size === "md" ? "h-11 w-11" : "h-9 w-9";
-  const iconSize = size === "md" ? "h-5 w-5" : "h-4 w-4";
-
-  return (
-    <button
-      onClick={toggleTheme}
-      className={`${buttonSize} inline-flex items-center justify-center rounded-full border border-t1-border bg-t1-surface/80 text-t1-muted transition-colors hover:text-t1-text`}
-      aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
-      title={isDark ? "Light mode" : "Dark mode"}
-    >
-      {isDark ? <Sun className={iconSize} /> : <Moon className={iconSize} />}
-    </button>
-  );
-}
-
 export default function Layout({ children }: { children: ReactNode }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [location] = useLocation();
-  const { isDark } = useTheme();
   const { authEnabled, user, signOut } = useAuth();
   const isOnCourtRoute = location.startsWith("/on-court");
 
@@ -260,27 +239,27 @@ export default function Layout({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-screen bg-background text-t1-text">
       <OfflineBanner />
-      <header className="sticky top-0 z-50 border-b border-t1-border bg-t1-bg/86 backdrop-blur-xl">
+      <header className="sticky top-0 z-50 border-b border-t1-border bg-t1-bg/92 backdrop-blur-md">
         <div className="container flex h-14 items-center justify-between gap-3 lg:h-16">
           <Link href="/" className="flex items-center gap-3 no-underline">
             <div className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-t1-border bg-t1-surface/84">
               <img
                 src={TIER1_LOGO_WHITE}
                 alt="Tier 1 Performance"
-                className={`h-6 w-auto transition-all ${isDark ? "" : "brightness-0"}`}
+                className="h-6 w-auto brightness-0"
               />
             </div>
             <div className="flex flex-col">
               <span className="font-display text-[0.95rem] leading-none font-semibold uppercase tracking-[0.18em] text-t1-text sm:text-sm">
                 Tier 1 Coaches
               </span>
-              <span className="hidden text-[11px] leading-none uppercase tracking-[0.18em] text-t1-muted sm:block">
-                Performance control panel
+              <span className="hidden text-[11px] leading-none tracking-[0.12em] text-t1-muted sm:block">
+                Coaching Playbook
               </span>
             </div>
           </Link>
 
-          <nav className="hidden lg:flex items-center gap-1 rounded-full border border-t1-border bg-t1-surface/84 px-2 py-2 shadow-[0_16px_40px_rgba(15,23,42,0.08)]">
+          <nav className="hidden lg:flex items-center gap-1 rounded-lg border border-t1-border bg-t1-surface/90 px-2 py-1.5 shadow-sm">
             {navItems.map(item =>
               item.children ? (
                 <NavDropdown key={item.label} item={item} isActive={isActive} />
@@ -288,9 +267,9 @@ export default function Layout({ children }: { children: ReactNode }) {
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`inline-flex min-h-[42px] items-center rounded-full px-4 py-2.5 action-label no-underline transition-colors ${
+                  className={`inline-flex min-h-[42px] items-center rounded-lg px-3.5 py-2 action-label no-underline transition-colors ${
                     isActive(item.href)
-                      ? "bg-t1-blue text-white shadow-sm"
+                      ? "bg-t1-accent text-white shadow-sm"
                       : "text-t1-muted hover:bg-t1-bg hover:text-t1-text"
                   }`}
                 >
@@ -303,13 +282,11 @@ export default function Layout({ children }: { children: ReactNode }) {
           <div className="flex items-center gap-2">
             <Link
               href="/on-court"
-              className="hidden min-h-[42px] items-center gap-2 rounded-full bg-t1-blue px-4 action-label text-white no-underline xl:inline-flex"
+              className="hidden min-h-[42px] items-center gap-2 rounded-full bg-t1-accent px-4 action-label text-white no-underline xl:inline-flex"
             >
               <PlayCircle className="h-4 w-4" />
               On Court
             </Link>
-
-            <ThemeToggle size="sm" />
 
             {authEnabled && user && (
               <div className="hidden items-center gap-2 lg:flex">
@@ -343,7 +320,7 @@ export default function Layout({ children }: { children: ReactNode }) {
                         Cancel
                       </AlertDialogCancel>
                       <AlertDialogAction
-                        className="bg-t1-blue text-white hover:bg-t1-blue/90"
+                        className="bg-t1-accent text-white hover:bg-t1-accent/90"
                         onClick={() => void signOut()}
                       >
                         Sign Out
@@ -370,7 +347,6 @@ export default function Layout({ children }: { children: ReactNode }) {
             </div>
 
             <div className="flex items-center gap-2">
-              <ThemeToggle size="md" />
               <button
                 onClick={() => setMobileOpen(false)}
                 className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-t1-border bg-t1-surface/80 text-t1-text"
@@ -396,14 +372,14 @@ export default function Layout({ children }: { children: ReactNode }) {
                       <Link
                         key={item.href}
                         href={item.href}
-                        className={`flex min-h-[54px] items-center gap-4 rounded-[1.4rem] border px-4 py-3 text-[0.97rem] leading-tight font-semibold no-underline transition-colors ${
+                        className={`flex min-h-[54px] items-center gap-4 rounded-lg border px-4 py-3 text-[0.97rem] leading-tight font-semibold no-underline transition-colors ${
                           active
-                            ? "border-t1-blue/25 bg-t1-blue/10 text-t1-blue"
+                            ? "border-t1-accent/25 bg-t1-accent/10 text-t1-accent"
                             : "border-t1-border bg-t1-surface/80 text-t1-text"
                         }`}
                       >
                         <Icon
-                          className={`h-5 w-5 flex-shrink-0 ${active ? "text-t1-blue" : "text-t1-muted"}`}
+                          className={`h-5 w-5 flex-shrink-0 ${active ? "text-t1-accent" : "text-t1-muted"}`}
                         />
                         <span>{item.label}</span>
                         <ChevronRight className="ml-auto h-4 w-4 text-t1-muted/60" />
@@ -439,7 +415,7 @@ export default function Layout({ children }: { children: ReactNode }) {
                       Cancel
                     </AlertDialogCancel>
                     <AlertDialogAction
-                      className="bg-t1-blue text-white hover:bg-t1-blue/90"
+                      className="bg-t1-accent text-white hover:bg-t1-accent/90"
                       onClick={() => void signOut()}
                     >
                       Sign Out
@@ -467,7 +443,7 @@ export default function Layout({ children }: { children: ReactNode }) {
               <img
                 src={TIER1_LOGO_WHITE}
                 alt="Tier 1"
-                className={`h-4 w-auto opacity-70 ${isDark ? "" : "brightness-0"}`}
+                className="h-4 w-auto opacity-70 brightness-0"
               />
             </div>
             <span className="text-sm text-t1-muted">
@@ -492,7 +468,7 @@ export default function Layout({ children }: { children: ReactNode }) {
                   key={item.href}
                   href={item.href}
                   className={`flex flex-col items-center justify-center gap-1.5 no-underline transition-colors ${
-                    active ? "text-t1-blue" : "text-t1-muted"
+                    active ? "text-t1-accent" : "text-t1-muted"
                   }`}
                 >
                   <Icon className="h-5 w-5" strokeWidth={active ? 2.4 : 1.9} />
@@ -506,7 +482,7 @@ export default function Layout({ children }: { children: ReactNode }) {
             <button
               onClick={() => setMobileOpen(true)}
               className={`flex flex-col items-center justify-center gap-1.5 ${
-                mobileOpen ? "text-t1-blue" : "text-t1-muted"
+                mobileOpen ? "text-t1-accent" : "text-t1-muted"
               }`}
             >
               <Menu className="h-5 w-5" />

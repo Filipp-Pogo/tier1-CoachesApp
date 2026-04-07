@@ -260,7 +260,7 @@ function PlanCard({
                 </span>
               )}
               {draft && (
-                <span className="inline-flex items-center rounded-full border border-amber-500/20 bg-amber-500/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-amber-700 dark:text-amber-300">
+                <span className="inline-flex items-center rounded-full border border-amber-500/20 bg-amber-500/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-amber-700">
                   Draft
                 </span>
               )}
@@ -320,7 +320,7 @@ function PlanCard({
       <div className="mt-4 grid grid-cols-2 gap-2 xl:max-w-[340px]">
         <button
           onClick={onLaunchOnCourt}
-          className="touch-pill col-span-2 inline-flex items-center justify-center gap-2 rounded-full bg-t1-blue px-4 action-label text-white"
+          className="touch-pill col-span-2 inline-flex items-center justify-center gap-2 rounded-full bg-t1-accent px-4 action-label text-white"
         >
           <PlayCircle className="h-4 w-4" />
           On-Court
@@ -329,7 +329,7 @@ function PlanCard({
           onClick={onPrimaryAction}
           className="touch-pill inline-flex items-center justify-center gap-2 rounded-full border border-t1-border bg-t1-bg px-4 action-label text-t1-text"
         >
-          <Edit3 className="h-4 w-4 text-t1-blue" />
+          <Edit3 className="h-4 w-4 text-t1-accent" />
           {primaryActionLabel ??
             (plan.planType === "stock" ? "Customize copy" : "Edit in builder")}
         </button>
@@ -354,7 +354,7 @@ function PlanCard({
                       className="rounded-[1.25rem] border border-t1-border bg-t1-bg px-4 py-3"
                     >
                       <div className="flex items-center gap-3">
-                        <span className="inline-flex h-7 min-w-7 items-center justify-center rounded-full bg-t1-blue text-[10px] font-semibold text-white">
+                        <span className="inline-flex h-7 min-w-7 items-center justify-center rounded-full bg-t1-accent text-[10px] font-semibold text-white">
                           {index + 1}
                         </span>
                         <p className="text-sm font-semibold text-t1-text">
@@ -379,7 +379,7 @@ function PlanCard({
                       key={item}
                       className="flex items-start gap-2 rounded-[1.15rem] border border-t1-border bg-t1-bg px-4 py-3 text-sm text-t1-text"
                     >
-                      <Zap className="mt-0.5 h-4 w-4 flex-shrink-0 text-t1-blue" />
+                      <Zap className="mt-0.5 h-4 w-4 flex-shrink-0 text-t1-accent" />
                       <span>{item}</span>
                     </div>
                   ))}
@@ -805,7 +805,7 @@ export default function SessionPlans() {
       return (
         <Empty className="coach-empty p-8">
           <EmptyHeader className="gap-3">
-            <EmptyMedia variant="icon" className="bg-t1-blue/10 text-t1-blue">
+            <EmptyMedia variant="icon" className="bg-t1-accent/10 text-t1-accent">
               <Edit3 className="size-5" />
             </EmptyMedia>
             <EmptyTitle className="font-display text-xl font-semibold uppercase tracking-[0.12em] text-t1-text">
@@ -820,7 +820,7 @@ export default function SessionPlans() {
           <EmptyContent>
             <Link
               href="/session-builder"
-              className="touch-pill inline-flex items-center justify-center rounded-full bg-t1-blue px-5 action-label text-white no-underline"
+              className="touch-pill inline-flex items-center justify-center rounded-full bg-t1-accent px-5 action-label text-white no-underline"
             >
               Open builder
             </Link>
@@ -833,7 +833,7 @@ export default function SessionPlans() {
       return (
         <Empty className="coach-empty p-8">
           <EmptyHeader className="gap-3">
-            <EmptyMedia variant="icon" className="bg-t1-blue/10 text-t1-blue">
+            <EmptyMedia variant="icon" className="bg-t1-accent/10 text-t1-accent">
               <Users className="size-5" />
             </EmptyMedia>
             <EmptyTitle className="font-display text-xl font-semibold uppercase tracking-[0.12em] text-t1-text">
@@ -850,7 +850,7 @@ export default function SessionPlans() {
           <EmptyContent>
             <Link
               href="/session-builder"
-              className="touch-pill inline-flex items-center justify-center rounded-full bg-t1-blue px-5 action-label text-white no-underline"
+              className="touch-pill inline-flex items-center justify-center rounded-full bg-t1-accent px-5 action-label text-white no-underline"
             >
               Create a shared playbook
             </Link>
@@ -880,7 +880,7 @@ export default function SessionPlans() {
           <EmptyContent>
             <button
               onClick={() => setActiveTab("all")}
-              className="touch-pill inline-flex items-center justify-center rounded-full bg-t1-blue px-5 action-label text-white"
+              className="touch-pill inline-flex items-center justify-center rounded-full bg-t1-accent px-5 action-label text-white"
             >
               Browse stock playbooks
             </button>
@@ -892,7 +892,7 @@ export default function SessionPlans() {
     return (
       <Empty className="coach-empty p-8">
         <EmptyHeader className="gap-3">
-          <EmptyMedia variant="icon" className="bg-t1-blue/10 text-t1-blue">
+          <EmptyMedia variant="icon" className="bg-t1-accent/10 text-t1-accent">
             <History className="size-5" />
           </EmptyMedia>
           <EmptyTitle className="font-display text-xl font-semibold uppercase tracking-[0.12em] text-t1-text">
@@ -906,7 +906,7 @@ export default function SessionPlans() {
         <EmptyContent>
           <button
             onClick={() => setActiveTab("all")}
-            className="touch-pill inline-flex items-center justify-center rounded-full bg-t1-blue px-5 action-label text-white"
+            className="touch-pill inline-flex items-center justify-center rounded-full bg-t1-accent px-5 action-label text-white"
           >
             Browse stock playbooks
           </button>
@@ -957,7 +957,7 @@ export default function SessionPlans() {
                     href="/on-court"
                     className="touch-pill inline-flex items-center justify-center gap-2 rounded-full border border-t1-border bg-t1-surface px-5 action-label text-t1-text no-underline"
                   >
-                    <PlayCircle className="h-4 w-4 text-t1-blue" />
+                    <PlayCircle className="h-4 w-4 text-t1-accent" />
                     Resume On-Court
                   </Link>
                 ) : (
@@ -969,13 +969,13 @@ export default function SessionPlans() {
                     disabled={filteredStockPlans.length === 0}
                     className="touch-pill inline-flex items-center justify-center gap-2 rounded-full border border-t1-border bg-t1-surface px-5 action-label text-t1-text disabled:opacity-40"
                   >
-                    <PlayCircle className="h-4 w-4 text-t1-blue" />
+                    <PlayCircle className="h-4 w-4 text-t1-accent" />
                     Top plan to court
                   </button>
                 )}
                 <Link
                   href="/session-builder"
-                  className="touch-pill inline-flex items-center justify-center gap-2 rounded-full bg-t1-blue px-5 action-label text-white no-underline"
+                  className="touch-pill inline-flex items-center justify-center gap-2 rounded-full bg-t1-accent px-5 action-label text-white no-underline"
                 >
                   <Edit3 className="h-4 w-4" />
                   Builder
@@ -984,7 +984,7 @@ export default function SessionPlans() {
                   href="/compare-plans"
                   className="touch-pill inline-flex items-center justify-center gap-2 rounded-full border border-t1-border bg-t1-surface px-5 action-label text-t1-text no-underline"
                 >
-                  <ArrowLeftRight className="h-4 w-4 text-t1-blue" />
+                  <ArrowLeftRight className="h-4 w-4 text-t1-accent" />
                   Compare
                 </Link>
               </div>
@@ -1080,7 +1080,7 @@ export default function SessionPlans() {
                 onClick={() => setActiveTab(tab.key)}
                 className={`touch-pill inline-flex items-center gap-2 rounded-full border px-4 chip-label ${
                   activeTab === tab.key
-                    ? "border-t1-blue/25 bg-t1-blue text-white"
+                    ? "border-t1-accent/25 bg-t1-accent text-white"
                     : "border-t1-border bg-t1-surface text-t1-muted"
                 }`}
               >
@@ -1128,7 +1128,7 @@ export default function SessionPlans() {
                     }}
                     className={`touch-pill inline-flex items-center gap-2 rounded-full border px-4 chip-label ${
                       activeLevel === "all"
-                        ? "border-t1-blue/25 bg-t1-blue text-white"
+                        ? "border-t1-accent/25 bg-t1-accent text-white"
                         : "border-t1-border bg-t1-surface text-t1-muted"
                     }`}
                   >
@@ -1185,7 +1185,7 @@ export default function SessionPlans() {
                       }}
                       className={`touch-pill rounded-full border px-3 chip-label ${
                         !activeSubBand
-                          ? "border-t1-blue/25 bg-t1-blue text-white"
+                          ? "border-t1-accent/25 bg-t1-accent text-white"
                           : "border-t1-border bg-t1-surface text-t1-muted"
                       }`}
                     >
@@ -1200,7 +1200,7 @@ export default function SessionPlans() {
                         }}
                         className={`touch-pill rounded-full border px-3 chip-label ${
                           activeSubBand === group.subBand
-                            ? "border-t1-blue/25 bg-t1-blue text-white"
+                            ? "border-t1-accent/25 bg-t1-accent text-white"
                             : "border-t1-border bg-t1-surface text-t1-muted"
                         }`}
                       >
@@ -1221,7 +1221,7 @@ export default function SessionPlans() {
                     }}
                     className={`touch-pill rounded-full border px-3 chip-label ${
                       durationFilter == null
-                        ? "border-t1-blue/25 bg-t1-blue text-white"
+                        ? "border-t1-accent/25 bg-t1-accent text-white"
                         : "border-t1-border bg-t1-surface text-t1-muted"
                     }`}
                   >
@@ -1236,7 +1236,7 @@ export default function SessionPlans() {
                       }}
                       className={`touch-pill rounded-full border px-3 chip-label ${
                         durationFilter === duration
-                          ? "border-t1-blue/25 bg-t1-blue text-white"
+                          ? "border-t1-accent/25 bg-t1-accent text-white"
                           : "border-t1-border bg-t1-surface text-t1-muted"
                       }`}
                     >
@@ -1256,7 +1256,7 @@ export default function SessionPlans() {
                 <EmptyHeader className="gap-3">
                   <EmptyMedia
                     variant="icon"
-                    className="bg-t1-blue/10 text-t1-blue"
+                    className="bg-t1-accent/10 text-t1-accent"
                   >
                     <ClipboardList className="size-5" />
                   </EmptyMedia>
@@ -1270,7 +1270,7 @@ export default function SessionPlans() {
                 <EmptyContent>
                   <button
                     onClick={clearStockFilters}
-                    className="touch-pill inline-flex items-center justify-center rounded-full bg-t1-blue px-5 action-label text-white"
+                    className="touch-pill inline-flex items-center justify-center rounded-full bg-t1-accent px-5 action-label text-white"
                   >
                     Reset filters
                   </button>
@@ -1347,7 +1347,7 @@ export default function SessionPlans() {
                         <EmptyHeader className="gap-3">
                           <EmptyMedia
                             variant="icon"
-                            className="bg-t1-blue/10 text-t1-blue"
+                            className="bg-t1-accent/10 text-t1-accent"
                           >
                             <Search className="size-5" />
                           </EmptyMedia>
@@ -1361,7 +1361,7 @@ export default function SessionPlans() {
                         <EmptyContent>
                           <button
                             onClick={() => setSearchQuery("")}
-                            className="touch-pill inline-flex items-center justify-center rounded-full bg-t1-blue px-5 action-label text-white"
+                            className="touch-pill inline-flex items-center justify-center rounded-full bg-t1-accent px-5 action-label text-white"
                           >
                             Clear search
                           </button>

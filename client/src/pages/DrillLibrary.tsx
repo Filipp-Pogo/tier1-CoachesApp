@@ -560,7 +560,7 @@ export default function DrillLibrary() {
                       disabled={
                         !sameClassOnCourtSession && benchDrills.length === 0
                       }
-                      className="touch-pill inline-flex items-center justify-center gap-2 rounded-full bg-t1-blue px-5 action-label text-white disabled:opacity-40"
+                      className="touch-pill inline-flex items-center justify-center gap-2 rounded-full bg-t1-accent px-5 action-label text-white disabled:opacity-40"
                     >
                       <PlayCircle className="h-4 w-4" />
                       {sameClassOnCourtSession
@@ -571,7 +571,7 @@ export default function DrillLibrary() {
                       href={`/session-plans?level=${selectedStage.id}`}
                       className="touch-pill inline-flex items-center justify-center gap-2 rounded-full border border-t1-border bg-t1-surface px-5 action-label text-t1-text no-underline"
                     >
-                      <ClipboardList className="h-4 w-4 text-t1-blue" />
+                      <ClipboardList className="h-4 w-4 text-t1-accent" />
                       Open playbooks
                     </Link>
                     <button
@@ -582,7 +582,7 @@ export default function DrillLibrary() {
                       disabled={!featuredCoachDrill}
                       className="touch-pill inline-flex items-center justify-center gap-2 rounded-full border border-t1-border bg-t1-surface px-5 action-label text-t1-text disabled:opacity-40"
                     >
-                      <ListChecks className="h-4 w-4 text-t1-blue" />
+                      <ListChecks className="h-4 w-4 text-t1-accent" />
                       How to run it
                     </button>
                   </div>
@@ -592,7 +592,7 @@ export default function DrillLibrary() {
                   <button
                     onClick={() => launchBench(benchDrills, benchSourceLabel)}
                     disabled={benchDrills.length === 0}
-                    className="touch-pill inline-flex items-center justify-center gap-2 rounded-full bg-t1-blue px-5 action-label text-white disabled:opacity-40"
+                    className="touch-pill inline-flex items-center justify-center gap-2 rounded-full bg-t1-accent px-5 action-label text-white disabled:opacity-40"
                   >
                     <PlayCircle className="h-4 w-4" />
                     Send to On-Court
@@ -680,7 +680,7 @@ export default function DrillLibrary() {
                   }}
                   className={`touch-pill inline-flex items-center rounded-full px-4 chip-label ${
                     activeTab === "all"
-                      ? "bg-t1-blue text-white"
+                      ? "bg-t1-accent text-white"
                       : "border border-t1-border bg-t1-surface text-t1-muted"
                   }`}
                 >
@@ -693,7 +693,7 @@ export default function DrillLibrary() {
                   }}
                   className={`touch-pill inline-flex items-center gap-2 rounded-full px-4 chip-label ${
                     activeTab === "favorites"
-                      ? "bg-amber-500/15 text-amber-600 dark:text-amber-300"
+                      ? "bg-amber-500/15 text-amber-700"
                       : "border border-t1-border bg-t1-surface text-t1-muted"
                   }`}
                 >
@@ -735,7 +735,7 @@ export default function DrillLibrary() {
                     `${selectedStage.shortName} recommended drill bench`
                   )
                 }
-                className="touch-pill inline-flex items-center justify-center gap-2 rounded-full bg-t1-blue px-5 action-label text-white"
+                className="touch-pill inline-flex items-center justify-center gap-2 rounded-full bg-t1-accent px-5 action-label text-white"
               >
                 <PlayCircle className="h-4 w-4" />
                 Send all to On-Court
@@ -793,12 +793,12 @@ export default function DrillLibrary() {
                         onClick={() => openPreview(recommendation.drill.id)}
                         className="touch-pill inline-flex items-center justify-center gap-2 rounded-full border border-t1-border bg-t1-surface px-4 action-label text-t1-text"
                       >
-                        <ListChecks className="h-4 w-4 text-t1-blue" />
+                        <ListChecks className="h-4 w-4 text-t1-accent" />
                         How to run
                       </button>
                       <button
                         onClick={() => launchSingleDrill(recommendation.drill)}
-                        className="touch-pill inline-flex items-center justify-center gap-2 rounded-full bg-t1-blue px-4 action-label text-white"
+                        className="touch-pill inline-flex items-center justify-center gap-2 rounded-full bg-t1-accent px-4 action-label text-white"
                       >
                         <PlayCircle className="h-4 w-4" />
                         On-Court
@@ -864,7 +864,7 @@ export default function DrillLibrary() {
           <div className="mt-5 grid gap-4 xl:grid-cols-[minmax(0,1.08fr)_minmax(0,0.92fr)]">
             <div className="panel-muted rounded-[1.7rem] p-4 sm:p-5">
               <div className="flex items-center gap-3">
-                <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-t1-blue text-[11px] font-semibold text-white">
+                <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-t1-accent text-[11px] font-semibold text-white">
                   1
                 </span>
                 <div>
@@ -914,7 +914,7 @@ export default function DrillLibrary() {
             <div className="grid gap-4">
               <div className="panel-muted rounded-[1.7rem] p-4 sm:p-5">
                 <div className="flex items-center gap-3">
-                  <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-t1-blue text-[11px] font-semibold text-white">
+                  <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-t1-accent text-[11px] font-semibold text-white">
                     2
                   </span>
                   <div>
@@ -937,7 +937,7 @@ export default function DrillLibrary() {
                       }}
                       className={`touch-pill inline-flex items-center rounded-full border px-4 chip-label ${
                         blockFilter === block.id
-                          ? "border-t1-blue/25 bg-t1-blue text-white"
+                          ? "border-t1-accent/25 bg-t1-accent text-white"
                           : "border-t1-border bg-t1-surface text-t1-muted"
                       }`}
                     >
@@ -949,7 +949,7 @@ export default function DrillLibrary() {
 
               <div className="panel-muted rounded-[1.7rem] p-4 sm:p-5">
                 <div className="flex items-center gap-3">
-                  <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-t1-blue text-[11px] font-semibold text-white">
+                  <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-t1-accent text-[11px] font-semibold text-white">
                     3
                   </span>
                   <div>
@@ -972,7 +972,7 @@ export default function DrillLibrary() {
                       }}
                       className={`touch-pill inline-flex items-center rounded-full border px-4 chip-label ${
                         focusFilter === focus.id
-                          ? "border-t1-blue/25 bg-t1-blue text-white"
+                          ? "border-t1-accent/25 bg-t1-accent text-white"
                           : "border-t1-border bg-t1-surface text-t1-muted"
                       }`}
                     >
@@ -990,14 +990,14 @@ export default function DrillLibrary() {
                 onClick={() => setShowSecondaryFilters(previous => !previous)}
                 className={`touch-pill inline-flex items-center gap-2 rounded-full border px-4 chip-label ${
                   showSecondaryFilters || secondaryFilterCount > 0
-                    ? "border-t1-blue/25 bg-t1-blue/10 text-t1-blue"
+                    ? "border-t1-accent/25 bg-t1-accent/10 text-t1-accent"
                     : "border-t1-border bg-t1-surface text-t1-muted"
                 }`}
               >
                 <SlidersHorizontal className="h-3.5 w-3.5" />
                 More filters
                 {secondaryFilterCount > 0 && (
-                  <span className="chip-count rounded-full bg-t1-blue px-2 py-0.5 text-white">
+                  <span className="chip-count rounded-full bg-t1-accent px-2 py-0.5 text-white">
                     {secondaryFilterCount}
                   </span>
                 )}
@@ -1030,7 +1030,7 @@ export default function DrillLibrary() {
                           }}
                           className={`touch-pill rounded-full border px-3 chip-label ${
                             goalFilter === goal.id
-                              ? "border-t1-blue/25 bg-t1-blue text-white"
+                              ? "border-t1-accent/25 bg-t1-accent text-white"
                               : "border-t1-border bg-t1-surface text-t1-muted"
                           }`}
                         >
@@ -1054,7 +1054,7 @@ export default function DrillLibrary() {
                           }}
                           className={`touch-pill rounded-full border px-3 chip-label ${
                             intensityFilter === intensity.id
-                              ? "border-t1-blue/25 bg-t1-blue text-white"
+                              ? "border-t1-accent/25 bg-t1-accent text-white"
                               : "border-t1-border bg-t1-surface text-t1-muted"
                           }`}
                         >
@@ -1078,7 +1078,7 @@ export default function DrillLibrary() {
                           }}
                           className={`touch-pill rounded-full border px-3 chip-label ${
                             complexityFilter === complexity.id
-                              ? "border-t1-blue/25 bg-t1-blue text-white"
+                              ? "border-t1-accent/25 bg-t1-accent text-white"
                               : "border-t1-border bg-t1-surface text-t1-muted"
                           }`}
                         >
@@ -1102,7 +1102,7 @@ export default function DrillLibrary() {
                           }}
                           className={`touch-pill rounded-full border px-3 chip-label ${
                             utrFilter === band
-                              ? "border-t1-blue/25 bg-t1-blue text-white"
+                              ? "border-t1-accent/25 bg-t1-accent text-white"
                               : "border-t1-border bg-t1-surface text-t1-muted"
                           }`}
                         >
@@ -1126,7 +1126,7 @@ export default function DrillLibrary() {
                           }}
                           className={`touch-pill rounded-full border px-3 chip-label ${
                             groupSizeFilter === groupSize.id
-                              ? "border-t1-blue/25 bg-t1-blue text-white"
+                              ? "border-t1-accent/25 bg-t1-accent text-white"
                               : "border-t1-border bg-t1-surface text-t1-muted"
                           }`}
                         >
@@ -1152,7 +1152,7 @@ export default function DrillLibrary() {
                           }}
                           className={`touch-pill rounded-full border px-3 chip-label ${
                             courtSetupFilter === courtSetup.id
-                              ? "border-t1-blue/25 bg-t1-blue text-white"
+                              ? "border-t1-accent/25 bg-t1-accent text-white"
                               : "border-t1-border bg-t1-surface text-t1-muted"
                           }`}
                         >
@@ -1180,7 +1180,7 @@ export default function DrillLibrary() {
                           }}
                           className={`touch-pill rounded-full border px-3 chip-label ${
                             feedingFilter === item.id
-                              ? "border-t1-blue/25 bg-t1-blue text-white"
+                              ? "border-t1-accent/25 bg-t1-accent text-white"
                               : "border-t1-border bg-t1-surface text-t1-muted"
                           }`}
                         >
@@ -1274,7 +1274,7 @@ export default function DrillLibrary() {
               <EmptyHeader className="gap-3">
                 <EmptyMedia
                   variant="icon"
-                  className="bg-t1-blue/10 text-t1-blue"
+                  className="bg-t1-accent/10 text-t1-accent"
                 >
                   <BookOpen className="size-5" />
                 </EmptyMedia>
@@ -1288,7 +1288,7 @@ export default function DrillLibrary() {
               <EmptyContent>
                 <button
                   onClick={clearFilters}
-                  className="touch-pill inline-flex items-center justify-center rounded-full bg-t1-blue px-5 action-label text-white"
+                  className="touch-pill inline-flex items-center justify-center rounded-full bg-t1-accent px-5 action-label text-white"
                 >
                   Reset filters
                 </button>
@@ -1351,7 +1351,7 @@ export default function DrillLibrary() {
                                 {drill.recommendedTime}
                               </span>
                               {drill.subBand && (
-                                <span className="rounded-full border border-amber-500/20 bg-amber-500/10 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-amber-700 dark:text-amber-300">
+                                <span className="rounded-full border border-amber-500/20 bg-amber-500/10 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] text-amber-700">
                                   {formatSubBand(drill.subBand)}
                                 </span>
                               )}
@@ -1432,7 +1432,7 @@ export default function DrillLibrary() {
                         </Link>
                         <button
                           onClick={() => launchSingleDrill(drill)}
-                          className="touch-pill inline-flex items-center justify-center gap-2 rounded-full bg-t1-blue px-4 action-label text-white"
+                          className="touch-pill inline-flex items-center justify-center gap-2 rounded-full bg-t1-accent px-4 action-label text-white"
                         >
                           <PlayCircle className="h-4 w-4" />
                           On-Court
@@ -1451,7 +1451,7 @@ export default function DrillLibrary() {
                     }
                     className="touch-pill inline-flex items-center justify-center gap-2 rounded-full border border-t1-border bg-t1-surface px-5 action-label text-t1-text"
                   >
-                    <Zap className="h-4 w-4 text-t1-blue" />
+                    <Zap className="h-4 w-4 text-t1-accent" />
                     Load more drills
                   </button>
                 </div>

@@ -77,7 +77,7 @@ export function NotificationSettings() {
     <div className="rounded-xl border border-t1-border bg-t1-surface/50 p-4 space-y-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Bell className="w-5 h-5 text-t1-blue" />
+          <Bell className="w-5 h-5 text-t1-accent" />
           <span className="font-semibold text-sm">Push Notifications</span>
         </div>
         <button
@@ -86,7 +86,7 @@ export function NotificationSettings() {
           className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
             subscribed
               ? 'bg-t1-surface border border-t1-border text-t1-muted hover:text-t1-text'
-              : 'bg-t1-blue text-white hover:bg-t1-blue/90'
+              : 'bg-t1-accent text-white hover:bg-t1-accent/90'
           } disabled:opacity-50`}
         >
           {loading ? 'Working...' : subscribed ? 'Disable' : 'Enable'}
@@ -112,7 +112,7 @@ export function NotificationSettings() {
               <button
                 onClick={() => handlePrefChange(key)}
                 className={`w-9 h-5 rounded-full transition-colors ${
-                  prefs[key] ? 'bg-t1-blue' : 'bg-t1-border'
+                  prefs[key] ? 'bg-t1-accent' : 'bg-t1-border'
                 }`}
               >
                 <div

@@ -198,12 +198,12 @@ export default function Dashboard() {
                       onClick={() => openStageDrills(stage.id)}
                       className={`min-h-[11.25rem] rounded-[1.55rem] border p-3.5 text-left transition-all ${
                         active
-                          ? "border-t1-blue/25 bg-t1-surface shadow-[0_16px_36px_rgba(2,6,23,0.1)]"
-                          : "border-t1-border bg-t1-bg hover:-translate-y-0.5 hover:border-t1-blue/20"
+                          ? "border-t1-accent/25 bg-t1-surface shadow-[0_16px_36px_rgba(2,6,23,0.1)]"
+                          : "border-t1-border bg-t1-bg hover:-translate-y-0.5 hover:border-t1-accent/20"
                       }`}
                     >
                       <div
-                        className={`rounded-[1.3rem] border border-t1-border/70 bg-gradient-to-br p-4 ${active ? brand.surfaceClassName : "from-white via-slate-50 to-slate-100/70 dark:from-slate-900 dark:via-slate-900 dark:to-slate-800"}`}
+                        className={`rounded-[1.3rem] border border-t1-border/70 bg-gradient-to-br p-4 ${active ? brand.surfaceClassName : "from-white via-slate-50 to-slate-100/70"}`}
                       >
                         <div className="flex items-start justify-between gap-3">
                           <span
@@ -302,7 +302,7 @@ export default function Dashboard() {
                   <div className="mt-4 grid gap-2 sm:grid-cols-2">
                     <Link
                       href="/on-court"
-                      className="touch-pill inline-flex items-center justify-center gap-2 rounded-full bg-t1-blue px-4 action-label text-white no-underline"
+                      className="touch-pill inline-flex items-center justify-center gap-2 rounded-full bg-t1-accent px-4 action-label text-white no-underline"
                     >
                       <PlayCircle className="h-4 w-4" />
                       Resume board
@@ -311,7 +311,7 @@ export default function Dashboard() {
                       href={`/session-plans?level=${selectedClass}`}
                       className="touch-pill inline-flex items-center justify-center gap-2 rounded-full border border-t1-border bg-t1-surface px-4 action-label text-t1-text no-underline"
                     >
-                      <ClipboardList className="h-4 w-4 text-t1-blue" />
+                      <ClipboardList className="h-4 w-4 text-t1-accent" />
                       Open class playbooks
                     </Link>
                   </div>
@@ -320,7 +320,7 @@ export default function Dashboard() {
                 <div className="mt-4 grid gap-2 sm:grid-cols-2">
                   <button
                     onClick={() => launchStageBoard(selectedClass)}
-                    className="touch-pill inline-flex items-center justify-center gap-2 rounded-full bg-t1-blue px-4 action-label text-white"
+                    className="touch-pill inline-flex items-center justify-center gap-2 rounded-full bg-t1-accent px-4 action-label text-white"
                   >
                     <PlayCircle className="h-4 w-4" />
                     Launch {activeStage.shortName}
@@ -329,7 +329,7 @@ export default function Dashboard() {
                     href={`/session-plans?level=${selectedClass}`}
                     className="touch-pill inline-flex items-center justify-center gap-2 rounded-full border border-t1-border bg-t1-surface px-4 action-label text-t1-text no-underline"
                   >
-                    <ClipboardList className="h-4 w-4 text-t1-blue" />
+                    <ClipboardList className="h-4 w-4 text-t1-accent" />
                     Open playbooks
                   </Link>
                 </div>
@@ -397,7 +397,7 @@ export default function Dashboard() {
           <div className="mt-4 grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
             <button
               onClick={() => launchStageBoard(selectedClass)}
-              className="touch-pill inline-flex items-center justify-center gap-2 rounded-full bg-t1-blue px-4 action-label text-white"
+              className="touch-pill inline-flex items-center justify-center gap-2 rounded-full bg-t1-accent px-4 action-label text-white"
             >
               <PlayCircle className="h-4 w-4" />
               Launch On-Court
@@ -407,20 +407,20 @@ export default function Dashboard() {
               className="touch-pill inline-flex items-center justify-between rounded-full border border-t1-border bg-t1-surface px-4 action-label text-t1-text no-underline"
             >
               <span>Open drills</span>
-              <ChevronRight className="h-4 w-4 text-t1-blue" />
+              <ChevronRight className="h-4 w-4 text-t1-accent" />
             </Link>
             <Link
               href={`/session-plans?level=${selectedClass}`}
               className="touch-pill inline-flex items-center justify-between rounded-full border border-t1-border bg-t1-surface px-4 action-label text-t1-text no-underline"
             >
               <span>Open playbooks</span>
-              <ChevronRight className="h-4 w-4 text-t1-blue" />
+              <ChevronRight className="h-4 w-4 text-t1-accent" />
             </Link>
             <Link
               href="/session-builder"
               className="touch-pill inline-flex items-center justify-center gap-2 rounded-full border border-t1-border bg-t1-surface px-4 action-label text-t1-text no-underline"
             >
-              <Wrench className="h-4 w-4 text-t1-blue" />
+              <Wrench className="h-4 w-4 text-t1-accent" />
               Build session
             </Link>
           </div>
@@ -488,7 +488,7 @@ export default function Dashboard() {
                     <div className="mt-4 grid gap-2 sm:grid-cols-2">
                       <button
                         onClick={() => launchDrill(recommendation.drill)}
-                        className="touch-pill inline-flex items-center justify-center gap-2 rounded-full bg-t1-blue px-4 action-label text-white"
+                        className="touch-pill inline-flex items-center justify-center gap-2 rounded-full bg-t1-accent px-4 action-label text-white"
                       >
                         <PlayCircle className="h-4 w-4" />
                         On-Court
@@ -559,7 +559,7 @@ export default function Dashboard() {
                   <div className="mt-4 grid gap-2 sm:grid-cols-2">
                     <button
                       onClick={() => launchPlan(recommendation.plan.id)}
-                      className="touch-pill inline-flex items-center justify-center gap-2 rounded-full bg-t1-blue px-4 action-label text-white"
+                      className="touch-pill inline-flex items-center justify-center gap-2 rounded-full bg-t1-accent px-4 action-label text-white"
                     >
                       <PlayCircle className="h-4 w-4" />
                       To court

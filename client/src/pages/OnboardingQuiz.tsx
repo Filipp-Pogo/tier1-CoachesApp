@@ -174,8 +174,8 @@ export default function OnboardingQuiz() {
               {Object.entries(incorrectByModule).map(([moduleId, questions]) => (
                 <div key={moduleId} className="mb-6">
                   <div className="flex items-center gap-2 mb-3">
-                    <BookOpen className="w-4 h-4 text-t1-blue" />
-                    <span className="text-sm font-medium text-t1-blue">{getModuleName(moduleId)}</span>
+                    <BookOpen className="w-4 h-4 text-t1-accent" />
+                    <span className="text-sm font-medium text-t1-accent">{getModuleName(moduleId)}</span>
                   </div>
                   <div className="space-y-3">
                     {questions.map(iq => (
@@ -208,7 +208,7 @@ export default function OnboardingQuiz() {
                             );
                           })}
                         </div>
-                        <div className="bg-t1-navy rounded-lg p-3 text-sm text-t1-blue-light">
+                        <div className="bg-t1-accent/10 rounded-lg p-3 text-sm text-t1-accent/80">
                           {iq.question.explanation}
                         </div>
                       </div>
@@ -226,7 +226,7 @@ export default function OnboardingQuiz() {
               className={`flex-1 flex items-center justify-center gap-2 font-semibold py-3 px-6 rounded-lg transition-colors ${
                 passed
                   ? 'bg-t1-surface hover:bg-secondary text-t1-text border border-t1-border'
-                  : 'bg-t1-blue hover:bg-t1-blue-light text-white'
+                  : 'bg-t1-accent hover:bg-t1-accent/80 text-white'
               }`}
             >
               <RotateCcw className="w-5 h-5" />
@@ -297,7 +297,7 @@ export default function OnboardingQuiz() {
             </div>
             <div className="h-2 bg-t1-surface rounded-full overflow-hidden">
               <div
-                className="h-full bg-t1-blue rounded-full transition-all duration-300"
+                className="h-full bg-t1-accent rounded-full transition-all duration-300"
                 style={{ width: `${progressPercent}%` }}
               />
             </div>
@@ -305,8 +305,8 @@ export default function OnboardingQuiz() {
 
           {/* Module Tag */}
           <div className="flex items-center gap-2 mb-4">
-            <Target className="w-4 h-4 text-t1-blue" />
-            <span className="text-xs font-medium tracking-wider text-t1-blue uppercase">
+            <Target className="w-4 h-4 text-t1-accent" />
+            <span className="text-xs font-medium tracking-wider text-t1-accent uppercase">
               {moduleName}
             </span>
           </div>
@@ -322,7 +322,7 @@ export default function OnboardingQuiz() {
               const isSelected = selectedAnswer === i;
               const isCorrectOption = i === currentQuestion.correctIndex;
 
-              let optionStyle = 'bg-t1-surface border-t1-border hover:bg-secondary hover:border-t1-blue/30 text-t1-text cursor-pointer';
+              let optionStyle = 'bg-t1-surface border-t1-border hover:bg-secondary hover:border-t1-accent/30 text-t1-text cursor-pointer';
 
               if (showExplanation) {
                 if (isCorrectOption) {
@@ -333,7 +333,7 @@ export default function OnboardingQuiz() {
                   optionStyle = 'bg-t1-surface border-t1-border/50 text-t1-muted opacity-60';
                 }
               } else if (isSelected) {
-                optionStyle = 'bg-t1-blue/10 border-t1-blue/40 text-t1-text';
+                optionStyle = 'bg-t1-accent/10 border-t1-accent/40 text-t1-text';
               }
 
               return (
@@ -407,7 +407,7 @@ export default function OnboardingQuiz() {
             {showExplanation && (
               <button
                 onClick={nextQuestion}
-                className="flex items-center gap-2 bg-t1-blue hover:bg-t1-blue-light text-white font-semibold py-2.5 px-6 rounded-lg transition-colors"
+                className="flex items-center gap-2 bg-t1-accent hover:bg-t1-accent/80 text-white font-semibold py-2.5 px-6 rounded-lg transition-colors"
               >
                 {currentIdx < totalQuestions - 1 ? (
                   <>Next <ChevronRight className="w-4 h-4" /></>
@@ -427,15 +427,15 @@ export default function OnboardingQuiz() {
     <div className="min-h-screen bg-t1-bg transition-colors duration-200">
       <div className="max-w-3xl mx-auto px-4 py-8">
         {/* Back Link */}
-        <Link href="/onboarding" className="flex items-center gap-2 text-sm text-t1-muted hover:text-t1-blue transition-colors mb-8">
+        <Link href="/onboarding" className="flex items-center gap-2 text-sm text-t1-muted hover:text-t1-accent transition-colors mb-8">
           <ArrowLeft className="w-4 h-4" />
           Back to Onboarding
         </Link>
 
         {/* Header */}
         <div className="text-center mb-10">
-          <div className="w-20 h-20 rounded-2xl bg-t1-blue/20 flex items-center justify-center mx-auto mb-6">
-            <GraduationCap className="w-10 h-10 text-t1-blue" />
+          <div className="w-20 h-20 rounded-2xl bg-t1-accent/20 flex items-center justify-center mx-auto mb-6">
+            <GraduationCap className="w-10 h-10 text-t1-accent" />
           </div>
           <h1 className="font-display font-bold text-4xl md:text-5xl text-t1-text uppercase tracking-tight mb-3">
             Onboarding Quiz
@@ -453,7 +453,7 @@ export default function OnboardingQuiz() {
               <div className="text-sm text-t1-muted mt-1">Questions</div>
             </div>
             <div>
-              <div className="text-3xl font-bold text-t1-blue">{PASS_THRESHOLD}%</div>
+              <div className="text-3xl font-bold text-t1-accent">{PASS_THRESHOLD}%</div>
               <div className="text-sm text-t1-muted mt-1">Pass Threshold</div>
             </div>
             <div>
@@ -482,25 +482,25 @@ export default function OnboardingQuiz() {
         </div>
 
         {/* Rules */}
-        <div className="bg-t1-navy border border-t1-blue/20 rounded-xl p-6 mb-8">
+        <div className="bg-t1-accent/10 border border-t1-accent/20 rounded-xl p-6 mb-8">
           <h3 className="font-display font-bold text-lg text-t1-text uppercase tracking-wide mb-3">
             Quiz Rules
           </h3>
-          <ul className="space-y-2 text-sm text-t1-blue-light">
+          <ul className="space-y-2 text-sm text-t1-accent/80">
             <li className="flex items-start gap-2">
-              <CheckCircle2 className="w-4 h-4 text-t1-blue flex-shrink-0 mt-0.5" />
+              <CheckCircle2 className="w-4 h-4 text-t1-accent flex-shrink-0 mt-0.5" />
               Questions are randomized each attempt
             </li>
             <li className="flex items-start gap-2">
-              <CheckCircle2 className="w-4 h-4 text-t1-blue flex-shrink-0 mt-0.5" />
+              <CheckCircle2 className="w-4 h-4 text-t1-accent flex-shrink-0 mt-0.5" />
               You will see the correct answer and explanation after each question
             </li>
             <li className="flex items-start gap-2">
-              <CheckCircle2 className="w-4 h-4 text-t1-blue flex-shrink-0 mt-0.5" />
+              <CheckCircle2 className="w-4 h-4 text-t1-accent flex-shrink-0 mt-0.5" />
               You need {PASS_THRESHOLD}% ({Math.ceil(quizQuestions.length * PASS_THRESHOLD / 100)}/{quizQuestions.length}) correct answers to pass
             </li>
             <li className="flex items-start gap-2">
-              <CheckCircle2 className="w-4 h-4 text-t1-blue flex-shrink-0 mt-0.5" />
+              <CheckCircle2 className="w-4 h-4 text-t1-accent flex-shrink-0 mt-0.5" />
               You can retake the quiz as many times as needed
             </li>
           </ul>
@@ -529,7 +529,7 @@ export default function OnboardingQuiz() {
         {/* Start Button */}
         <button
           onClick={startQuiz}
-          className="w-full flex items-center justify-center gap-3 bg-t1-blue hover:bg-t1-blue-light text-white font-bold py-4 px-8 rounded-xl transition-colors text-lg"
+          className="w-full flex items-center justify-center gap-3 bg-t1-accent hover:bg-t1-accent/80 text-white font-bold py-4 px-8 rounded-xl transition-colors text-lg"
         >
           <GraduationCap className="w-6 h-6" />
           {hasPassed ? 'Retake Quiz' : bestQuizResult ? 'Try Again' : 'Start Quiz'}

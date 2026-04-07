@@ -71,8 +71,8 @@ export default function Assessments() {
             onClick={() => setActiveStage('all')}
             className={`flex-shrink-0 px-3 py-2 rounded-full text-xs font-medium border transition-colors min-h-[36px] ${
               activeStage === 'all'
-                ? 'bg-t1-blue text-white border-t1-blue'
-                : 'bg-t1-surface border-t1-border text-t1-muted active:bg-t1-blue/10'
+                ? 'bg-t1-accent text-white border-t1-accent'
+                : 'bg-t1-surface border-t1-border text-t1-muted active:bg-t1-accent/10'
             }`}
           >
             All
@@ -85,8 +85,8 @@ export default function Assessments() {
                 onClick={() => setActiveStage(stageId)}
                 className={`flex-shrink-0 px-3 py-2 rounded-full text-xs font-medium border transition-colors min-h-[36px] ${
                   activeStage === stageId
-                    ? 'bg-t1-blue text-white border-t1-blue'
-                    : 'bg-t1-surface border-t1-border text-t1-muted active:bg-t1-blue/10'
+                    ? 'bg-t1-accent text-white border-t1-accent'
+                    : 'bg-t1-surface border-t1-border text-t1-muted active:bg-t1-accent/10'
                 }`}
               >
                 {stage?.shortName}
@@ -100,7 +100,7 @@ export default function Assessments() {
           <div className="flex justify-end">
             <button
               onClick={allExpanded ? collapseAll : expandAll}
-              className="text-[11px] text-t1-muted hover:text-t1-blue transition-colors font-medium flex items-center gap-1"
+              className="text-[11px] text-t1-muted hover:text-t1-accent transition-colors font-medium flex items-center gap-1"
             >
               {allExpanded ? (
                 <>Collapse All</>
@@ -135,7 +135,7 @@ export default function Assessments() {
               {/* Section Header — clickable when in All view */}
               {isAllView ? (
                 <button
-                  className="w-full text-left bg-t1-blue/5 border-b border-t1-border px-4 sm:px-6 py-3 sm:py-4 hover:bg-t1-blue/10 transition-colors"
+                  className="w-full text-left bg-t1-accent/5 border-b border-t1-border px-4 sm:px-6 py-3 sm:py-4 hover:bg-t1-accent/10 transition-colors"
                   onClick={() => toggleSection(assessment.stageId)}
                   aria-expanded={isExpanded}
                 >
@@ -170,7 +170,7 @@ export default function Assessments() {
                   </div>
                 </button>
               ) : (
-                <div className="bg-t1-blue/5 border-b border-t1-border px-4 sm:px-6 py-3 sm:py-4">
+                <div className="bg-t1-accent/5 border-b border-t1-border px-4 sm:px-6 py-3 sm:py-4">
                   <div className="flex items-center gap-2">
                     <h2 className="font-display text-sm sm:text-lg font-semibold uppercase tracking-wide text-t1-text">
                       {assessment.stageName} Standards
@@ -198,13 +198,13 @@ export default function Assessments() {
                     {assessment.categories.map((cat) => (
                       <div key={cat.name} className="bg-secondary/50 rounded-lg p-3 sm:p-4">
                         <h3 className="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-t1-text mb-2 flex items-center gap-1.5 border-b border-t1-border pb-1.5">
-                          <Target className="w-3 h-3 text-t1-blue" />
+                          <Target className="w-3 h-3 text-t1-accent" />
                           {cat.name}
                         </h3>
                         <ul className="space-y-1.5">
                           {cat.standards.map((standard, i) => (
                             <li key={i} className="flex items-start gap-2">
-                              <CheckCircle2 className="w-3 h-3 text-t1-blue flex-shrink-0 mt-0.5" />
+                              <CheckCircle2 className="w-3 h-3 text-t1-accent flex-shrink-0 mt-0.5" />
                               <span className="text-[10px] sm:text-xs text-t1-text/80">{standard}</span>
                             </li>
                           ))}

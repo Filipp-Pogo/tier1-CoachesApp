@@ -89,7 +89,7 @@ export default function OnCourtMode() {
           <div className="mt-6 flex flex-col gap-2 sm:flex-row">
             <Link
               href="/"
-              className="touch-pill inline-flex items-center justify-center gap-2 rounded-full bg-t1-blue px-5 action-label text-white no-underline"
+              className="touch-pill inline-flex items-center justify-center gap-2 rounded-full bg-t1-accent px-5 action-label text-white no-underline"
             >
               <ArrowLeft className="h-4 w-4" />
               Back to dashboard
@@ -207,7 +207,7 @@ export default function OnCourtMode() {
               <div className="mt-4 flex flex-col gap-2 sm:flex-row">
                 <button
                   onClick={() => setTimerRunning(previous => !previous)}
-                  className="touch-pill inline-flex flex-1 items-center justify-center gap-2 rounded-full bg-t1-blue px-4 action-label text-white"
+                  className="touch-pill inline-flex flex-1 items-center justify-center gap-2 rounded-full bg-t1-accent px-4 action-label text-white"
                 >
                   {timerRunning ? (
                     <>
@@ -289,7 +289,7 @@ export default function OnCourtMode() {
 
                   {currentItem.cue && (
                     <div className="coach-tip mt-4 rounded-[1.5rem] p-4">
-                      <p className="meta-label text-t1-blue">Cue to coach</p>
+                      <p className="meta-label text-t1-accent">Cue to coach</p>
                       <p className="body-copy-sm mt-2 font-semibold text-t1-text sm:text-base">
                         {currentItem.cue}
                       </p>
@@ -303,7 +303,7 @@ export default function OnCourtMode() {
                           key={item}
                           className="inline-flex items-start gap-2 rounded-[1.25rem] border border-t1-border bg-t1-surface px-4 py-3 body-copy-sm text-t1-text"
                         >
-                          <ShieldCheck className="mt-0.5 h-4 w-4 flex-shrink-0 text-t1-blue" />
+                          <ShieldCheck className="mt-0.5 h-4 w-4 flex-shrink-0 text-t1-accent" />
                           <span>{item}</span>
                         </div>
                       ))}
@@ -345,7 +345,7 @@ export default function OnCourtMode() {
                       );
                     }}
                     disabled={currentIndex === session.items.length - 1}
-                    className="touch-pill order-first col-span-2 inline-flex items-center justify-center gap-2 rounded-full bg-t1-blue px-4 action-label text-white disabled:opacity-40 md:order-none md:col-span-1"
+                    className="touch-pill order-first col-span-2 inline-flex items-center justify-center gap-2 rounded-full bg-t1-accent px-4 action-label text-white disabled:opacity-40 md:order-none md:col-span-1"
                   >
                     <CheckCircle2 className="h-4 w-4" />
                     Mark done
@@ -391,7 +391,7 @@ export default function OnCourtMode() {
                         key={item}
                         className="inline-flex items-start gap-2 rounded-[1.25rem] border border-t1-border bg-t1-surface px-4 py-3 body-copy-sm text-t1-text"
                       >
-                        <Zap className="mt-0.5 h-4 w-4 flex-shrink-0 text-t1-blue" />
+                        <Zap className="mt-0.5 h-4 w-4 flex-shrink-0 text-t1-accent" />
                         <span>{item}</span>
                       </div>
                     ))}
@@ -424,7 +424,7 @@ export default function OnCourtMode() {
                       onClick={() => setCurrentIndex(index)}
                       className={`touch-pill w-full min-h-[5rem] rounded-[1.5rem] border px-4 py-3 text-left transition-colors ${
                         active
-                          ? "border-t1-blue/30 bg-t1-blue/8"
+                          ? "border-t1-accent/30 bg-t1-accent/8"
                           : completed
                             ? "border-emerald-500/20 bg-emerald-500/8"
                             : "border-t1-border bg-t1-bg"
@@ -440,7 +440,7 @@ export default function OnCourtMode() {
                         <span
                           className={`mt-0.5 inline-flex h-6 min-w-6 items-center justify-center rounded-full px-2 text-[11px] font-semibold ${
                             active
-                              ? "bg-t1-blue text-white"
+                              ? "bg-t1-accent text-white"
                               : completed
                                 ? "bg-emerald-500 text-white"
                                 : "bg-t1-surface text-t1-muted"
