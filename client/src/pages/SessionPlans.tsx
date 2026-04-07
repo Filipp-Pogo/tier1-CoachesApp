@@ -225,9 +225,9 @@ function PlanCard({
   };
 
   return (
-    <article className="premium-card rounded-[1.9rem] p-4 sm:p-5">
+    <article className="premium-card rounded-xl p-4 sm:p-5">
       <div
-        className={`rounded-[1.5rem] border border-t1-border bg-gradient-to-br ${brand.surfaceClassName} p-4 sm:p-5`}
+        className={`rounded-xl border border-t1-border bg-gradient-to-br ${brand.surfaceClassName} p-4 sm:p-5`}
       >
         <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
           <div className="min-w-0 flex-1">
@@ -351,7 +351,7 @@ function PlanCard({
                   {plan.blocks.map((block, index) => (
                     <div
                       key={`${plan.id}-${block.label}-${index}`}
-                      className="rounded-[1.25rem] border border-t1-border bg-t1-bg px-4 py-3"
+                      className="rounded-xl border border-t1-border bg-t1-bg px-4 py-3"
                     >
                       <div className="flex items-center gap-3">
                         <span className="inline-flex h-7 min-w-7 items-center justify-center rounded-full bg-t1-accent text-[10px] font-semibold text-white">
@@ -377,7 +377,7 @@ function PlanCard({
                   {plan.standards.map(item => (
                     <div
                       key={item}
-                      className="flex items-start gap-2 rounded-[1.15rem] border border-t1-border bg-t1-bg px-4 py-3 text-sm text-t1-text"
+                      className="flex items-start gap-2 rounded-xl border border-t1-border bg-t1-bg px-4 py-3 text-sm text-t1-text"
                     >
                       <Zap className="mt-0.5 h-4 w-4 flex-shrink-0 text-t1-accent" />
                       <span>{item}</span>
@@ -392,7 +392,7 @@ function PlanCard({
                   {plan.commonMistakes.map(item => (
                     <div
                       key={item}
-                      className="flex items-start gap-2 rounded-[1.15rem] border border-red-500/18 bg-red-500/8 px-4 py-3 text-sm text-t1-text"
+                      className="flex items-start gap-2 rounded-xl border border-red-500/18 bg-red-500/8 px-4 py-3 text-sm text-t1-text"
                     >
                       <AlertTriangle className="mt-0.5 h-4 w-4 flex-shrink-0 text-red-500" />
                       <span>{item}</span>
@@ -401,7 +401,7 @@ function PlanCard({
                 </div>
               </div>
 
-              <div className="rounded-[1.25rem] border border-t1-border bg-t1-bg px-4 py-4">
+              <div className="rounded-xl border border-t1-border bg-t1-bg px-4 py-4">
                 <p className="meta-label">Match transfer</p>
                 <p className="support-copy-strong body-copy-sm mt-2">
                   {plan.matchPlayTransfer}
@@ -920,7 +920,7 @@ export default function SessionPlans() {
       <section className="page-hero">
         <div className="container py-5 sm:py-8">
           <div className="grid gap-4 xl:grid-cols-[minmax(0,1.32fr)_minmax(320px,0.82fr)]">
-            <section className="premium-card rounded-[2rem] p-5 sm:p-6 lg:p-7">
+            <section className="premium-card rounded-xl p-5 sm:p-6 lg:p-7">
               <p className="section-kicker">Playbooks</p>
               <h1 className="page-title mt-3 text-t1-text">
                 Pick the playbook. Send it to court.
@@ -990,26 +990,26 @@ export default function SessionPlans() {
               </div>
             </section>
 
-            <section className="premium-card rounded-[2rem] p-5 sm:p-6 lg:p-7">
+            <section className="premium-card rounded-xl p-5 sm:p-6 lg:p-7">
               <p className="section-kicker">Library status</p>
               <h2 className="section-title mt-3 text-t1-text">
                 Stock, custom, shared
               </h2>
 
               <div className="mt-5 grid gap-3 sm:grid-cols-3">
-                <div className="rounded-[1.45rem] border border-t1-border bg-t1-bg p-4">
+                <div className="rounded-xl border border-t1-border bg-t1-bg p-4">
                   <p className="meta-label">Stock</p>
                   <p className="mt-2 text-3xl font-semibold text-t1-text">
                     {stockPlanCards.length}
                   </p>
                 </div>
-                <div className="rounded-[1.45rem] border border-t1-border bg-t1-bg p-4">
+                <div className="rounded-xl border border-t1-border bg-t1-bg p-4">
                   <p className="meta-label">My plans</p>
                   <p className="mt-2 text-3xl font-semibold text-t1-text">
                     {customPlans.length}
                   </p>
                 </div>
-                <div className="rounded-[1.45rem] border border-t1-border bg-t1-bg p-4">
+                <div className="rounded-xl border border-t1-border bg-t1-bg p-4">
                   <p className="meta-label">Team shared</p>
                   <p className="mt-2 text-3xl font-semibold text-t1-text">
                     {sharedPlans.length}
@@ -1017,7 +1017,7 @@ export default function SessionPlans() {
                 </div>
               </div>
 
-              <div className="mt-4 rounded-[1.45rem] border border-t1-border bg-t1-bg p-4">
+              <div className="mt-4 rounded-xl border border-t1-border bg-t1-bg p-4">
                 <p className="meta-label">Current lane</p>
                 <p className="mt-2 text-base font-semibold text-t1-text">
                   {activeTabSummary}
@@ -1326,7 +1326,7 @@ export default function SessionPlans() {
           <>
             {loadingCustomPlans &&
             (activeTab === "custom" || activeTab === "shared") ? (
-              <div className="panel-muted rounded-[1.6rem] p-8 text-center body-copy-sm text-t1-muted">
+              <div className="panel-muted rounded-xl p-8 text-center body-copy-sm text-t1-muted">
                 Loading synced playbooks…
               </div>
             ) : (

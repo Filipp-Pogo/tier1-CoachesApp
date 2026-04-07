@@ -107,7 +107,7 @@ function DetailPanel({
 
   return (
     <section
-      className={`rounded-[1.25rem] border p-4 sm:p-5 lg:p-6 ${toneClassName}`}
+      className={`rounded-xl border p-4 sm:p-5 lg:p-6 ${toneClassName}`}
     >
       <h2
         className={`chip-label mb-4 flex items-center gap-2 font-display ${titleClassName}`}
@@ -159,7 +159,7 @@ export default function DrillDetail() {
   if (!drill) {
     return (
       <div className="container py-16 text-center">
-        <h1 className="font-display text-2xl font-bold uppercase text-t1-text">
+        <h1 className="font-display text-2xl font-bold text-t1-text">
           Drill Not Found
         </h1>
         <Link
@@ -206,7 +206,7 @@ export default function DrillDetail() {
               onClick={handleCopy}
               className={`flex min-h-[40px] items-center gap-1.5 rounded-full border px-3.5 py-2 action-label transition-all ${
                 copied
-                  ? "border-green-500/30 bg-green-500/15 text-green-400"
+                  ? "border-emerald-200 bg-emerald-50 text-emerald-700"
                   : "border-t1-border bg-t1-surface text-t1-muted active:bg-t1-accent/10"
               }`}
             >
@@ -221,12 +221,12 @@ export default function DrillDetail() {
               onClick={() => toggleFavorite(drill.id)}
               className={`flex min-h-[40px] items-center gap-1.5 rounded-full border px-3.5 py-2 action-label transition-all ${
                 favorited
-                  ? "border-yellow-500/40 bg-yellow-500/15 text-yellow-400"
-                  : "border-t1-border bg-t1-surface text-t1-muted active:bg-yellow-500/10"
+                  ? "border-amber-300 bg-amber-50 text-amber-700"
+                  : "border-t1-border bg-t1-surface text-t1-muted active:bg-amber-50"
               }`}
             >
               <Star
-                className={`h-3.5 w-3.5 ${favorited ? "fill-yellow-400" : ""}`}
+                className={`h-3.5 w-3.5 ${favorited ? "fill-amber-500" : ""}`}
               />
               {favorited ? "Saved" : "Save"}
             </button>
@@ -278,7 +278,7 @@ export default function DrillDetail() {
               </p>
 
               <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-                <div className="rounded-[1.2rem] border border-t1-border bg-t1-bg px-4 py-3">
+                <div className="rounded-xl border border-t1-border bg-t1-bg px-4 py-3">
                   <p className="meta-label">Class fit</p>
                   <p className="mt-2 text-sm font-semibold text-t1-text">
                     {drill.level
@@ -292,21 +292,21 @@ export default function DrillDetail() {
                   </p>
                 </div>
 
-                <div className="rounded-[1.2rem] border border-t1-border bg-t1-bg px-4 py-3">
+                <div className="rounded-xl border border-t1-border bg-t1-bg px-4 py-3">
                   <p className="meta-label">Session block</p>
                   <p className="mt-2 text-sm font-semibold text-t1-text">
                     {block?.name ?? "General court work"}
                   </p>
                 </div>
 
-                <div className="rounded-[1.2rem] border border-t1-border bg-t1-bg px-4 py-3">
+                <div className="rounded-xl border border-t1-border bg-t1-bg px-4 py-3">
                   <p className="meta-label">Training focus</p>
                   <p className="mt-2 text-sm font-semibold text-t1-text">
                     {leadFocus?.name ?? primaryStage?.shortName ?? "All-court"}
                   </p>
                 </div>
 
-                <div className="rounded-[1.2rem] border border-t1-border bg-t1-bg px-4 py-3">
+                <div className="rounded-xl border border-t1-border bg-t1-bg px-4 py-3">
                   <p className="meta-label">Rep profile</p>
                   <p className="mt-2 text-sm font-semibold text-t1-text">
                     {[leadGoal?.name, intensity?.name, complexity?.name]
@@ -317,13 +317,13 @@ export default function DrillDetail() {
               </div>
 
               <div className="mt-4 grid gap-3 md:grid-cols-2">
-                <div className="rounded-[1.2rem] border border-t1-border bg-t1-bg px-4 py-3">
+                <div className="rounded-xl border border-t1-border bg-t1-bg px-4 py-3">
                   <p className="meta-label">How to start</p>
                   <p className="support-copy-strong body-copy-sm mt-2 text-t1-text">
                     {guide.howToRun[0] ?? drill.setup}
                   </p>
                 </div>
-                <div className="rounded-[1.2rem] border border-t1-accent/20 bg-t1-accent/5 px-4 py-3">
+                <div className="rounded-xl border border-t1-accent/20 bg-t1-accent/5 px-4 py-3">
                   <p className="meta-label text-t1-accent">Coach first</p>
                   <p className="support-copy-strong body-copy-sm mt-2 text-t1-text">
                     {guide.whatToCoach[0] ?? drill.coachingCues[0]}
@@ -337,7 +337,7 @@ export default function DrillDetail() {
                 onClick={handleCopy}
                 className={`flex items-center gap-1.5 rounded-full border px-3.5 py-2 action-label transition-all ${
                   copied
-                    ? "border-green-500/30 bg-green-500/15 text-green-400"
+                    ? "border-emerald-200 bg-emerald-50 text-emerald-700"
                     : "border-t1-border bg-t1-surface text-t1-muted hover:border-t1-accent/40 hover:text-t1-accent"
                 }`}
               >
@@ -352,12 +352,12 @@ export default function DrillDetail() {
                 onClick={() => toggleFavorite(drill.id)}
                 className={`flex items-center gap-1.5 rounded-full border px-3.5 py-2 action-label transition-all ${
                   favorited
-                    ? "border-yellow-500/40 bg-yellow-500/15 text-yellow-400"
-                    : "border-t1-border bg-t1-surface text-t1-muted hover:border-yellow-500/40 hover:text-yellow-400"
+                    ? "border-amber-300 bg-amber-50 text-amber-700"
+                    : "border-t1-border bg-t1-surface text-t1-muted hover:border-amber-300 hover:text-amber-700"
                 }`}
               >
                 <Star
-                  className={`h-3.5 w-3.5 ${favorited ? "fill-yellow-400" : ""}`}
+                  className={`h-3.5 w-3.5 ${favorited ? "fill-amber-500" : ""}`}
                 />
                 {favorited ? "Saved" : "Save"}
               </button>

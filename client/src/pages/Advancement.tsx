@@ -1,19 +1,19 @@
 /*
-  ADVANCEMENT: Tier 1 Performance — Cold Dark Brand
+  ADVANCEMENT: Tier 1 Performance — Playbook Aesthetic
   MOBILE-FIRST: Compact header, tighter spacing, stacked cards on mobile.
 */
 import { CheckCircle2, Clock, XCircle, ArrowRight, Shield, MessageSquare } from 'lucide-react';
 import { advancementInfo } from '@/lib/data';
 
 const statusIcons: Record<string, React.ReactNode> = {
-  Approved: <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 text-green-400" />,
-  Pending: <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-400" />,
+  Approved: <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-700" />,
+  Pending: <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-amber-700" />,
   Deferred: <XCircle className="w-4 h-4 sm:w-5 sm:h-5 text-t1-red" />,
 };
 
 const statusColors: Record<string, string> = {
-  Approved: 'border-green-500/30 bg-green-500/10',
-  Pending: 'border-yellow-500/30 bg-yellow-500/10',
+  Approved: 'border-emerald-200 bg-emerald-50',
+  Pending: 'border-amber-200 bg-amber-50',
   Deferred: 'border-t1-red/30 bg-t1-red/10',
 };
 
@@ -23,7 +23,7 @@ export default function Advancement() {
       {/* Header — compact on mobile */}
       <section className="bg-t1-accent/10 border-b border-t1-border">
         <div className="container py-4 sm:py-8">
-          <h1 className="font-display text-xl sm:text-4xl font-bold text-t1-text uppercase tracking-wide">
+          <h1 className="font-display text-xl sm:text-4xl font-bold text-t1-text">
             Advancement
           </h1>
           <p className="mt-1 sm:mt-2 text-t1-muted text-xs sm:text-sm max-w-2xl">
@@ -35,7 +35,7 @@ export default function Advancement() {
       <div className="container mt-4 sm:mt-8 space-y-4 sm:space-y-8">
         {/* Philosophy */}
         <section className="bg-t1-surface border border-t1-border rounded-lg p-4 sm:p-6">
-          <h2 className="font-display text-sm sm:text-lg font-semibold uppercase tracking-wide text-t1-text mb-3 sm:mb-4 flex items-center gap-2">
+          <h2 className="font-display text-sm sm:text-lg font-semibold text-t1-text mb-3 sm:mb-4 flex items-center gap-2">
             <Shield className="w-4 h-4 sm:w-5 sm:h-5 text-t1-accent" /> Philosophy
           </h2>
           <ul className="space-y-2 sm:space-y-3">
@@ -52,7 +52,7 @@ export default function Advancement() {
 
         {/* Statuses */}
         <section>
-          <h2 className="font-display text-sm sm:text-lg font-semibold uppercase tracking-wide text-t1-text mb-3 sm:mb-4">
+          <h2 className="font-display text-sm sm:text-lg font-semibold text-t1-text mb-3 sm:mb-4">
             Statuses
           </h2>
           <div className="space-y-2 sm:space-y-0 sm:grid sm:grid-cols-3 sm:gap-4">
@@ -60,7 +60,7 @@ export default function Advancement() {
               <div key={status.name} className={`border rounded-lg p-3 sm:p-5 ${statusColors[status.name]}`}>
                 <div className="flex items-center gap-2 mb-2 sm:mb-3">
                   {statusIcons[status.name]}
-                  <h3 className="font-display text-sm sm:text-base font-semibold uppercase tracking-wide text-t1-text">
+                  <h3 className="font-display text-sm sm:text-base font-semibold text-t1-text">
                     {status.name}
                   </h3>
                 </div>
@@ -72,7 +72,7 @@ export default function Advancement() {
 
         {/* Readiness Factors */}
         <section className="bg-t1-surface border border-t1-border rounded-lg p-4 sm:p-6">
-          <h2 className="font-display text-sm sm:text-lg font-semibold uppercase tracking-wide text-t1-text mb-2 sm:mb-4">
+          <h2 className="font-display text-sm sm:text-lg font-semibold text-t1-text mb-2 sm:mb-4">
             What Readiness Means
           </h2>
           <p className="text-xs sm:text-sm text-t1-muted mb-3">
@@ -90,7 +90,7 @@ export default function Advancement() {
 
         {/* Approval Chain */}
         <section className="bg-t1-surface border border-t1-border rounded-lg p-4 sm:p-6">
-          <h2 className="font-display text-sm sm:text-lg font-semibold uppercase tracking-wide text-t1-text mb-3 sm:mb-4">
+          <h2 className="font-display text-sm sm:text-lg font-semibold text-t1-text mb-3 sm:mb-4">
             Approval Structure
           </h2>
           <div className="space-y-2 sm:space-y-3">
@@ -111,7 +111,7 @@ export default function Advancement() {
 
         {/* Communication Standards */}
         <section className="bg-t1-surface border border-t1-border rounded-lg p-4 sm:p-6">
-          <h2 className="font-display text-sm sm:text-lg font-semibold uppercase tracking-wide text-t1-text mb-3 sm:mb-4 flex items-center gap-2">
+          <h2 className="font-display text-sm sm:text-lg font-semibold text-t1-text mb-3 sm:mb-4 flex items-center gap-2">
             <MessageSquare className="w-4 h-4 sm:w-5 sm:h-5 text-t1-accent" /> Family Communication
           </h2>
           <p className="text-xs sm:text-sm text-t1-muted mb-3">

@@ -1,5 +1,5 @@
 /*
-  ASSESSMENTS: Tier 1 Performance — Cold Dark Brand
+  ASSESSMENTS: Tier 1 Performance — Playbook Aesthetic
   MOBILE-FIRST: Compact hero, large filter touch targets, stacked cards on mobile.
   Collapsible sections by level when viewing "All".
 */
@@ -55,7 +55,7 @@ export default function Assessments() {
         <img src={ASSESSMENT_IMG} alt="Assessment standards" className="absolute inset-0 w-full h-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-r from-t1-bg/95 via-t1-bg/80 to-t1-bg/60" />
         <div className="relative container h-full flex flex-col justify-center">
-          <h1 className="font-display text-xl sm:text-4xl font-bold text-white uppercase tracking-wide">
+          <h1 className="font-display text-xl sm:text-4xl font-bold text-t1-text">
             Assessments
           </h1>
           <p className="mt-1 text-t1-muted text-xs sm:text-sm">
@@ -113,9 +113,9 @@ export default function Assessments() {
 
         {/* Draft notice */}
         {showDraftBanner && (
-          <div className="bg-t1-surface border border-yellow-500/20 rounded-lg p-3">
+          <div className="bg-t1-surface border border-amber-200 rounded-lg p-3">
             <div className="flex items-start gap-2">
-              <AlertTriangle className="w-3.5 h-3.5 text-yellow-400 flex-shrink-0 mt-0.5" />
+              <AlertTriangle className="w-3.5 h-3.5 text-amber-700 flex-shrink-0 mt-0.5" />
               <p className="text-[10px] sm:text-xs text-t1-muted">
                 HS, ASA, and FTA standards are draft outlines.
               </p>
@@ -142,11 +142,11 @@ export default function Assessments() {
                   <div className="flex items-center justify-between">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
-                        <h2 className="font-display text-sm sm:text-lg font-semibold uppercase tracking-wide text-t1-text">
+                        <h2 className="font-display text-sm sm:text-lg font-semibold text-t1-text">
                           {assessment.stageName} Standards
                         </h2>
                         {isDraft && (
-                          <span className="text-[10px] bg-yellow-500/15 text-yellow-400 px-1.5 py-0.5 rounded font-medium uppercase tracking-wider">
+                          <span className="text-[10px] bg-amber-50 text-amber-700 px-1.5 py-0.5 rounded font-medium uppercase tracking-wider">
                             Draft
                           </span>
                         )}
@@ -172,11 +172,11 @@ export default function Assessments() {
               ) : (
                 <div className="bg-t1-accent/5 border-b border-t1-border px-4 sm:px-6 py-3 sm:py-4">
                   <div className="flex items-center gap-2">
-                    <h2 className="font-display text-sm sm:text-lg font-semibold uppercase tracking-wide text-t1-text">
+                    <h2 className="font-display text-sm sm:text-lg font-semibold text-t1-text">
                       {assessment.stageName} Standards
                     </h2>
                     {isDraft && (
-                      <span className="text-[10px] bg-yellow-500/15 text-yellow-400 px-1.5 py-0.5 rounded font-medium uppercase tracking-wider">
+                      <span className="text-[10px] bg-amber-50 text-amber-700 px-1.5 py-0.5 rounded font-medium uppercase tracking-wider">
                         Draft
                       </span>
                     )}

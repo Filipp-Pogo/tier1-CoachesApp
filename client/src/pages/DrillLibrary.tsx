@@ -502,7 +502,7 @@ export default function DrillLibrary() {
       <section className="page-hero">
         <div className="container py-5 sm:py-8">
           <div className="grid gap-4 xl:grid-cols-[minmax(0,1.35fr)_minmax(320px,0.82fr)]">
-            <section className="premium-card rounded-[2rem] p-5 sm:p-6 lg:p-7">
+            <section className="premium-card rounded-xl p-5 sm:p-6 lg:p-7">
               <p className="section-kicker">
                 {selectedStage ? "Class drills" : "Drills"}
               </p>
@@ -601,7 +601,7 @@ export default function DrillLibrary() {
               )}
             </section>
 
-            <section className="premium-card rounded-[2rem] p-5 sm:p-6 lg:p-7">
+            <section className="premium-card rounded-xl p-5 sm:p-6 lg:p-7">
               <p className="section-kicker">
                 {selectedStage ? "Coach view" : "Current lens"}
               </p>
@@ -612,7 +612,7 @@ export default function DrillLibrary() {
               </h2>
 
               <div className="mt-5 space-y-3">
-                <div className="rounded-[1.5rem] border border-t1-border bg-t1-bg p-4">
+                <div className="rounded-xl border border-t1-border bg-t1-bg p-4">
                   <p className="meta-label">
                     {selectedStage ? "Class context" : "Class"}
                   </p>
@@ -630,7 +630,7 @@ export default function DrillLibrary() {
                   </p>
                 </div>
 
-                <div className="rounded-[1.5rem] border border-t1-border bg-t1-bg p-4">
+                <div className="rounded-xl border border-t1-border bg-t1-bg p-4">
                   <p className="meta-label">Primary filters</p>
                   <p className="mt-2 text-base font-semibold text-t1-text">
                     {primaryLensLabel}
@@ -642,7 +642,7 @@ export default function DrillLibrary() {
                   </p>
                 </div>
 
-                <div className="rounded-[1.5rem] border border-t1-border bg-t1-bg p-4">
+                <div className="rounded-xl border border-t1-border bg-t1-bg p-4">
                   <p className="meta-label">Secondary filters</p>
                   <p className="mt-2 text-base font-semibold text-t1-text">
                     {secondaryLensLabel}
@@ -653,7 +653,7 @@ export default function DrillLibrary() {
                   </p>
                 </div>
 
-                <div className="rounded-[1.5rem] border border-t1-border bg-t1-bg p-4">
+                <div className="rounded-xl border border-t1-border bg-t1-bg p-4">
                   <p className="meta-label">Ready now</p>
                   <p className="mt-2 text-3xl font-semibold text-t1-text">
                     {filteredDrills.length}
@@ -715,7 +715,7 @@ export default function DrillLibrary() {
 
       <div className="container space-y-5 py-5 sm:py-7">
         {selectedStage && selectedBrand && recommendedDrills.length > 0 && (
-          <section className="premium-card rounded-[2rem] p-5 sm:p-6">
+          <section className="premium-card rounded-xl p-5 sm:p-6">
             <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
               <div>
                 <p className="section-kicker">Recommended drills</p>
@@ -749,7 +749,7 @@ export default function DrillLibrary() {
                 return (
                   <article
                     key={recommendation.drill.id}
-                    className="rounded-[1.7rem] border border-t1-border bg-t1-bg p-4 sm:p-5"
+                    className="rounded-xl border border-t1-border bg-t1-bg p-4 sm:p-5"
                   >
                     <div className="flex flex-wrap items-center gap-2">
                       <span
@@ -773,13 +773,13 @@ export default function DrillLibrary() {
                     </p>
 
                     <div className="mt-4 grid gap-3">
-                      <div className="rounded-[1.3rem] border border-t1-border bg-t1-surface px-4 py-3">
+                      <div className="rounded-xl border border-t1-border bg-t1-surface px-4 py-3">
                         <p className="meta-label">How to run</p>
                         <p className="support-copy-strong body-copy-sm mt-2">
                           {guide.howToRun[0] ?? recommendation.drill.setup}
                         </p>
                       </div>
-                      <div className="rounded-[1.3rem] border border-t1-border bg-t1-surface px-4 py-3">
+                      <div className="rounded-xl border border-t1-border bg-t1-surface px-4 py-3">
                         <p className="meta-label">Coach first</p>
                         <p className="support-copy-strong body-copy-sm mt-2">
                           {guide.whatToCoach[0] ??
@@ -862,7 +862,7 @@ export default function DrillLibrary() {
           </div>
 
           <div className="mt-5 grid gap-4 xl:grid-cols-[minmax(0,1.08fr)_minmax(0,0.92fr)]">
-            <div className="panel-muted rounded-[1.7rem] p-4 sm:p-5">
+            <div className="panel-muted rounded-xl p-4 sm:p-5">
               <div className="flex items-center gap-3">
                 <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-t1-accent text-[11px] font-semibold text-white">
                   1
@@ -912,7 +912,7 @@ export default function DrillLibrary() {
             </div>
 
             <div className="grid gap-4">
-              <div className="panel-muted rounded-[1.7rem] p-4 sm:p-5">
+              <div className="panel-muted rounded-xl p-4 sm:p-5">
                 <div className="flex items-center gap-3">
                   <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-t1-accent text-[11px] font-semibold text-white">
                     2
@@ -947,7 +947,7 @@ export default function DrillLibrary() {
                 </div>
               </div>
 
-              <div className="panel-muted rounded-[1.7rem] p-4 sm:p-5">
+              <div className="panel-muted rounded-xl p-4 sm:p-5">
                 <div className="flex items-center gap-3">
                   <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-t1-accent text-[11px] font-semibold text-white">
                     3
@@ -1220,10 +1220,10 @@ export default function DrillLibrary() {
                     <button
                       key={drill.id}
                       onClick={() => openPreview(drill.id)}
-                      className="premium-card min-w-[230px] rounded-[1.6rem] p-4 text-left"
+                      className="premium-card min-w-[230px] rounded-xl p-4 text-left"
                     >
                       <div
-                        className={`rounded-[1.35rem] bg-gradient-to-br ${brand.surfaceClassName} p-4`}
+                        className={`rounded-xl bg-gradient-to-br ${brand.surfaceClassName} p-4`}
                       >
                         <span
                           className={`inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] ${brand.tintClassName}`}
@@ -1324,10 +1324,10 @@ export default function DrillLibrary() {
                   return (
                     <article
                       key={drill.id}
-                      className="premium-card rounded-[1.8rem] p-4 sm:p-5"
+                      className="premium-card rounded-xl p-4 sm:p-5"
                     >
                       <div
-                        className={`rounded-[1.45rem] border border-t1-border bg-gradient-to-br ${brand.surfaceClassName} p-4`}
+                        className={`rounded-xl border border-t1-border bg-gradient-to-br ${brand.surfaceClassName} p-4`}
                       >
                         <div className="flex items-start gap-3">
                           <div className="min-w-0 flex-1">
@@ -1409,7 +1409,7 @@ export default function DrillLibrary() {
                       </div>
 
                       {guide.howToRun[0] && (
-                        <div className="mt-4 rounded-[1.35rem] border border-t1-border bg-t1-bg px-4 py-3">
+                        <div className="mt-4 rounded-xl border border-t1-border bg-t1-bg px-4 py-3">
                           <p className="meta-label">How to start</p>
                           <p className="support-copy-strong body-copy-sm mt-2">
                             {guide.howToRun[0]}
