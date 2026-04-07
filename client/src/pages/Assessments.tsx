@@ -5,7 +5,7 @@
 */
 import { useState } from 'react';
 import { Target, CheckCircle2, AlertTriangle, ChevronDown, ChevronRight } from 'lucide-react';
-import { assessments, pathwayStages } from '@/lib/data';
+import { useAssessments, usePathwayStages } from '@/hooks/useContentData';
 
 const ASSESSMENT_IMG = 'https://d2xsxph8kpxj0f.cloudfront.net/310519663356767696/ELbCQXq8c7BR3Zt5VxeR2S/assessment-bg-eUTW7YwB73FinQ8wZew5gb.webp';
 
@@ -13,6 +13,8 @@ const ALL_STAGE_IDS = ['foundations', 'prep', 'jasa', 'hs', 'asa', 'fta'];
 const draftStages = ['hs', 'asa', 'fta'];
 
 export default function Assessments() {
+  const { data: assessments } = useAssessments();
+  const { data: pathwayStages } = usePathwayStages();
   const [activeStage, setActiveStage] = useState<string>('all');
   // Track which sections are expanded — default first one open when viewing all
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(['foundations']));

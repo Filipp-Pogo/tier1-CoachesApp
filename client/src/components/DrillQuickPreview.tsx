@@ -27,7 +27,7 @@ import {
 } from "@/components/ui/sheet";
 import { useIsMobile } from "@/hooks/useMobile";
 import { useFavorites } from "@/hooks/useFavorites";
-import { drills, pathwayStages, sessionBlocks } from "@/lib/data";
+import { useDrills, usePathwayStages, useSessionBlocks } from "@/hooks/useContentData";
 import {
   buildDrillClipboardText,
   buildDrillCoachGuide,
@@ -54,6 +54,9 @@ export function DrillQuickPreview({
   onOpenChange,
 }: DrillQuickPreviewProps) {
   const isMobile = useIsMobile();
+  const { data: drills } = useDrills();
+  const { data: pathwayStages } = usePathwayStages();
+  const { data: sessionBlocks } = useSessionBlocks();
   const drill = drillId ? drills.find(item => item.id === drillId) : null;
   const { isFavorite, toggleFavorite } = useFavorites();
   const [copied, setCopied] = useState(false);

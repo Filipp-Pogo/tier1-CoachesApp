@@ -1,6 +1,6 @@
 import { stockPlanToCardPlan, type SessionPlanCardData } from './customPlans';
-import { drills, type Drill, type PathwayStageId } from './data';
-import { sessionPlans } from './sessionPlans';
+import { type Drill, type PathwayStageId } from './data';
+import { type SessionPlan } from './sessionPlans';
 
 type DrillRecommendationSlotId = 'start' | 'build' | 'compete';
 
@@ -97,11 +97,12 @@ export interface CoachDrillRecommendation {
 }
 
 export function getRecommendedDrillsForStage(options: {
+  drills: Drill[];
   favoriteIds?: string[];
   recentIds?: string[];
   stageId: PathwayStageId;
 }) {
-  const { favoriteIds = [], recentIds = [], stageId } = options;
+  const { drills, favoriteIds = [], recentIds = [], stageId } = options;
   const stageDrills = drills.filter(drill => drill.level.includes(stageId));
   const usedIds = new Set<string>();
   const recommendations: CoachDrillRecommendation[] = [];
@@ -147,11 +148,12 @@ export interface CoachPlanRecommendation {
 }
 
 export function getRecommendedPlansForStage(options: {
+  sessionPlans: SessionPlan[];
   favoriteIds?: string[];
   recentIds?: string[];
   stageId: PathwayStageId;
 }) {
-  const { favoriteIds = [], recentIds = [], stageId } = options;
+  const { sessionPlans, favoriteIds = [], recentIds = [], stageId } = options;
   const stagePlans = sessionPlans
     .filter(plan => plan.level === stageId)
     .map(stockPlanToCardPlan);

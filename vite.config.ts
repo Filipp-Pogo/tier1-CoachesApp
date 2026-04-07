@@ -4,6 +4,7 @@ import react from "@vitejs/plugin-react";
 import fs from "node:fs";
 import path from "node:path";
 import { defineConfig, type Plugin, type ViteDevServer } from "vite";
+import { VitePWA } from "vite-plugin-pwa";
 import { vitePluginManusRuntime } from "vite-plugin-manus-runtime";
 
 // =============================================================================
@@ -150,7 +151,58 @@ function vitePluginManusDebugCollector(): Plugin {
   };
 }
 
-const plugins = [react(), tailwindcss(), jsxLocPlugin(), vitePluginManusRuntime(), vitePluginManusDebugCollector()];
+const plugins = [
+  react(),
+  tailwindcss(),
+  jsxLocPlugin(),
+  vitePluginManusRuntime(),
+  vitePluginManusDebugCollector(),
+  VitePWA({
+    registerType: "autoUpdate",
+    includeAssets: ["icons/icon-192.png", "icons/icon-512.png"],
+    manifest: false, // Using client/public/manifest.json directly
+    workbox: {
+      globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2}"],
+      runtimeCaching: [
+        {
+          // Cache Supabase reference data API calls (drills, plans, etc.)
+          urlPattern: /^https:\/\/.*\.supabase\.co\/rest\/v1\/(drills|session_plans|pathway_stages|session_blocks|skill_categories|assessments|coach_standards|content_versions)/,
+          handler: "StaleWhileRevalidate",
+          options: {
+            cacheName: "tier1-reference-data",
+            expiration: { maxEntries: 50, maxAgeSeconds: 7 * 24 * 3600 },
+          },
+        },
+        {
+          // Cache Google Fonts
+          urlPattern: /^https:\/\/fonts\.googleapis\.com/,
+          handler: "StaleWhileRevalidate",
+          options: {
+            cacheName: "google-fonts-stylesheets",
+            expiration: { maxEntries: 10, maxAgeSeconds: 365 * 24 * 3600 },
+          },
+        },
+        {
+          urlPattern: /^https:\/\/fonts\.gstatic\.com/,
+          handler: "CacheFirst",
+          options: {
+            cacheName: "google-fonts-webfonts",
+            expiration: { maxEntries: 30, maxAgeSeconds: 365 * 24 * 3600 },
+          },
+        },
+        {
+          // Cache CDN images (hero images, etc.)
+          urlPattern: /^https:\/\/.*cloudfront\.net\//,
+          handler: "CacheFirst",
+          options: {
+            cacheName: "tier1-images",
+            expiration: { maxEntries: 50, maxAgeSeconds: 30 * 24 * 3600 },
+          },
+        },
+      ],
+    },
+  }),
+];
 
 export default defineConfig({
   plugins,

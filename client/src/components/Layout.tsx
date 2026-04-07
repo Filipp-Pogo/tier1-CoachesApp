@@ -6,6 +6,7 @@ import {
   type ReactNode,
 } from "react";
 import { Link, useLocation } from "wouter";
+import { OfflineBanner } from "@/components/OfflineBanner";
 import {
   ArrowLeftRight,
   BookOpen,
@@ -258,6 +259,7 @@ export default function Layout({ children }: { children: ReactNode }) {
 
   return (
     <div className="min-h-screen bg-background text-t1-text">
+      <OfflineBanner />
       <header className="sticky top-0 z-50 border-b border-t1-border bg-t1-bg/86 backdrop-blur-xl">
         <div className="container flex h-14 items-center justify-between gap-3 lg:h-16">
           <Link href="/" className="flex items-center gap-3 no-underline">

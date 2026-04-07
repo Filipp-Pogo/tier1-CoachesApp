@@ -23,7 +23,7 @@ import {
   TrendingUp,
   Video,
 } from "lucide-react";
-import { drills, pathwayStages, sessionBlocks } from "@/lib/data";
+import { useDrills, usePathwayStages, useSessionBlocks } from "@/hooks/useContentData";
 import { useFavorites } from "@/hooks/useFavorites";
 import { useRecentDrills } from "@/hooks/useRecentDrills";
 import {
@@ -61,7 +61,7 @@ function getEmbedUrl(url: string): string | null {
   return null;
 }
 
-function getBackNavigation(search: string) {
+function getBackNavigation(search: string, pathwayStages: { id: string; shortName: string }[]) {
   if (!search) {
     return {
       href: "/drills",
@@ -121,6 +121,9 @@ function DetailPanel({
 }
 
 export default function DrillDetail() {
+  const { data: drills } = useDrills();
+  const { data: pathwayStages } = usePathwayStages();
+  const { data: sessionBlocks } = useSessionBlocks();
   const { id } = useParams<{ id: string }>();
   const drill = drills.find(item => item.id === id);
   const { isFavorite, toggleFavorite } = useFavorites();
@@ -129,9 +132,10 @@ export default function DrillDetail() {
   const backNavigation = useMemo(
     () =>
       getBackNavigation(
-        typeof window === "undefined" ? "" : window.location.search
+        typeof window === "undefined" ? "" : window.location.search,
+        pathwayStages
       ),
-    []
+    [pathwayStages]
   );
 
   useEffect(() => {

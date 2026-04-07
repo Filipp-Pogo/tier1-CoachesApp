@@ -4,7 +4,7 @@
 */
 import { useParams, Link } from 'wouter';
 import { ArrowLeft, ChevronRight, AlertTriangle, CheckCircle2, XCircle, Target, BookOpen } from 'lucide-react';
-import { pathwayStages, drills, assessments } from '@/lib/data';
+import { usePathwayStages, useDrills, useAssessments } from '@/hooks/useContentData';
 
 const stageAccent: Record<string, string> = {
   foundations: 'border-red-500',
@@ -25,6 +25,9 @@ const stageBg: Record<string, string> = {
 };
 
 export default function StagePage() {
+  const { data: pathwayStages } = usePathwayStages();
+  const { data: drills } = useDrills();
+  const { data: assessments } = useAssessments();
   const { id } = useParams<{ id: string }>();
   const stage = pathwayStages.find(s => s.id === id);
   

@@ -4,7 +4,7 @@
 */
 import { Link } from 'wouter';
 import { ChevronRight, ArrowRight } from 'lucide-react';
-import { pathwayStages } from '@/lib/data';
+import { usePathwayStages } from '@/hooks/useContentData';
 
 const PATHWAY_IMG = 'https://d2xsxph8kpxj0f.cloudfront.net/310519663356767696/ELbCQXq8c7BR3Zt5VxeR2S/pathway-hero-Xdykqbm6PopwUPUpgsQCLe.webp';
 
@@ -18,6 +18,8 @@ const stageColors: Record<string, { bg: string; border: string; dot: string; tex
 };
 
 export default function Pathway() {
+  const { data: pathwayStages } = usePathwayStages();
+
   return (
     <div>
       {/* Hero — compact on mobile */}

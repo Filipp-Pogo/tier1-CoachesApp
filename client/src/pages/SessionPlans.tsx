@@ -39,8 +39,9 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/components/ui/empty";
-import { pathwayStages, type PathwayStageId } from "@/lib/data";
-import { sessionPlans, sessionPlanLevelGroups } from "@/lib/sessionPlans";
+import { type PathwayStageId } from "@/lib/data";
+import { sessionPlanLevelGroups } from "@/lib/sessionPlans";
+import { usePathwayStages, useSessionPlans } from "@/hooks/useContentData";
 import { useSessionPlanFavorites } from "@/hooks/useSessionPlanFavorites";
 import { useCoachClass } from "@/hooks/useCoachClass";
 import { useAuth } from "@/contexts/AuthContext";
@@ -64,7 +65,7 @@ import { getStageBrand } from "@/lib/stageBranding";
 
 type PlansTab = "all" | "favorites" | "recent" | "custom" | "shared";
 
-function readSessionPlansState(fallbackLevel: PathwayStageId): {
+function readSessionPlansState(fallbackLevel: PathwayStageId, pathwayStages: { id: string }[]): {
   tab: PlansTab;
   level: PathwayStageId | "all";
 } {
@@ -468,8 +469,10 @@ function PlanCard({
 }
 
 export default function SessionPlans() {
+  const { data: pathwayStages } = usePathwayStages();
+  const { data: sessionPlans } = useSessionPlans();
   const { selectedClass, setSelectedClass } = useCoachClass();
-  const initialState = readSessionPlansState(selectedClass);
+  const initialState = readSessionPlansState(selectedClass, pathwayStages);
   const [activeLevel, setActiveLevel] = useState<PathwayStageId | "all">(
     initialState.level
   );
@@ -496,7 +499,7 @@ export default function SessionPlans() {
 
   useEffect(() => {
     const syncFromUrl = () => {
-      const nextState = readSessionPlansState(selectedClass);
+      const nextState = readSessionPlansState(selectedClass, pathwayStages);
       setActiveTab(nextState.tab);
       setActiveLevel(nextState.level);
       setActiveSubBand(null);
@@ -570,7 +573,7 @@ export default function SessionPlans() {
 
   const stockPlanCards = useMemo(
     () => sessionPlans.map(stockPlanToCardPlan),
-    []
+    [sessionPlans]
   );
 
   const handleExpand = (planId: string) => {
@@ -669,7 +672,7 @@ export default function SessionPlans() {
   const availableLevels = useMemo(() => {
     const levels = new Set(sessionPlans.map(plan => plan.level));
     return pathwayStages.filter(stage => levels.has(stage.id));
-  }, []);
+  }, [sessionPlans, pathwayStages]);
 
   const availableSubBands = useMemo(() => {
     if (activeLevel === "all") return [];
@@ -679,7 +682,7 @@ export default function SessionPlans() {
   const availableDurations = useMemo(() => {
     const durations = new Set(sessionPlans.map(plan => plan.totalTime));
     return Array.from(durations).sort((left, right) => left - right);
-  }, []);
+  }, [sessionPlans]);
 
   const favoritePlans = useMemo(
     () => stockPlanCards.filter(plan => favorites.includes(plan.id)),
@@ -768,7 +771,7 @@ export default function SessionPlans() {
     });
 
     return counts;
-  }, [stockPlanCards]);
+  }, [stockPlanCards, pathwayStages]);
   const classFilterChanged = activeLevel !== selectedClass;
   const hasStockFilters =
     classFilterChanged || activeSubBand != null || durationFilter != null;

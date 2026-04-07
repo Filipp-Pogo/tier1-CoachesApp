@@ -9,8 +9,9 @@ import {
   ArrowLeftRight, ChevronDown, Clock, ClipboardList, Zap,
   Target, AlertTriangle, ArrowRight, X, Search, AlertCircle
 } from 'lucide-react';
-import { pathwayStages, type PathwayStageId } from '@/lib/data';
-import { sessionPlans, type SessionPlan } from '@/lib/sessionPlans';
+import { type PathwayStageId } from '@/lib/data';
+import { type SessionPlan } from '@/lib/sessionPlans';
+import { usePathwayStages, useSessionPlans } from '@/hooks/useContentData';
 
 const levelColors: Record<PathwayStageId, string> = {
   foundations: 'bg-red-500/15 text-red-400 border-red-500/20',
@@ -39,6 +40,8 @@ interface PlanSelectorProps {
 }
 
 function PlanSelector({ slot, selectedPlan, onSelect, onClear, otherPlanId }: PlanSelectorProps) {
+  const { data: sessionPlans } = useSessionPlans();
+  const { data: pathwayStages } = usePathwayStages();
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [levelFilter, setLevelFilter] = useState<PathwayStageId | 'all'>('all');
@@ -59,12 +62,12 @@ function PlanSelector({ slot, selectedPlan, onSelect, onClear, otherPlanId }: Pl
       );
     }
     return result;
-  }, [levelFilter, searchQuery, otherPlanId]);
+  }, [sessionPlans, levelFilter, searchQuery, otherPlanId]);
 
   const availableLevels = useMemo(() => {
     const levels = new Set(sessionPlans.map(p => p.level));
     return pathwayStages.filter(s => levels.has(s.id));
-  }, []);
+  }, [sessionPlans, pathwayStages]);
 
   if (selectedPlan) {
     const draft = isDraftPlan(selectedPlan);

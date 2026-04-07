@@ -11,12 +11,10 @@ import {
   Wrench,
 } from "lucide-react";
 import {
-  drills,
-  pathwayStages,
   type Drill,
   type PathwayStageId,
 } from "@/lib/data";
-import { sessionPlans } from "@/lib/sessionPlans";
+import { useDrills, usePathwayStages, useSessionPlans } from "@/hooks/useContentData";
 import { stockPlanToCardPlan } from "@/lib/customPlans";
 import { useFavorites } from "@/hooks/useFavorites";
 import { useRecentDrills } from "@/hooks/useRecentDrills";
@@ -36,23 +34,10 @@ import {
 } from "@/lib/coachRecommendations";
 import { buildDrillCoachGuide } from "@/lib/drillGuidance";
 
-function buildStageCounts() {
-  const drillCounts = {} as Record<PathwayStageId, number>;
-  const planCounts = {} as Record<PathwayStageId, number>;
-
-  pathwayStages.forEach(stage => {
-    drillCounts[stage.id] = drills.filter(drill =>
-      drill.level.includes(stage.id)
-    ).length;
-    planCounts[stage.id] = sessionPlans.filter(
-      plan => plan.level === stage.id
-    ).length;
-  });
-
-  return { drillCounts, planCounts };
-}
-
 export default function Dashboard() {
+  const { data: drills } = useDrills();
+  const { data: pathwayStages } = usePathwayStages();
+  const { data: sessionPlans } = useSessionPlans();
   const [, navigate] = useLocation();
   const { favorites } = useFavorites();
   const { recentIds: recentDrillIds } = useRecentDrills();
@@ -64,20 +49,34 @@ export default function Dashboard() {
 
   const favoriteDrills = useMemo(
     () => drills.filter(drill => favorites.includes(drill.id)),
-    [favorites]
+    [drills, favorites]
   );
   const favoritePlans = useMemo(
     () => sessionPlans.filter(plan => favoritePlanIds.includes(plan.id)),
-    [favoritePlanIds]
+    [sessionPlans, favoritePlanIds]
   );
   const recentPlans = useMemo(
     () =>
       recentIds
         .map(id => sessionPlans.find(plan => plan.id === id))
         .filter((plan): plan is (typeof sessionPlans)[number] => Boolean(plan)),
-    [recentIds]
+    [sessionPlans, recentIds]
   );
-  const { drillCounts, planCounts } = useMemo(buildStageCounts, []);
+  const { drillCounts, planCounts } = useMemo(() => {
+    const drillCounts = {} as Record<PathwayStageId, number>;
+    const planCounts = {} as Record<PathwayStageId, number>;
+
+    pathwayStages.forEach(stage => {
+      drillCounts[stage.id] = drills.filter(drill =>
+        drill.level.includes(stage.id)
+      ).length;
+      planCounts[stage.id] = sessionPlans.filter(
+        plan => plan.level === stage.id
+      ).length;
+    });
+
+    return { drillCounts, planCounts };
+  }, [pathwayStages, drills, sessionPlans]);
 
   const activeStage = pathwayStages.find(stage => stage.id === selectedClass)!;
   const activeBrand = getStageBrand(selectedClass);
@@ -102,20 +101,22 @@ export default function Dashboard() {
   const recommendedDrills = useMemo(
     () =>
       getRecommendedDrillsForStage({
+        drills,
         favoriteIds: favorites,
         recentIds: recentDrillIds,
         stageId: selectedClass,
       }),
-    [favorites, recentDrillIds, selectedClass]
+    [drills, favorites, recentDrillIds, selectedClass]
   );
   const recommendedPlans = useMemo(
     () =>
       getRecommendedPlansForStage({
+        sessionPlans,
         favoriteIds: favoritePlanIds,
         recentIds,
         stageId: selectedClass,
       }).slice(0, 2),
-    [favoritePlanIds, recentIds, selectedClass]
+    [sessionPlans, favoritePlanIds, recentIds, selectedClass]
   );
 
   const openStageDrills = (stageId: PathwayStageId) => {

@@ -25,13 +25,11 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import {
-  pathwayStages,
-  sessionBlocks,
-  drills,
   sessionTemplates,
   type PathwayStageId,
   type SessionBlockId,
 } from "@/lib/data";
+import { useDrills, usePathwayStages, useSessionBlocks } from "@/hooks/useContentData";
 import { exportSessionPDF } from "@/lib/session-pdf";
 import {
   Empty,
@@ -108,7 +106,7 @@ function mapLabelToBlockId(label: string): SessionBlockId {
   return "feeding";
 }
 
-function blockLabelFromId(blockId: SessionBlockId) {
+function blockLabelFromId(blockId: SessionBlockId, sessionBlocks: { id: string; shortName: string }[]) {
   return (
     sessionBlocks.find(block => block.id === blockId)?.shortName ?? "Block"
   );
@@ -125,12 +123,15 @@ function stringifyListInput(values: string[]) {
   return values.join("\n");
 }
 
-function createDefaultPlanName(level: PathwayStageId) {
+function createDefaultPlanName(level: PathwayStageId, pathwayStages: { id: string; shortName: string }[]) {
   const stage = pathwayStages.find(item => item.id === level);
   return `${stage?.shortName || "Custom"} Session Plan`;
 }
 
 export default function SessionBuilder() {
+  const { data: pathwayStages } = usePathwayStages();
+  const { data: sessionBlocks } = useSessionBlocks();
+  const { data: drills } = useDrills();
   const [selectedLevel, setSelectedLevel] =
     useState<PathwayStageId>("foundations");
   const [sessionTime, setSessionTime] = useState("60");
@@ -149,7 +150,7 @@ export default function SessionBuilder() {
   const [sourcePlanId, setSourcePlanId] = useState<string | null>(null);
   const [sourceType, setSourceType] = useState<"stock" | "custom">("custom");
   const [planName, setPlanName] = useState(
-    createDefaultPlanName("foundations")
+    createDefaultPlanName("foundations", pathwayStages)
   );
   const [planObjective, setPlanObjective] = useState("");
   const [planEmphasis, setPlanEmphasis] = useState("");
@@ -198,7 +199,7 @@ export default function SessionBuilder() {
     setCustomPlanId(null);
     setSourcePlanId(null);
     setSourceType("custom");
-    setPlanName(name || createDefaultPlanName(level));
+    setPlanName(name || createDefaultPlanName(level, pathwayStages));
     setPlanObjective("");
     setPlanEmphasis("");
     setPlanVisibility("private");
@@ -309,7 +310,7 @@ export default function SessionBuilder() {
     customPlanId: customPlanId ?? undefined,
     sourcePlanId,
     sourceType,
-    name: planName.trim() || createDefaultPlanName(selectedLevel),
+    name: planName.trim() || createDefaultPlanName(selectedLevel, pathwayStages),
     level: selectedLevel,
     subBand: null,
     totalTime: parseInt(sessionTime, 10) || 60,
@@ -327,7 +328,7 @@ export default function SessionBuilder() {
         .filter(Boolean)
         .join(" — ");
       return {
-        label: blockLabelFromId(block.blockId),
+        label: blockLabelFromId(block.blockId, sessionBlocks),
         content:
           content ||
           sessionBlocks.find(item => item.id === block.blockId)?.description ||
@@ -460,7 +461,7 @@ export default function SessionBuilder() {
                     onClick={() => {
                       setSelectedLevel(stage.id);
                       if (!customPlanId && !sourcePlanId && !planName.trim()) {
-                        setPlanName(createDefaultPlanName(stage.id));
+                        setPlanName(createDefaultPlanName(stage.id, pathwayStages));
                       }
                     }}
                     className={`flex-shrink-0 px-2.5 py-1.5 rounded-full text-xs font-medium border transition-colors min-h-[32px] ${
@@ -933,7 +934,7 @@ export default function SessionBuilder() {
               </span>
               <span className="flex items-center gap-1 text-t1-blue">
                 <ClipboardList className="w-3 h-3" />
-                {planName || createDefaultPlanName(selectedLevel)}
+                {planName || createDefaultPlanName(selectedLevel, pathwayStages)}
               </span>
               <span
                 className={`px-2 py-0.5 rounded-full text-[10px] uppercase tracking-wider border ${

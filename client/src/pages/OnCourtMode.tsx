@@ -17,7 +17,7 @@ import {
 } from "lucide-react";
 import { clearOnCourtSession, loadOnCourtSession } from "@/lib/onCourtMode";
 import { getStageBrand } from "@/lib/stageBranding";
-import { pathwayStages } from "@/lib/data";
+import { usePathwayStages } from "@/hooks/useContentData";
 import { useIsMobile } from "@/hooks/useMobile";
 
 function formatElapsed(seconds: number) {
@@ -27,6 +27,7 @@ function formatElapsed(seconds: number) {
 }
 
 export default function OnCourtMode() {
+  const { data: pathwayStages } = usePathwayStages();
   const [session, setSession] = useState(() => loadOnCourtSession());
   const [currentIndex, setCurrentIndex] = useState(0);
   const [elapsedSeconds, setElapsedSeconds] = useState(0);

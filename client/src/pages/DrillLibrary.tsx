@@ -12,12 +12,10 @@ import {
   Zap,
 } from "lucide-react";
 import {
-  drills,
-  pathwayStages,
-  sessionBlocks,
   type Drill,
   type PathwayStageId,
 } from "@/lib/data";
+import { useDrills, usePathwayStages, useSessionBlocks } from "@/hooks/useContentData";
 import { formatSubBand } from "@/lib/customPlans";
 import { useFavorites } from "@/hooks/useFavorites";
 import { useCoachClass } from "@/hooks/useCoachClass";
@@ -70,6 +68,9 @@ import {
 const DRILLS_PER_PAGE = 24;
 
 export default function DrillLibrary() {
+  const { data: drills } = useDrills();
+  const { data: pathwayStages } = usePathwayStages();
+  const { data: sessionBlocks } = useSessionBlocks();
   const { selectedClass, setSelectedClass } = useCoachClass();
   const initialState = readDrillLibraryStateFromUrl(selectedClass);
   const [, navigate] = useLocation();
@@ -147,12 +148,13 @@ export default function DrillLibrary() {
     () =>
       levelFilter
         ? getRecommendedDrillsForStage({
+            drills,
             favoriteIds: favorites,
             recentIds,
             stageId: levelFilter,
           })
         : [],
-    [favorites, levelFilter, recentIds]
+    [drills, favorites, levelFilter, recentIds]
   );
   const recommendedBenchDrills = useMemo(
     () => recommendedDrills.map(item => item.drill),
