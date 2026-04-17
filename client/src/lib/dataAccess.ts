@@ -237,7 +237,12 @@ export async function fetchSkillCategories(): Promise<{ id: SkillCategory; name:
 }
 
 export async function fetchDrills(): Promise<Drill[]> {
-  return fetchTable('drills', mapDbDrill, hardcodedDrills);
+  const drills = await fetchTable('drills', mapDbDrill, hardcodedDrills);
+  const { drillEnhancements } = await import('./drillEnhancements');
+  return drills.map((d) => {
+    const extras = drillEnhancements[d.id];
+    return extras ? { ...d, ...extras } : d;
+  });
 }
 
 export async function fetchSessionPlans(): Promise<SessionPlan[]> {
