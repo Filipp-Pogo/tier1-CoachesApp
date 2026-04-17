@@ -1,10 +1,13 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { Link, useParams } from "wouter";
 import {
+  AlertTriangle,
   ArrowLeft,
   ChevronDown,
   Clock,
+  Lightbulb,
   ListChecks,
+  Shuffle,
   Star,
   Target,
   Video,
@@ -19,6 +22,7 @@ import {
   readDrillLibraryStateFromSearch,
 } from "@/lib/drillFilters";
 import { getStageBrand } from "@/lib/stageBranding";
+import { CourtDiagram } from "@/components/CourtDiagram";
 
 function getEmbedUrl(url: string): string | null {
   try {
@@ -158,13 +162,31 @@ export default function DrillDetail() {
         </section>
       )}
 
-      {/* How to Run It */}
+      {/* Court Diagram */}
+      {drill.diagram && (
+        <section className="mt-5 rounded-xl border border-t1-border bg-t1-surface p-4 sm:p-5">
+          <CourtDiagram diagram={drill.diagram} className="mx-auto max-w-sm" />
+        </section>
+      )}
+
+      {/* Why It Matters */}
+      {drill.whyItMatters && (
+        <section className="mt-3 flex gap-3 rounded-xl border border-t1-accent/20 bg-t1-accent/5 p-4 sm:p-5">
+          <Lightbulb className="mt-0.5 h-5 w-5 flex-shrink-0 text-t1-accent" />
+          <div>
+            <h2 className="chip-label mb-1 font-display text-t1-accent">Why It Matters</h2>
+            <p className="body-copy-sm text-t1-text/80">{drill.whyItMatters}</p>
+          </div>
+        </section>
+      )}
+
+      {/* How to Run It — prefer stepByStep when available */}
       <section className="mt-5 rounded-xl border border-t1-border bg-t1-surface p-4 sm:p-5">
         <h2 className="chip-label mb-4 flex items-center gap-2 font-display text-t1-text">
           <ListChecks className="h-4 w-4 text-t1-accent" /> How to Run It
         </h2>
         <ol className="space-y-3">
-          {guide.howToRun.map((step, i) => (
+          {(drill.stepByStep ?? guide.howToRun).map((step, i) => (
             <li key={step} className="flex items-start gap-3">
               <span className="mt-0.5 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-t1-accent text-[10px] font-bold text-white">
                 {i + 1}
@@ -189,6 +211,40 @@ export default function DrillDetail() {
           ))}
         </ul>
       </section>
+
+      {/* Common Setup Errors */}
+      {drill.commonSetupErrors && drill.commonSetupErrors.length > 0 && (
+        <section className="mt-3 rounded-xl border border-amber-200 bg-amber-50 p-4 sm:p-5">
+          <h2 className="chip-label mb-3 flex items-center gap-2 font-display text-amber-800">
+            <AlertTriangle className="h-4 w-4" /> Common Setup Mistakes
+          </h2>
+          <ul className="space-y-2">
+            {drill.commonSetupErrors.map(err => (
+              <li key={err} className="flex items-start gap-2.5 body-copy-sm text-amber-900/80">
+                <span className="mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-amber-500" />
+                <span>{err}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      {/* Variations */}
+      {drill.variations && drill.variations.length > 0 && (
+        <section className="mt-3 rounded-xl border border-t1-border bg-t1-surface p-4 sm:p-5">
+          <h2 className="chip-label mb-3 flex items-center gap-2 font-display text-t1-text">
+            <Shuffle className="h-4 w-4 text-t1-accent" /> Variations
+          </h2>
+          <ul className="space-y-2">
+            {drill.variations.map(v => (
+              <li key={v} className="flex items-start gap-2.5 body-copy-sm text-t1-text/80">
+                <span className="mt-1.5 flex-shrink-0 text-t1-accent">&#9654;</span>
+                <span>{v}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
       {/* Collapsible extras */}
       <div className="mt-5 space-y-2">

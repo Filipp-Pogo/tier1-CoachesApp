@@ -288,6 +288,19 @@ export const skillCategories: { id: SkillCategory; name: string }[] = [
 
 // ─── Drill Library ─────────────────────────────────────────────────
 
+export interface DrillDiagram {
+  positions: { x: number; y: number; label: string; role?: 'coach' | 'player' | 'machine' }[];
+  paths?: {
+    from: { x: number; y: number };
+    to: { x: number; y: number };
+    label?: string;
+    style?: 'solid' | 'dashed';
+    kind?: 'ball' | 'movement';
+  }[];
+  zones?: { x: number; y: number; width: number; height: number; label?: string; color?: 'accent' | 'muted' }[];
+  caption?: string;
+}
+
 export interface Drill {
   id: string;
   name: string;
@@ -312,6 +325,16 @@ export interface Drill {
   subBand?: string[];
   /** Optional format: group, private, or both */
   format?: 'group' | 'private' | 'group-or-private';
+  /** Visual court diagram for the drill */
+  diagram?: DrillDiagram;
+  /** Beat-by-beat flow of how the drill runs */
+  stepByStep?: string[];
+  /** Why this drill matters for player development */
+  whyItMatters?: string;
+  /** Alternative setups or difficulty variations */
+  variations?: string[];
+  /** Common mistakes coaches make when setting up or running this drill */
+  commonSetupErrors?: string[];
 }
 
 export const drills: Drill[] = [
