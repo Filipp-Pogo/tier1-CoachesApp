@@ -122,12 +122,12 @@ export default function OnboardingQuiz() {
       <div className="min-h-screen bg-t1-bg transition-colors duration-200">
         <div className="max-w-3xl mx-auto px-4 py-8">
           {/* Result Header */}
-          <div className={`rounded-xl p-8 mb-8 text-center border ${passed ? 'bg-emerald-50 border-emerald-200' : 'bg-red-50 border-red-200'}`}>
-            <div className={`w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4 ${passed ? 'bg-emerald-100' : 'bg-red-100'}`}>
+          <div className={`rounded-xl p-8 mb-8 text-center border ${passed ? 'bg-emerald-500/10 border-emerald-500/25' : 'bg-red-500/10 border-red-500/25'}`}>
+            <div className={`w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4 ${passed ? 'bg-emerald-500/15' : 'bg-red-500/15'}`}>
               {passed ? (
-                <Trophy className="w-10 h-10 text-emerald-700" />
+                <Trophy className="w-10 h-10 text-emerald-400" />
               ) : (
-                <AlertTriangle className="w-10 h-10 text-red-700" />
+                <AlertTriangle className="w-10 h-10 text-red-400" />
               )}
             </div>
             <h1 className="font-display font-bold text-4xl text-t1-text mb-2">
@@ -143,7 +143,7 @@ export default function OnboardingQuiz() {
             {/* Score */}
             <div className="flex items-center justify-center gap-8">
               <div>
-                <div className={`text-5xl font-bold ${passed ? 'text-emerald-700' : 'text-red-700'}`}>
+                <div className={`text-5xl font-bold ${passed ? 'text-emerald-400' : 'text-red-400'}`}>
                   {result.percentage}%
                 </div>
                 <div className="text-sm text-t1-muted mt-1">Score</div>
@@ -190,16 +190,16 @@ export default function OnboardingQuiz() {
                                 key={i}
                                 className={`flex items-center gap-3 p-3 rounded-lg text-sm ${
                                   isCorrect
-                                    ? 'bg-emerald-50 border border-emerald-200 text-emerald-700'
+                                    ? 'bg-emerald-500/10 border border-emerald-500/25 text-emerald-400'
                                     : isSelected
-                                      ? 'bg-red-50 border border-red-200 text-red-700'
+                                      ? 'bg-red-500/10 border border-red-500/25 text-red-400'
                                       : 'bg-t1-bg text-t1-muted'
                                 }`}
                               >
                                 {isCorrect ? (
-                                  <CheckCircle2 className="w-4 h-4 text-emerald-700 flex-shrink-0" />
+                                  <CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0" />
                                 ) : isSelected ? (
-                                  <XCircle className="w-4 h-4 text-red-700 flex-shrink-0" />
+                                  <XCircle className="w-4 h-4 text-red-400 flex-shrink-0" />
                                 ) : (
                                   <div className="w-4 h-4 rounded-full border border-t1-border flex-shrink-0" />
                                 )}
@@ -252,16 +252,16 @@ export default function OnboardingQuiz() {
                   <div key={r.id} className="flex items-center justify-between py-2 border-b border-t1-border/50 last:border-0">
                     <div className="flex items-center gap-3">
                       {r.passed ? (
-                        <CheckCircle2 className="w-4 h-4 text-emerald-700" />
+                        <CheckCircle2 className="w-4 h-4 text-emerald-400" />
                       ) : (
-                        <XCircle className="w-4 h-4 text-red-700" />
+                        <XCircle className="w-4 h-4 text-red-400" />
                       )}
                       <span className="text-sm text-t1-muted">
                         {new Date(r.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                       </span>
                     </div>
                     <div className="flex items-center gap-3">
-                      <span className={`text-sm font-bold ${r.passed ? 'text-emerald-700' : 'text-red-700'}`}>
+                      <span className={`text-sm font-bold ${r.passed ? 'text-emerald-400' : 'text-red-400'}`}>
                         {r.percentage}%
                       </span>
                       <span className="text-xs text-t1-muted">{r.score}/{r.total}</span>
@@ -326,9 +326,9 @@ export default function OnboardingQuiz() {
 
               if (showExplanation) {
                 if (isCorrectOption) {
-                  optionStyle = 'bg-emerald-50 border-emerald-300 text-emerald-700';
+                  optionStyle = 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400';
                 } else if (isSelected && !isCorrectOption) {
-                  optionStyle = 'bg-red-50 border-red-300 text-red-700';
+                  optionStyle = 'bg-red-500/10 border-red-500/30 text-red-400';
                 } else {
                   optionStyle = 'bg-t1-surface border-t1-border/50 text-t1-muted opacity-60';
                 }
@@ -345,9 +345,9 @@ export default function OnboardingQuiz() {
                 >
                   <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 text-sm font-bold ${
                     showExplanation && isCorrectOption
-                      ? 'bg-emerald-100 text-emerald-700'
+                      ? 'bg-emerald-500/15 text-emerald-400'
                       : showExplanation && isSelected && !isCorrectOption
-                        ? 'bg-red-100 text-red-700'
+                        ? 'bg-red-500/15 text-red-400'
                         : 'bg-t1-bg text-t1-muted'
                   }`}>
                     {showExplanation && isCorrectOption ? (
@@ -368,17 +368,17 @@ export default function OnboardingQuiz() {
           {showExplanation && (
             <div className={`rounded-xl p-5 mb-8 border ${
               isCorrect
-                ? 'bg-emerald-500/5 border-emerald-500/20'
-                : 'bg-amber-500/5 border-amber-500/20'
+                ? 'bg-emerald-500/100/5 border-emerald-500/20'
+                : 'bg-amber-500/100/5 border-amber-500/20'
             }`}>
               <div className="flex items-start gap-3">
                 {isCorrect ? (
-                  <CheckCircle2 className="w-5 h-5 text-emerald-700 flex-shrink-0 mt-0.5" />
+                  <CheckCircle2 className="w-5 h-5 text-emerald-400 flex-shrink-0 mt-0.5" />
                 ) : (
-                  <AlertTriangle className="w-5 h-5 text-amber-700 flex-shrink-0 mt-0.5" />
+                  <AlertTriangle className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5" />
                 )}
                 <div>
-                  <p className={`font-semibold mb-1 ${isCorrect ? 'text-emerald-700' : 'text-amber-700'}`}>
+                  <p className={`font-semibold mb-1 ${isCorrect ? 'text-emerald-400' : 'text-amber-400'}`}>
                     {isCorrect ? 'Correct!' : 'Not quite.'}
                   </p>
                   <p className="text-sm text-t1-text/80 leading-relaxed">
@@ -512,14 +512,14 @@ export default function OnboardingQuiz() {
             <div className="flex items-center justify-between">
               <div>
                 <span className="text-sm text-t1-muted">Your Best Score</span>
-                <div className={`text-2xl font-bold ${bestQuizResult.passed ? 'text-emerald-700' : 'text-amber-700'}`}>
+                <div className={`text-2xl font-bold ${bestQuizResult.passed ? 'text-emerald-400' : 'text-amber-400'}`}>
                   {bestQuizResult.percentage}%
                 </div>
               </div>
               {hasPassed && (
-                <div className="flex items-center gap-2 bg-emerald-50 border border-emerald-200 rounded-lg px-4 py-2">
-                  <Trophy className="w-5 h-5 text-emerald-700" />
-                  <span className="text-sm font-semibold text-emerald-700">PASSED</span>
+                <div className="flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/25 rounded-lg px-4 py-2">
+                  <Trophy className="w-5 h-5 text-emerald-400" />
+                  <span className="text-sm font-semibold text-emerald-400">PASSED</span>
                 </div>
               )}
             </div>

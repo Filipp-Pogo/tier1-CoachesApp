@@ -107,7 +107,7 @@ export function DrillQuickPreview({
               <Clock className="h-3 w-3" /> {drill.recommendedTime}
             </span>
             {drill.subBand && (
-              <span className="chip-label rounded bg-amber-50 px-2 py-1 text-amber-700">
+              <span className="chip-label rounded bg-amber-500/10 px-2 py-1 text-amber-400">
                 {formatSubBand(drill.subBand)}
               </span>
             )}
@@ -118,7 +118,7 @@ export function DrillQuickPreview({
               onClick={handleCopy}
               className={`flex min-h-[38px] items-center gap-1.5 rounded-full border px-3 py-2 action-label transition-all ${
                 copied
-                  ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+                  ? "border-emerald-500/25 bg-emerald-500/10 text-emerald-400"
                   : "border-t1-border bg-t1-surface text-t1-muted active:text-t1-accent"
               }`}
             >
@@ -133,8 +133,8 @@ export function DrillQuickPreview({
               onClick={() => toggleFavorite(drill.id)}
               className={`flex min-h-[38px] items-center gap-1.5 rounded-full border px-3 py-2 action-label transition-all ${
                 favorited
-                  ? "border-amber-300 bg-amber-50 text-amber-700"
-                  : "border-t1-border bg-t1-surface text-t1-muted active:text-amber-700"
+                  ? "border-amber-500/30 bg-amber-500/10 text-amber-400"
+                  : "border-t1-border bg-t1-surface text-t1-muted active:text-amber-400"
               }`}
             >
               <Star

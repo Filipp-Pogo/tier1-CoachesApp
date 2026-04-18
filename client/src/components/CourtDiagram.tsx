@@ -5,6 +5,8 @@
  *   x: 0-100 (% of court width, 0=left, 100=right)
  *   y: 0-100 (% of court length, 0=far baseline, 100=near baseline)
  *   50 = net line
+ *
+ * Palette: Tier 1 Cold Dark
  */
 
 export interface CourtPosition {
@@ -67,21 +69,21 @@ function mapY(y: number): number {
 function roleColor(role?: string): string {
   switch (role) {
     case 'coach':
-      return '#B85C38';
+      return '#3b82f6';
     case 'machine':
-      return '#6B7B8D';
+      return '#a0a5ad';
     default:
-      return '#2C2C2C';
+      return '#e8e8e8';
   }
 }
 
 function zoneColor(color?: string): string {
   switch (color) {
     case 'accent':
-      return 'rgba(184, 92, 56, 0.15)';
+      return 'rgba(59, 130, 246, 0.15)';
     case 'muted':
     default:
-      return 'rgba(107, 123, 141, 0.12)';
+      return 'rgba(160, 165, 173, 0.12)';
   }
 }
 
@@ -106,7 +108,7 @@ export function CourtDiagram({ diagram, className = '' }: Props) {
             markerHeight="4"
             orient="auto-start-reverse"
           >
-            <path d="M 0 0 L 10 5 L 0 10 z" fill="#B85C38" />
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="#3b82f6" />
           </marker>
           <marker
             id="move-arrow"
@@ -117,43 +119,43 @@ export function CourtDiagram({ diagram, className = '' }: Props) {
             markerHeight="4"
             orient="auto-start-reverse"
           >
-            <path d="M 0 0 L 10 5 L 0 10 z" fill="#6B7B8D" />
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="#a0a5ad" />
           </marker>
         </defs>
 
-        {/* Court surface */}
+        {/* Court surface — dark green-tinted surface on dark bg */}
         <rect
           x={COURT_LEFT}
           y={COURT_TOP}
           width={COURT_RIGHT - COURT_LEFT}
           height={COURT_BOTTOM - COURT_TOP}
-          fill="#EDE8DF"
-          stroke="#2C2C2C"
+          fill="#2a2e34"
+          stroke="#a0a5ad"
           strokeWidth="0.4"
         />
 
         {/* Singles sidelines */}
-        <line x1={SINGLES_LEFT} y1={COURT_TOP} x2={SINGLES_LEFT} y2={COURT_BOTTOM} stroke="#2C2C2C" strokeWidth="0.4" />
-        <line x1={SINGLES_RIGHT} y1={COURT_TOP} x2={SINGLES_RIGHT} y2={COURT_BOTTOM} stroke="#2C2C2C" strokeWidth="0.4" />
+        <line x1={SINGLES_LEFT} y1={COURT_TOP} x2={SINGLES_LEFT} y2={COURT_BOTTOM} stroke="#a0a5ad" strokeWidth="0.4" />
+        <line x1={SINGLES_RIGHT} y1={COURT_TOP} x2={SINGLES_RIGHT} y2={COURT_BOTTOM} stroke="#a0a5ad" strokeWidth="0.4" />
 
         {/* Service lines */}
-        <line x1={SINGLES_LEFT} y1={SERVICE_LINE_TOP_Y} x2={SINGLES_RIGHT} y2={SERVICE_LINE_TOP_Y} stroke="#2C2C2C" strokeWidth="0.4" />
-        <line x1={SINGLES_LEFT} y1={SERVICE_LINE_BOTTOM_Y} x2={SINGLES_RIGHT} y2={SERVICE_LINE_BOTTOM_Y} stroke="#2C2C2C" strokeWidth="0.4" />
+        <line x1={SINGLES_LEFT} y1={SERVICE_LINE_TOP_Y} x2={SINGLES_RIGHT} y2={SERVICE_LINE_TOP_Y} stroke="#a0a5ad" strokeWidth="0.4" />
+        <line x1={SINGLES_LEFT} y1={SERVICE_LINE_BOTTOM_Y} x2={SINGLES_RIGHT} y2={SERVICE_LINE_BOTTOM_Y} stroke="#a0a5ad" strokeWidth="0.4" />
 
         {/* Center service line */}
-        <line x1={CENTER_X} y1={SERVICE_LINE_TOP_Y} x2={CENTER_X} y2={SERVICE_LINE_BOTTOM_Y} stroke="#2C2C2C" strokeWidth="0.4" />
+        <line x1={CENTER_X} y1={SERVICE_LINE_TOP_Y} x2={CENTER_X} y2={SERVICE_LINE_BOTTOM_Y} stroke="#a0a5ad" strokeWidth="0.4" />
 
         {/* Center marks on baselines */}
-        <line x1={CENTER_X - 1} y1={COURT_TOP} x2={CENTER_X + 1} y2={COURT_TOP} stroke="#2C2C2C" strokeWidth="0.4" />
-        <line x1={CENTER_X - 1} y1={COURT_BOTTOM} x2={CENTER_X + 1} y2={COURT_BOTTOM} stroke="#2C2C2C" strokeWidth="0.4" />
+        <line x1={CENTER_X - 1} y1={COURT_TOP} x2={CENTER_X + 1} y2={COURT_TOP} stroke="#a0a5ad" strokeWidth="0.4" />
+        <line x1={CENTER_X - 1} y1={COURT_BOTTOM} x2={CENTER_X + 1} y2={COURT_BOTTOM} stroke="#a0a5ad" strokeWidth="0.4" />
 
         {/* Net */}
-        <line x1={COURT_LEFT - 2} y1={NET_Y} x2={COURT_RIGHT + 2} y2={NET_Y} stroke="#2C2C2C" strokeWidth="1.2" />
+        <line x1={COURT_LEFT - 2} y1={NET_Y} x2={COURT_RIGHT + 2} y2={NET_Y} stroke="#e8e8e8" strokeWidth="1.2" />
         <text
           x={COURT_LEFT - 3}
           y={NET_Y + 1.5}
           fontSize="3"
-          fill="#6B7B8D"
+          fill="#a0a5ad"
           textAnchor="end"
           fontFamily="IBM Plex Mono, monospace"
         >
@@ -169,7 +171,7 @@ export function CourtDiagram({ diagram, className = '' }: Props) {
               width={mapX(zone.x + zone.width) - mapX(zone.x)}
               height={mapY(zone.y + zone.height) - mapY(zone.y)}
               fill={zoneColor(zone.color)}
-              stroke={zone.color === 'accent' ? '#B85C38' : '#6B7B8D'}
+              stroke={zone.color === 'accent' ? '#3b82f6' : '#a0a5ad'}
               strokeWidth="0.3"
               strokeDasharray="1 1"
               rx="1"
@@ -179,9 +181,9 @@ export function CourtDiagram({ diagram, className = '' }: Props) {
                 x={mapX(zone.x + zone.width / 2)}
                 y={mapY(zone.y + zone.height / 2) + 1}
                 fontSize="2.8"
-                fill={zone.color === 'accent' ? '#8B4C2A' : '#5A6B7D'}
+                fill={zone.color === 'accent' ? '#60a5fa' : '#a0a5ad'}
                 textAnchor="middle"
-                fontFamily="Source Sans 3, sans-serif"
+                fontFamily="Inter, sans-serif"
                 fontWeight="600"
               >
                 {zone.label}
@@ -207,7 +209,7 @@ export function CourtDiagram({ diagram, className = '' }: Props) {
             <g key={`p-${i}`}>
               <path
                 d={isBall ? `M ${x1} ${y1} Q ${midX} ${midY} ${x2} ${y2}` : `M ${x1} ${y1} L ${x2} ${y2}`}
-                stroke={isBall ? '#B85C38' : '#6B7B8D'}
+                stroke={isBall ? '#3b82f6' : '#a0a5ad'}
                 strokeWidth={isBall ? '0.7' : '0.5'}
                 strokeDasharray={path.style === 'dashed' || !isBall ? '1.2 1' : undefined}
                 fill="none"
@@ -218,9 +220,9 @@ export function CourtDiagram({ diagram, className = '' }: Props) {
                   x={midX}
                   y={midY - 1.5}
                   fontSize="2.6"
-                  fill={isBall ? '#8B4C2A' : '#5A6B7D'}
+                  fill={isBall ? '#60a5fa' : '#a0a5ad'}
                   textAnchor="middle"
-                  fontFamily="Source Sans 3, sans-serif"
+                  fontFamily="Inter, sans-serif"
                   fontWeight="600"
                 >
                   {path.label}
@@ -238,16 +240,16 @@ export function CourtDiagram({ diagram, className = '' }: Props) {
               cy={mapY(pos.y)}
               r="3"
               fill={roleColor(pos.role)}
-              stroke="#FDFBF7"
+              stroke="#1a1d21"
               strokeWidth="0.5"
             />
             <text
               x={mapX(pos.x)}
               y={mapY(pos.y) + 1}
               fontSize="2.6"
-              fill="#FDFBF7"
+              fill="#1a1d21"
               textAnchor="middle"
-              fontFamily="Source Sans 3, sans-serif"
+              fontFamily="Inter, sans-serif"
               fontWeight="700"
             >
               {pos.label}

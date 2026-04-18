@@ -127,8 +127,8 @@ export default function DrillDetail() {
           onClick={() => toggleFavorite(drill.id)}
           className={`flex-shrink-0 rounded-full border p-2.5 transition-colors ${
             favorited
-              ? "border-amber-500/30 bg-amber-500/12 text-amber-500"
-              : "border-t1-border bg-t1-surface text-t1-muted hover:text-amber-500"
+              ? "border-amber-500/30 bg-amber-500/100/12 text-amber-500"
+              : "border-t1-border bg-t1-surface text-t1-muted hover:text-amber-400"
           }`}
           aria-label={favorited ? `Unsave ${drill.name}` : `Save ${drill.name}`}
         >
@@ -214,14 +214,14 @@ export default function DrillDetail() {
 
       {/* Common Setup Errors */}
       {drill.commonSetupErrors && drill.commonSetupErrors.length > 0 && (
-        <section className="mt-3 rounded-xl border border-amber-200 bg-amber-50 p-4 sm:p-5">
-          <h2 className="chip-label mb-3 flex items-center gap-2 font-display text-amber-800">
+        <section className="mt-3 rounded-xl border border-amber-500/25 bg-amber-500/10 p-4 sm:p-5">
+          <h2 className="chip-label mb-3 flex items-center gap-2 font-display text-amber-400">
             <AlertTriangle className="h-4 w-4" /> Common Setup Mistakes
           </h2>
           <ul className="space-y-2">
             {drill.commonSetupErrors.map(err => (
-              <li key={err} className="flex items-start gap-2.5 body-copy-sm text-amber-900/80">
-                <span className="mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-amber-500" />
+              <li key={err} className="flex items-start gap-2.5 body-copy-sm text-amber-300/80">
+                <span className="mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-amber-500/100" />
                 <span>{err}</span>
               </li>
             ))}

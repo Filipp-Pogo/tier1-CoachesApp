@@ -6,14 +6,14 @@ import { CheckCircle2, Clock, XCircle, ArrowRight, Shield, MessageSquare } from 
 import { advancementInfo } from '@/lib/data';
 
 const statusIcons: Record<string, React.ReactNode> = {
-  Approved: <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-700" />,
-  Pending: <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-amber-700" />,
+  Approved: <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-400" />,
+  Pending: <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-amber-400" />,
   Deferred: <XCircle className="w-4 h-4 sm:w-5 sm:h-5 text-t1-red" />,
 };
 
 const statusColors: Record<string, string> = {
-  Approved: 'border-emerald-200 bg-emerald-50',
-  Pending: 'border-amber-200 bg-amber-50',
+  Approved: 'border-emerald-500/25 bg-emerald-500/10',
+  Pending: 'border-amber-500/25 bg-amber-500/10',
   Deferred: 'border-t1-red/30 bg-t1-red/10',
 };
 

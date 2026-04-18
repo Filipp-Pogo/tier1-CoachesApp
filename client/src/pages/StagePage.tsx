@@ -70,7 +70,7 @@ export default function StagePage() {
               </h1>
               <p className="text-xs sm:text-sm text-t1-muted uppercase tracking-wider mt-0.5">{stage.subtitle}</p>
               {stage.contentStatus !== 'complete' && (
-                <div className="mt-2 inline-flex items-center gap-1.5 bg-amber-50 border border-amber-200 text-amber-700 px-2.5 py-1 rounded text-[10px] sm:text-xs font-medium">
+                <div className="mt-2 inline-flex items-center gap-1.5 bg-amber-500/10 border border-amber-500/25 text-amber-400 px-2.5 py-1 rounded text-[10px] sm:text-xs font-medium">
                   <AlertTriangle className="w-3 h-3" />
                   {stage.contentStatus === 'placeholder' 
                     ? 'Outline — detailed content being added.'

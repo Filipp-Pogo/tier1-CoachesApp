@@ -1,10 +1,10 @@
-@import url("https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Source+Sans+3:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap");
 @import "tailwindcss";
 @import "tw-animate-css";
 
 @theme inline {
-  --font-sans: "Source Sans 3", "Inter", system-ui, sans-serif;
-  --font-display: "Lora", Georgia, "Times New Roman", serif;
+  --font-sans: "Inter", system-ui, sans-serif;
+  --font-display: "Oswald", "Inter", system-ui, sans-serif;
   --font-mono: "IBM Plex Mono", ui-monospace, monospace;
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
@@ -52,69 +52,71 @@
   --color-t1-red: var(--t1-red);
   --color-t1-border: var(--t1-border);
   --color-t1-border-strong: var(--t1-border-strong);
+  --color-t1-navy: var(--t1-navy);
 }
 
 :root {
-  --radius: 0.625rem;
+  --radius: 0.5rem;
 
-  /* ─── Playbook Palette ─────────────────────────────────── */
-  --background: #F5F0E8;
-  --foreground: #2C2C2C;
-  --card: #FDFBF7;
-  --card-foreground: #2C2C2C;
-  --popover: rgba(253, 251, 247, 0.97);
-  --popover-foreground: #2C2C2C;
-  --primary: #B85C38;
-  --primary-foreground: #FDFBF7;
-  --secondary: #EDE8DF;
-  --secondary-foreground: #5A5650;
-  --muted: #EDE8DF;
-  --muted-foreground: #6B7B8D;
-  --accent: #F0E6D8;
-  --accent-foreground: #8B4C2A;
-  --destructive: #C0392B;
-  --destructive-foreground: #FDFBF7;
-  --border: rgba(44, 44, 44, 0.10);
-  --input: rgba(44, 44, 44, 0.10);
-  --ring: #B85C38;
+  /* ─── Tier 1 Cold Dark Palette ─────────────────────────── */
+  --background: #1a1d21;
+  --foreground: #e8e8e8;
+  --card: #22262b;
+  --card-foreground: #e8e8e8;
+  --popover: rgba(34, 38, 43, 0.97);
+  --popover-foreground: #e8e8e8;
+  --primary: #3b82f6;
+  --primary-foreground: #ffffff;
+  --secondary: #2a2e34;
+  --secondary-foreground: #a0a5ad;
+  --muted: #2a2e34;
+  --muted-foreground: #a0a5ad;
+  --accent: #172554;
+  --accent-foreground: #93c5fd;
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+  --border: rgba(255, 255, 255, 0.08);
+  --input: rgba(255, 255, 255, 0.08);
+  --ring: #3b82f6;
 
   /* Charts */
-  --chart-1: #B85C38;
-  --chart-2: #5A8A6A;
-  --chart-3: #C49A5C;
-  --chart-4: #C0392B;
-  --chart-5: #6B7B8D;
+  --chart-1: #3b82f6;
+  --chart-2: #22c55e;
+  --chart-3: #f59e0b;
+  --chart-4: #ef4444;
+  --chart-5: #a0a5ad;
 
   /* Sidebar */
-  --sidebar: rgba(245, 240, 232, 0.95);
-  --sidebar-foreground: #2C2C2C;
-  --sidebar-primary: #B85C38;
-  --sidebar-primary-foreground: #FDFBF7;
-  --sidebar-accent: #F0E6D8;
-  --sidebar-accent-foreground: #8B4C2A;
-  --sidebar-border: rgba(44, 44, 44, 0.08);
-  --sidebar-ring: #B85C38;
+  --sidebar: rgba(26, 29, 33, 0.95);
+  --sidebar-foreground: #e8e8e8;
+  --sidebar-primary: #3b82f6;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #172554;
+  --sidebar-accent-foreground: #93c5fd;
+  --sidebar-border: rgba(255, 255, 255, 0.08);
+  --sidebar-ring: #3b82f6;
 
   /* ─── Tier 1 Semantic Tokens ───────────────────────────── */
-  --t1-bg: #F5F0E8;
-  --t1-surface: #FDFBF7;
-  --t1-text: #2C2C2C;
-  --t1-muted: #6B7B8D;
-  --t1-accent: #B85C38;
-  --t1-accent-light: #D4845E;
-  --t1-secondary: #6B7B8D;
-  --t1-red: #C0392B;
-  --t1-border: rgba(44, 44, 44, 0.10);
-  --t1-border-strong: rgba(44, 44, 44, 0.18);
-  --t1-surface-soft: rgba(253, 251, 247, 0.92);
-  --t1-surface-muted: rgba(245, 240, 232, 0.94);
+  --t1-bg: #1a1d21;
+  --t1-surface: #22262b;
+  --t1-text: #e8e8e8;
+  --t1-muted: #a0a5ad;
+  --t1-accent: #3b82f6;
+  --t1-accent-light: #60a5fa;
+  --t1-secondary: #a0a5ad;
+  --t1-red: #ef4444;
+  --t1-border: rgba(255, 255, 255, 0.08);
+  --t1-border-strong: rgba(255, 255, 255, 0.14);
+  --t1-navy: #172554;
+  --t1-surface-soft: rgba(34, 38, 43, 0.92);
+  --t1-surface-muted: rgba(42, 46, 52, 0.94);
   --t1-hero-overlay: linear-gradient(
     180deg,
-    rgba(253, 251, 247, 0.92) 0%,
-    rgba(245, 240, 232, 0.97) 66%,
-    rgba(245, 240, 232, 1) 100%
+    rgba(26, 29, 33, 0.85) 0%,
+    rgba(26, 29, 33, 0.97) 66%,
+    rgba(26, 29, 33, 1) 100%
   );
-  --t1-panel-shadow: 0 2px 12px rgba(44, 44, 44, 0.06);
+  --t1-panel-shadow: 0 2px 12px rgba(0, 0, 0, 0.25);
 }
 
 @layer base {
@@ -142,7 +144,7 @@
   h4,
   h5,
   h6 {
-    font-family: "Lora", Georgia, "Times New Roman", serif;
+    font-family: "Oswald", "Inter", system-ui, sans-serif;
   }
 
   a,
@@ -168,7 +170,7 @@
 }
 
 :focus-visible {
-  outline: 3px solid rgba(184, 92, 56, 0.5);
+  outline: 3px solid rgba(59, 130, 246, 0.5);
   outline-offset: 2px;
 }
 
@@ -178,8 +180,8 @@ input:focus-visible,
 textarea:focus-visible,
 select:focus-visible,
 [role="button"]:focus-visible {
-  box-shadow: 0 0 0 3px rgba(184, 92, 56, 0.15);
-  border-radius: 8px;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+  border-radius: 6px;
 }
 
 @layer components {
@@ -224,7 +226,7 @@ select:focus-visible,
     display: none;
   }
 
-  /* ─── Playbook Hero ───────────────────────────────────── */
+  /* ─── Cold Dark Hero ─────────────────────────────────── */
   .page-hero {
     position: relative;
     overflow: hidden;
@@ -244,23 +246,23 @@ select:focus-visible,
       0deg,
       transparent,
       transparent 31px,
-      rgba(44, 44, 44, 0.03) 31px,
-      rgba(44, 44, 44, 0.03) 32px
+      rgba(255, 255, 255, 0.02) 31px,
+      rgba(255, 255, 255, 0.02) 32px
     );
     pointer-events: none;
   }
 
-  /* ─── Playbook Surfaces ───────────────────────────────── */
+  /* ─── Cold Dark Surfaces ─────────────────────────────── */
   .panel-surface {
     border: 1px solid var(--t1-border-strong);
-    border-radius: 0.625rem;
+    border-radius: 0.5rem;
     background: var(--t1-surface);
     box-shadow: var(--t1-panel-shadow);
   }
 
   .panel-muted {
     border: 1px solid var(--t1-border);
-    border-radius: 0.625rem;
+    border-radius: 0.5rem;
     background: var(--t1-surface-muted);
   }
 
@@ -268,7 +270,7 @@ select:focus-visible,
     position: relative;
     overflow: hidden;
     border: 1px solid var(--t1-border-strong);
-    border-radius: 0.625rem;
+    border-radius: 0.5rem;
     background: var(--t1-surface);
     box-shadow: var(--t1-panel-shadow);
   }
@@ -281,7 +283,7 @@ select:focus-visible,
     right: 0;
     height: 3px;
     background: var(--t1-accent);
-    opacity: 0.6;
+    opacity: 0.8;
   }
 
   .premium-card > * {
@@ -290,24 +292,24 @@ select:focus-visible,
   }
 
   .coach-tip {
-    border: 1px solid color-mix(in srgb, var(--t1-accent) 25%, var(--t1-border));
-    border-radius: 0.625rem;
-    background: color-mix(in srgb, var(--t1-accent) 5%, var(--t1-surface));
+    border: 1px solid rgba(59, 130, 246, 0.2);
+    border-radius: 0.5rem;
+    background: rgba(59, 130, 246, 0.06);
     border-left: 3px solid var(--t1-accent);
   }
 
   .coach-empty {
     border: 1px dashed var(--t1-border-strong);
-    border-radius: 0.625rem;
+    border-radius: 0.5rem;
     background: var(--t1-surface-muted);
   }
 
-  /* ─── Playbook Typography ─────────────────────────────── */
+  /* ─── Cold Dark Typography ───────────────────────────── */
   .section-kicker {
     color: var(--t1-accent);
-    font-family: "Source Sans 3", system-ui, sans-serif;
+    font-family: "Oswald", system-ui, sans-serif;
     font-size: 0.76rem;
-    font-weight: 700;
+    font-weight: 600;
     line-height: 1.2;
     letter-spacing: 0.2em;
     text-transform: uppercase;
@@ -335,28 +337,31 @@ select:focus-visible,
   }
 
   .page-title {
-    font-family: "Lora", Georgia, serif;
+    font-family: "Oswald", system-ui, sans-serif;
     font-size: clamp(1.75rem, 4vw, 2.75rem);
-    font-weight: 600;
-    line-height: 1.15;
-    letter-spacing: -0.01em;
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
     text-wrap: balance;
   }
 
   .section-title {
-    font-family: "Lora", Georgia, serif;
+    font-family: "Oswald", system-ui, sans-serif;
     font-size: clamp(1.25rem, 2vw, 1.65rem);
     font-weight: 600;
-    line-height: 1.2;
-    letter-spacing: -0.01em;
+    line-height: 1.15;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
     text-wrap: balance;
   }
 
   .card-title {
-    font-family: "Lora", Georgia, serif;
+    font-family: "Oswald", system-ui, sans-serif;
     font-size: clamp(1.05rem, 1.3vw, 1.35rem);
     font-weight: 600;
-    line-height: 1.25;
+    line-height: 1.2;
+    letter-spacing: 0.01em;
     text-wrap: balance;
   }
 
@@ -378,9 +383,9 @@ select:focus-visible,
   }
 
   .chip-label {
-    font-family: "Source Sans 3", system-ui, sans-serif;
+    font-family: "Oswald", system-ui, sans-serif;
     font-size: 0.72rem;
-    font-weight: 700;
+    font-weight: 600;
     line-height: 1;
     letter-spacing: 0.14em;
     text-transform: uppercase;
@@ -402,12 +407,12 @@ select:focus-visible,
     line-height: 1.15;
   }
 
-  /* ─── Playbook Search ─────────────────────────────────── */
+  /* ─── Cold Dark Search ───────────────────────────────── */
   .search-field {
     min-height: 3rem;
     width: 100%;
     border: 1px solid var(--t1-border-strong);
-    border-radius: 0.625rem;
+    border-radius: 0.5rem;
     background: var(--t1-surface);
     color: var(--t1-text);
     padding-left: 2.875rem;
@@ -426,7 +431,7 @@ select:focus-visible,
   .search-field:focus {
     outline: none;
     border-color: var(--t1-accent);
-    box-shadow: 0 0 0 3px rgba(184, 92, 56, 0.1);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
   }
 
   /* ─── Touch Targets ───────────────────────────────────── */

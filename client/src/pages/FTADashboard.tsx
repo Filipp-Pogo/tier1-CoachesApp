@@ -222,8 +222,8 @@ export default function FTADashboard() {
 
       {/* ── Wellness Alerts (if any) ── */}
       {wellnessAlerts.length > 0 && (
-        <section className="rounded-xl border border-red-200 bg-red-50/50 p-4">
-          <h2 className="flex items-center gap-2 text-sm font-semibold text-red-700">
+        <section className="rounded-xl border border-red-500/25 bg-red-500/10/50 p-4">
+          <h2 className="flex items-center gap-2 text-sm font-semibold text-red-400">
             <AlertTriangle className="h-4 w-4" />
             Wellness Alerts — Requires Attention
           </h2>
@@ -232,10 +232,10 @@ export default function FTADashboard() {
               <Link
                 key={a.id}
                 href={`/athletes/${a.id}`}
-                className="flex items-center justify-between rounded-lg border border-red-200 bg-white px-4 py-3 no-underline transition-colors hover:border-red-300"
+                className="flex items-center justify-between rounded-lg border border-red-500/25 bg-t1-surface px-4 py-3 no-underline transition-colors hover:border-red-500/30"
               >
                 <div className="flex items-center gap-3">
-                  <div className="h-2.5 w-2.5 rounded-full bg-red-500" />
+                  <div className="h-2.5 w-2.5 rounded-full bg-red-500/100" />
                   <div>
                     <p className="text-sm font-semibold text-t1-text">
                       {a.firstName} {a.lastName}
@@ -400,10 +400,10 @@ export default function FTADashboard() {
                   <span
                     className={`flex-shrink-0 rounded-full px-2.5 py-0.5 text-xs font-semibold ${
                       match.result === "win"
-                        ? "bg-emerald-100 text-emerald-700"
+                        ? "bg-emerald-500/15 text-emerald-400"
                         : match.result === "loss"
-                          ? "bg-red-100 text-red-700"
-                          : "bg-amber-100 text-amber-700"
+                          ? "bg-red-500/15 text-red-400"
+                          : "bg-amber-500/15 text-amber-400"
                     }`}
                   >
                     {match.result === "win"

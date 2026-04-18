@@ -75,8 +75,8 @@ function PlanCard({
           onClick={onToggleFavorite}
           className={`inline-flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full border transition-colors ${
             isFavorite
-              ? "border-amber-500/30 bg-amber-500/12 text-amber-500"
-              : "border-t1-border bg-t1-bg text-t1-muted hover:text-amber-500"
+              ? "border-amber-500/30 bg-amber-500/100/12 text-amber-500"
+              : "border-t1-border bg-t1-bg text-t1-muted hover:text-amber-400"
           }`}
           aria-label={isFavorite ? "Remove favorite" : "Add favorite"}
         >

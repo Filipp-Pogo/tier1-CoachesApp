@@ -294,8 +294,8 @@ export default function DrillLibrary() {
                       onClick={() => toggleFavorite(drill.id)}
                       className={`flex-shrink-0 rounded-full border p-2 transition-colors ${
                         favorited
-                          ? "border-amber-500/30 bg-amber-500/12 text-amber-500"
-                          : "border-t1-border bg-t1-bg text-t1-muted hover:text-amber-500"
+                          ? "border-amber-500/30 bg-amber-500/10 text-amber-400"
+                          : "border-t1-border bg-t1-bg text-t1-muted hover:text-amber-400"
                       }`}
                       aria-label={favorited ? `Unsave ${drill.name}` : `Save ${drill.name}`}
                     >

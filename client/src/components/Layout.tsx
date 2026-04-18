@@ -135,7 +135,7 @@ export default function Layout({ children }: { children: ReactNode }) {
               <img
                 src={TIER1_LOGO_WHITE}
                 alt="Tier 1 Performance"
-                className="h-6 w-auto brightness-0"
+                className="h-6 w-auto"
               />
             </div>
             <div className="flex flex-col">
@@ -337,15 +337,15 @@ export default function Layout({ children }: { children: ReactNode }) {
               <img
                 src={TIER1_LOGO_WHITE}
                 alt="Tier 1"
-                className="h-4 w-auto opacity-70 brightness-0"
+                className="h-4 w-auto opacity-70"
               />
             </div>
             <span className="text-sm text-t1-muted">
-              Tier 1 Academy Operating System. Build faster, coach cleaner.
+              Tier 1 Performance · Caliber Sports Facility
             </span>
           </div>
           <p className="text-[11px] uppercase tracking-[0.18em] text-t1-muted">
-            Action first. Details on demand.
+            The standard is the standard.
           </p>
         </div>
       </footer>

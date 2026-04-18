@@ -14,17 +14,17 @@ import { type SessionPlan } from '@/lib/sessionPlans';
 import { usePathwayStages, useSessionPlans } from '@/hooks/useContentData';
 
 const levelColors: Record<PathwayStageId, string> = {
-  foundations: 'bg-red-50 text-red-700 border-red-200',
-  prep: 'bg-emerald-50 text-emerald-700 border-emerald-200',
-  jasa: 'bg-amber-50 text-amber-700 border-amber-200',
-  hs: 'bg-purple-50 text-purple-700 border-purple-200',
-  asa: 'bg-blue-50 text-blue-700 border-blue-200',
-  fta: 'bg-orange-50 text-orange-700 border-orange-200',
+  foundations: 'bg-red-500/10 text-red-400 border-red-500/25',
+  prep: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/25',
+  jasa: 'bg-amber-500/10 text-amber-400 border-amber-500/25',
+  hs: 'bg-purple-500/10 text-purple-400 border-purple-500/25',
+  asa: 'bg-blue-500/10 text-blue-400 border-blue-500/25',
+  fta: 'bg-orange-500/10 text-orange-400 border-orange-500/25',
 };
 
 const accentColors: Record<string, { border: string; bg: string; text: string }> = {
   a: { border: 'border-t1-accent', bg: 'bg-t1-accent/10', text: 'text-t1-accent' },
-  b: { border: 'border-amber-500', bg: 'bg-amber-50', text: 'text-amber-700' },
+  b: { border: 'border-amber-500', bg: 'bg-amber-500/10', text: 'text-amber-400' },
 };
 
 function isDraftPlan(plan: SessionPlan): boolean {
@@ -79,7 +79,7 @@ function PlanSelector({ slot, selectedPlan, onSelect, onClear, otherPlanId }: Pl
           </span>
           <button
             onClick={onClear}
-            className="text-t1-muted hover:text-red-700 transition-colors"
+            className="text-t1-muted hover:text-red-400 transition-colors"
             aria-label="Clear selection"
           >
             <X className="w-4 h-4" />
@@ -94,7 +94,7 @@ function PlanSelector({ slot, selectedPlan, onSelect, onClear, otherPlanId }: Pl
             {selectedPlan.totalTime} min
           </span>
           {draft && (
-            <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200 flex items-center gap-1">
+            <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/25 flex items-center gap-1">
               <AlertCircle className="w-3 h-3" />
               Draft
             </span>
@@ -309,10 +309,10 @@ export default function PlanComparison() {
                     Duration
                   </h4>
                   <div className="grid grid-cols-[1fr_1fr] gap-2">
-                    <span className={`text-sm font-semibold ${planA!.totalTime !== planB!.totalTime ? 'text-amber-700' : 'text-t1-text'}`}>
+                    <span className={`text-sm font-semibold ${planA!.totalTime !== planB!.totalTime ? 'text-amber-400' : 'text-t1-text'}`}>
                       {planA!.totalTime} min
                     </span>
-                    <span className={`text-sm font-semibold ${planA!.totalTime !== planB!.totalTime ? 'text-amber-700' : 'text-t1-text'}`}>
+                    <span className={`text-sm font-semibold ${planA!.totalTime !== planB!.totalTime ? 'text-amber-400' : 'text-t1-text'}`}>
                       {planB!.totalTime} min
                     </span>
                   </div>
@@ -341,7 +341,7 @@ export default function PlanComparison() {
                       <div
                         key={i}
                         className={`grid grid-cols-[1fr_1fr] gap-2 p-2 rounded-lg ${
-                          row.same ? 'bg-t1-bg/30' : 'bg-amber-500/5 border border-amber-500/10'
+                          row.same ? 'bg-t1-bg/30' : 'bg-amber-500/100/5 border border-amber-500/10'
                         }`}
                       >
                         <div>
@@ -405,16 +405,16 @@ export default function PlanComparison() {
                   <div className="grid grid-cols-[1fr_1fr] gap-2">
                     <ul className="space-y-0.5">
                       {planA!.commonMistakes.map((m, i) => (
-                        <li key={i} className="text-xs text-red-700/80 flex items-start gap-1">
-                          <span className="text-red-700 mt-0.5">•</span>
+                        <li key={i} className="text-xs text-red-400/80 flex items-start gap-1">
+                          <span className="text-red-400 mt-0.5">•</span>
                           {m}
                         </li>
                       ))}
                     </ul>
                     <ul className="space-y-0.5">
                       {planB!.commonMistakes.map((m, i) => (
-                        <li key={i} className="text-xs text-red-700/80 flex items-start gap-1">
-                          <span className="text-red-700 mt-0.5">•</span>
+                        <li key={i} className="text-xs text-red-400/80 flex items-start gap-1">
+                          <span className="text-red-400 mt-0.5">•</span>
                           {m}
                         </li>
                       ))}

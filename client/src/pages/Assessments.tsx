@@ -113,9 +113,9 @@ export default function Assessments() {
 
         {/* Draft notice */}
         {showDraftBanner && (
-          <div className="bg-t1-surface border border-amber-200 rounded-lg p-3">
+          <div className="bg-t1-surface border border-amber-500/25 rounded-lg p-3">
             <div className="flex items-start gap-2">
-              <AlertTriangle className="w-3.5 h-3.5 text-amber-700 flex-shrink-0 mt-0.5" />
+              <AlertTriangle className="w-3.5 h-3.5 text-amber-400 flex-shrink-0 mt-0.5" />
               <p className="text-[10px] sm:text-xs text-t1-muted">
                 HS, ASA, and FTA standards are draft outlines.
               </p>
@@ -146,7 +146,7 @@ export default function Assessments() {
                           {assessment.stageName} Standards
                         </h2>
                         {isDraft && (
-                          <span className="text-[10px] bg-amber-50 text-amber-700 px-1.5 py-0.5 rounded font-medium uppercase tracking-wider">
+                          <span className="text-[10px] bg-amber-500/10 text-amber-400 px-1.5 py-0.5 rounded font-medium uppercase tracking-wider">
                             Draft
                           </span>
                         )}
@@ -176,7 +176,7 @@ export default function Assessments() {
                       {assessment.stageName} Standards
                     </h2>
                     {isDraft && (
-                      <span className="text-[10px] bg-amber-50 text-amber-700 px-1.5 py-0.5 rounded font-medium uppercase tracking-wider">
+                      <span className="text-[10px] bg-amber-500/10 text-amber-400 px-1.5 py-0.5 rounded font-medium uppercase tracking-wider">
                         Draft
                       </span>
                     )}

@@ -9,11 +9,11 @@ import { usePathwayStages } from '@/hooks/useContentData';
 const PATHWAY_IMG = 'https://d2xsxph8kpxj0f.cloudfront.net/310519663356767696/ELbCQXq8c7BR3Zt5VxeR2S/pathway-hero-Xdykqbm6PopwUPUpgsQCLe.webp';
 
 const stageColors: Record<string, { bg: string; border: string; dot: string; text: string }> = {
-  foundations: { bg: 'bg-red-50', border: 'border-red-200', dot: 'bg-red-500', text: 'text-red-700' },
-  prep: { bg: 'bg-emerald-50', border: 'border-emerald-200', dot: 'bg-emerald-500', text: 'text-emerald-700' },
-  jasa: { bg: 'bg-amber-50', border: 'border-amber-200', dot: 'bg-amber-500', text: 'text-amber-700' },
-  hs: { bg: 'bg-blue-50', border: 'border-blue-200', dot: 'bg-blue-500', text: 'text-blue-700' },
-  asa: { bg: 'bg-purple-50', border: 'border-purple-200', dot: 'bg-purple-500', text: 'text-purple-700' },
+  foundations: { bg: 'bg-red-500/10', border: 'border-red-500/25', dot: 'bg-red-500', text: 'text-red-400' },
+  prep: { bg: 'bg-emerald-500/10', border: 'border-emerald-500/25', dot: 'bg-emerald-500', text: 'text-emerald-400' },
+  jasa: { bg: 'bg-amber-500/10', border: 'border-amber-500/25', dot: 'bg-amber-500', text: 'text-amber-400' },
+  hs: { bg: 'bg-blue-500/10', border: 'border-blue-500/25', dot: 'bg-blue-500', text: 'text-blue-400' },
+  asa: { bg: 'bg-purple-500/10', border: 'border-purple-500/25', dot: 'bg-purple-500', text: 'text-purple-400' },
   fta: { bg: 'bg-t1-text/5', border: 'border-t1-text/20', dot: 'bg-t1-text', text: 'text-t1-text' },
 };
 
@@ -87,7 +87,7 @@ export default function Pathway() {
                             </span>
                           )}
                           {stage.contentStatus === 'partial' && (
-                            <span className="text-[9px] sm:text-[10px] bg-amber-50 text-amber-700 px-1.5 py-0.5 rounded font-medium uppercase tracking-wider">
+                            <span className="text-[9px] sm:text-[10px] bg-amber-500/10 text-amber-400 px-1.5 py-0.5 rounded font-medium uppercase tracking-wider">
                               Partial
                             </span>
                           )}

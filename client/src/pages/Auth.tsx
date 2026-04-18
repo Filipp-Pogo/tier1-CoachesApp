@@ -128,7 +128,7 @@ export default function AuthPage() {
           </div>
 
           {!authEnabled && (
-            <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
+            <div className="mt-4 rounded-xl border border-amber-500/25 bg-amber-500/10 p-3 text-sm text-amber-400">
               Supabase is not configured yet. Add <code>VITE_SUPABASE_URL</code>{" "}
               and <code>VITE_SUPABASE_ANON_KEY</code> to enable login + cloud
               sync.

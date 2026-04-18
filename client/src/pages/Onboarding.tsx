@@ -181,7 +181,7 @@ export default function Onboarding() {
                 {activeModule.lessons.length}
               </span>
               {isComplete && (
-                <span className="flex items-center gap-1 text-xs text-emerald-700">
+                <span className="flex items-center gap-1 text-xs text-emerald-400">
                   <CheckCircle2 className="w-3.5 h-3.5" /> Completed
                 </span>
               )}
@@ -218,7 +218,7 @@ export default function Onboarding() {
           {/* Key Takeaways */}
           <div className="bg-t1-surface border border-t1-border rounded-xl p-6 mb-10">
             <div className="flex items-center gap-2 mb-4">
-              <Lightbulb className="w-5 h-5 text-amber-700" />
+              <Lightbulb className="w-5 h-5 text-amber-400" />
               <h3 className="font-display font-bold text-lg text-t1-text">
                 Key Takeaways
               </h3>
@@ -247,7 +247,7 @@ export default function Onboarding() {
                 {nextLesson ? " & Continue" : " & Finish Module"}
               </button>
             ) : (
-              <div className="flex items-center gap-2 text-emerald-700 py-3 px-6 bg-emerald-50 rounded-lg">
+              <div className="flex items-center gap-2 text-emerald-400 py-3 px-6 bg-emerald-500/10 rounded-lg">
                 <CheckCircle2 className="w-5 h-5" />
                 <span className="font-semibold">Lesson Complete</span>
               </div>
@@ -324,10 +324,10 @@ export default function Onboarding() {
           {/* Module Header */}
           <div className="flex items-start gap-4 mb-8">
             <div
-              className={`w-14 h-14 rounded-xl flex items-center justify-center flex-shrink-0 ${modComplete ? "bg-emerald-100" : "bg-t1-accent/20"}`}
+              className={`w-14 h-14 rounded-xl flex items-center justify-center flex-shrink-0 ${modComplete ? "bg-emerald-500/15" : "bg-t1-accent/20"}`}
             >
               <Icon
-                className={`w-7 h-7 ${modComplete ? "text-emerald-700" : "text-t1-accent"}`}
+                className={`w-7 h-7 ${modComplete ? "text-emerald-400" : "text-t1-accent"}`}
               />
             </div>
             <div>
@@ -336,7 +336,7 @@ export default function Onboarding() {
                   Module {activeModule.order}
                 </span>
                 {modComplete && (
-                  <span className="flex items-center gap-1 text-xs text-emerald-700">
+                  <span className="flex items-center gap-1 text-xs text-emerald-400">
                     <CheckCircle2 className="w-3.5 h-3.5" /> Complete
                   </span>
                 )}
@@ -358,7 +358,7 @@ export default function Onboarding() {
             </div>
             <div className="h-2 bg-t1-bg rounded-full overflow-hidden">
               <div
-                className={`h-full rounded-full transition-all duration-500 ${modComplete ? "bg-emerald-500" : "bg-t1-accent"}`}
+                className={`h-full rounded-full transition-all duration-500 ${modComplete ? "bg-emerald-500/100" : "bg-t1-accent"}`}
                 style={{
                   width: `${(completedInModule / activeModule.lessons.length) * 100}%`,
                 }}
@@ -378,10 +378,10 @@ export default function Onboarding() {
                 >
                   <div className="flex items-center gap-4">
                     <div
-                      className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${done ? "bg-emerald-100" : "bg-t1-bg"}`}
+                      className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${done ? "bg-emerald-500/15" : "bg-t1-bg"}`}
                     >
                       {done ? (
-                        <CheckCircle2 className="w-5 h-5 text-emerald-700" />
+                        <CheckCircle2 className="w-5 h-5 text-emerald-400" />
                       ) : (
                         <span className="text-sm font-bold text-t1-muted">
                           {idx + 1}
@@ -528,9 +528,9 @@ export default function Onboarding() {
               <div className="text-sm text-t1-muted mb-2">Quiz Status</div>
               {hasPassed ? (
                 <div className="flex items-center gap-2">
-                  <CheckCircle2 className="w-6 h-6 text-emerald-700" />
+                  <CheckCircle2 className="w-6 h-6 text-emerald-400" />
                   <div>
-                    <div className="text-lg font-bold text-emerald-700">
+                    <div className="text-lg font-bold text-emerald-400">
                       PASSED
                     </div>
                     <div className="text-xs text-t1-muted">
@@ -540,7 +540,7 @@ export default function Onboarding() {
                 </div>
               ) : bestQuizResult ? (
                 <div>
-                  <div className="text-lg font-bold text-amber-700">
+                  <div className="text-lg font-bold text-amber-400">
                     Not Yet Passed
                   </div>
                   <div className="text-xs text-t1-muted">
@@ -576,10 +576,10 @@ export default function Onboarding() {
               >
                 <div className="flex items-center gap-4">
                   <div
-                    className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 ${modComplete ? "bg-emerald-100" : "bg-t1-accent/20"}`}
+                    className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 ${modComplete ? "bg-emerald-500/15" : "bg-t1-accent/20"}`}
                   >
                     <Icon
-                      className={`w-6 h-6 ${modComplete ? "text-emerald-700" : "text-t1-accent"}`}
+                      className={`w-6 h-6 ${modComplete ? "text-emerald-400" : "text-t1-accent"}`}
                     />
                   </div>
                   <div className="flex-1 min-w-0">
@@ -588,7 +588,7 @@ export default function Onboarding() {
                         Module {mod.order}
                       </span>
                       {modComplete && (
-                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-700" />
+                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
                       )}
                     </div>
                     <h3 className="font-display font-bold text-lg text-t1-text group-hover:text-t1-accent transition-colors">
@@ -601,7 +601,7 @@ export default function Onboarding() {
                     <div className="mt-3 flex items-center gap-3">
                       <div className="flex-1 h-1.5 bg-t1-bg rounded-full overflow-hidden">
                         <div
-                          className={`h-full rounded-full transition-all duration-500 ${modComplete ? "bg-emerald-500" : "bg-t1-accent"}`}
+                          className={`h-full rounded-full transition-all duration-500 ${modComplete ? "bg-emerald-500/100" : "bg-t1-accent"}`}
                           style={{ width: `${modPercent}%` }}
                         />
                       </div>
@@ -641,7 +641,7 @@ export default function Onboarding() {
                   : `Complete all ${onboardingModules.length} modules to unlock the quiz.`}
               </p>
               {hasPassed && (
-                <p className="text-sm text-emerald-700 mt-1">
+                <p className="text-sm text-emerald-400 mt-1">
                   You passed with {bestQuizResult?.percentage}%. You can retake
                   the quiz anytime.
                 </p>
@@ -668,7 +668,7 @@ export default function Onboarding() {
         <div className="mt-8 flex justify-end">
           <AlertDialog>
             <AlertDialogTrigger asChild>
-              <button className="flex items-center gap-2 text-xs text-t1-muted hover:text-red-700 transition-colors">
+              <button className="flex items-center gap-2 text-xs text-t1-muted hover:text-red-400 transition-colors">
                 <RotateCcw className="w-3.5 h-3.5" />
                 Reset Progress
               </button>
@@ -676,8 +676,8 @@ export default function Onboarding() {
             <AlertDialogContent className="bg-t1-surface border-t1-border">
               <AlertDialogHeader>
                 <div className="flex items-center gap-2 mb-1">
-                  <div className="w-10 h-10 rounded-full bg-red-50 flex items-center justify-center">
-                    <AlertTriangle className="w-5 h-5 text-red-700" />
+                  <div className="w-10 h-10 rounded-full bg-red-500/10 flex items-center justify-center">
+                    <AlertTriangle className="w-5 h-5 text-red-400" />
                   </div>
                   <AlertDialogTitle className="font-display text-lg text-t1-text">
                     Reset All Progress
