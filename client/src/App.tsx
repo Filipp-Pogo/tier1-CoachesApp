@@ -22,6 +22,9 @@ import Onboarding from "./pages/Onboarding";
 import OnboardingQuiz from "./pages/OnboardingQuiz";
 import AuthPage from "./pages/Auth";
 import OnCourtMode from "./pages/OnCourtMode";
+import FTADashboard from "./pages/FTADashboard";
+import AthleteDirectory from "./pages/AthleteDirectory";
+import AthleteProfile from "./pages/AthleteProfile";
 import { Loader2 } from "lucide-react";
 
 function Router() {
@@ -45,7 +48,10 @@ function Router() {
   return (
     <Layout>
       <Switch>
-        <Route path="/" component={Dashboard} />
+        <Route path="/" component={FTADashboard} />
+        <Route path="/athletes" component={AthleteDirectory} />
+        <Route path="/athletes/:id" component={AthleteProfile} />
+        <Route path="/legacy-dashboard" component={Dashboard} />
         <Route path="/pathway" component={Pathway} />
         <Route path="/stage/:id" component={StagePage} />
         <Route path="/drills" component={DrillLibrary} />
@@ -60,6 +66,7 @@ function Router() {
         <Route path="/compare-plans" component={PlanComparison} />
         <Route path="/onboarding" component={Onboarding} />
         <Route path="/onboarding/quiz" component={OnboardingQuiz} />
+        <Route path="/fta-dashboard" component={FTADashboard} />
         <Route path="/404" component={NotFound} />
         <Route component={NotFound} />
       </Switch>

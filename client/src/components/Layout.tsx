@@ -22,6 +22,7 @@ import {
   Shield,
   Target,
   TrendingUp,
+  Users,
   Wrench,
   X,
 } from "lucide-react";
@@ -47,29 +48,55 @@ interface NavItem {
   icon: ComponentType<{ className?: string; strokeWidth?: number }>;
 }
 
-/* 4 primary nav destinations */
+interface NavZone {
+  title: string;
+  items: NavItem[];
+}
+
+/* ── Primary nav (header bar) — 5 items ── */
 const primaryNav: NavItem[] = [
   { href: "/", label: "Home", icon: LayoutDashboard },
+  { href: "/athletes", label: "Athletes", icon: Users },
   { href: "/drills", label: "Drills", icon: BookOpen },
   { href: "/session-plans", label: "Plans", icon: ClipboardList },
   { href: "/on-court", label: "On Court", icon: PlayCircle },
 ];
 
-/* Secondary items accessible from "More" drawer */
-const secondaryNav: NavItem[] = [
-  { href: "/session-builder", label: "Session Builder", icon: Wrench },
-  { href: "/session-history", label: "Session History", icon: History },
-  { href: "/compare-plans", label: "Compare Plans", icon: ArrowLeftRight },
-  { href: "/pathway", label: "Pathway", icon: RouteIcon },
-  { href: "/assessments", label: "Assessments", icon: Target },
-  { href: "/advancement", label: "Advancement", icon: TrendingUp },
-  { href: "/coach-standards", label: "Coach Standards", icon: Shield },
-  { href: "/onboarding", label: "Onboarding", icon: GraduationCap },
+/* ── Three-zone navigation for the "More" drawer ── */
+const navZones: NavZone[] = [
+  {
+    title: "FTA Command Center",
+    items: [
+      { href: "/", label: "Dashboard", icon: LayoutDashboard },
+      { href: "/athletes", label: "Athlete Directory", icon: Users },
+    ],
+  },
+  {
+    title: "Coaches Playbook",
+    items: [
+      { href: "/drills", label: "Drill Library", icon: BookOpen },
+      { href: "/session-plans", label: "Session Plans", icon: ClipboardList },
+      { href: "/session-builder", label: "Session Builder", icon: Wrench },
+      { href: "/compare-plans", label: "Compare Plans", icon: ArrowLeftRight },
+      { href: "/session-history", label: "Session History", icon: History },
+      { href: "/pathway", label: "Pathway", icon: RouteIcon },
+      { href: "/assessments", label: "Assessments", icon: Target },
+      { href: "/advancement", label: "Advancement", icon: TrendingUp },
+      { href: "/coach-standards", label: "Coach Standards", icon: Shield },
+    ],
+  },
+  {
+    title: "Admin",
+    items: [
+      { href: "/onboarding", label: "Onboarding", icon: GraduationCap },
+    ],
+  },
 ];
 
-/* Mobile bottom nav — 4 items, no "More" */
+/* ── Mobile bottom nav — 5 items ── */
 const bottomNavItems: NavItem[] = [
   { href: "/", label: "Home", icon: LayoutDashboard },
+  { href: "/athletes", label: "Athletes", icon: Users },
   { href: "/drills", label: "Drills", icon: BookOpen },
   { href: "/session-plans", label: "Plans", icon: ClipboardList },
   { href: "/on-court", label: "Court", icon: PlayCircle },
@@ -116,12 +143,12 @@ export default function Layout({ children }: { children: ReactNode }) {
                 Tier 1 Coaches
               </span>
               <span className="hidden text-[11px] leading-none tracking-[0.12em] text-t1-muted sm:block">
-                Coaching Playbook
+                Academy Operating System
               </span>
             </div>
           </Link>
 
-          {/* Desktop nav — 4 primary items, flat links */}
+          {/* Desktop nav — 5 primary items, flat links */}
           <nav className="hidden lg:flex items-center gap-1 rounded-lg border border-t1-border bg-t1-surface/90 px-2 py-1.5 shadow-sm">
             {primaryNav.map((item) => (
               <Link
@@ -203,16 +230,16 @@ export default function Layout({ children }: { children: ReactNode }) {
         </div>
       </header>
 
-      {/* "More" drawer — shared between desktop and mobile */}
+      {/* "More" drawer — three-zone navigation */}
       {mobileOpen && (
         <div className="fixed inset-0 z-[60] flex flex-col bg-t1-bg/96 backdrop-blur-xl">
           <div className="flex h-14 items-center justify-between border-b border-t1-border px-4">
             <div>
               <p className="font-display text-[0.95rem] leading-none font-semibold uppercase tracking-[0.18em] text-t1-text">
-                Quick navigation
+                Navigation
               </p>
               <p className="mt-1 text-[11px] uppercase tracking-[0.18em] text-t1-muted">
-                All pages
+                All zones &amp; pages
               </p>
             </div>
             <button
@@ -224,62 +251,37 @@ export default function Layout({ children }: { children: ReactNode }) {
             </button>
           </div>
 
-          <div className="flex-1 overflow-y-auto px-4 py-4">
-            {/* On mobile: show primary items too since they may not have bottom nav context */}
-            <div className="mb-5 lg:hidden">
-              <p className="mb-2 px-2 chip-label text-t1-muted">Primary</p>
-              <div className="space-y-2">
-                {primaryNav.map((item) => {
-                  const Icon = item.icon;
-                  const active = isActive(item.href);
-                  return (
-                    <Link
-                      key={item.href}
-                      href={item.href}
-                      className={`flex min-h-[54px] items-center gap-4 rounded-lg border px-4 py-3 text-[0.97rem] leading-tight font-semibold no-underline transition-colors ${
-                        active
-                          ? "border-t1-accent/25 bg-t1-accent/10 text-t1-accent"
-                          : "border-t1-border bg-t1-surface/80 text-t1-text"
-                      }`}
-                    >
-                      <Icon
-                        className={`h-5 w-5 flex-shrink-0 ${active ? "text-t1-accent" : "text-t1-muted"}`}
-                      />
-                      <span>{item.label}</span>
-                      <ChevronRight className="ml-auto h-4 w-4 text-t1-muted/60" />
-                    </Link>
-                  );
-                })}
+          <div className="flex-1 overflow-y-auto px-4 py-4 space-y-6">
+            {navZones.map((zone) => (
+              <div key={zone.title}>
+                <p className="mb-2 px-2 chip-label text-t1-muted">
+                  {zone.title}
+                </p>
+                <div className="space-y-2">
+                  {zone.items.map((item) => {
+                    const Icon = item.icon;
+                    const active = isActive(item.href);
+                    return (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        className={`flex min-h-[54px] items-center gap-4 rounded-lg border px-4 py-3 text-[0.97rem] leading-tight font-semibold no-underline transition-colors ${
+                          active
+                            ? "border-t1-accent/25 bg-t1-accent/10 text-t1-accent"
+                            : "border-t1-border bg-t1-surface/80 text-t1-text"
+                        }`}
+                      >
+                        <Icon
+                          className={`h-5 w-5 flex-shrink-0 ${active ? "text-t1-accent" : "text-t1-muted"}`}
+                        />
+                        <span>{item.label}</span>
+                        <ChevronRight className="ml-auto h-4 w-4 text-t1-muted/60" />
+                      </Link>
+                    );
+                  })}
+                </div>
               </div>
-            </div>
-
-            {/* Secondary items — flat list */}
-            <div>
-              <p className="mb-2 px-2 chip-label text-t1-muted">More</p>
-              <div className="space-y-2">
-                {secondaryNav.map((item) => {
-                  const Icon = item.icon;
-                  const active = isActive(item.href);
-                  return (
-                    <Link
-                      key={item.href}
-                      href={item.href}
-                      className={`flex min-h-[54px] items-center gap-4 rounded-lg border px-4 py-3 text-[0.97rem] leading-tight font-semibold no-underline transition-colors ${
-                        active
-                          ? "border-t1-accent/25 bg-t1-accent/10 text-t1-accent"
-                          : "border-t1-border bg-t1-surface/80 text-t1-text"
-                      }`}
-                    >
-                      <Icon
-                        className={`h-5 w-5 flex-shrink-0 ${active ? "text-t1-accent" : "text-t1-muted"}`}
-                      />
-                      <span>{item.label}</span>
-                      <ChevronRight className="ml-auto h-4 w-4 text-t1-muted/60" />
-                    </Link>
-                  );
-                })}
-              </div>
-            </div>
+            ))}
           </div>
 
           <div className="border-t border-t1-border px-4 py-4">
@@ -327,7 +329,7 @@ export default function Layout({ children }: { children: ReactNode }) {
         {children}
       </main>
 
-      {/* Desktop footer — unchanged */}
+      {/* Desktop footer */}
       <footer className="hidden border-t border-t1-border bg-t1-bg/84 lg:block">
         <div className="container flex items-center justify-between py-5">
           <div className="flex items-center gap-3">
@@ -339,7 +341,7 @@ export default function Layout({ children }: { children: ReactNode }) {
               />
             </div>
             <span className="text-sm text-t1-muted">
-              Tier 1 Coaches App. Build faster, coach cleaner.
+              Tier 1 Academy Operating System. Build faster, coach cleaner.
             </span>
           </div>
           <p className="text-[11px] uppercase tracking-[0.18em] text-t1-muted">
@@ -348,10 +350,10 @@ export default function Layout({ children }: { children: ReactNode }) {
         </div>
       </footer>
 
-      {/* Mobile bottom nav — 4 items only */}
+      {/* Mobile bottom nav — 5 items */}
       {!isOnCourtRoute && (
         <nav className="safe-area-bottom fixed bottom-0 left-0 right-0 z-50 border-t border-t1-border bg-t1-bg/94 backdrop-blur-xl lg:hidden">
-          <div className="grid h-[4.25rem] grid-cols-4">
+          <div className="grid h-[4.25rem] grid-cols-5">
             {bottomNavItems.map((item) => {
               const active = isActive(item.href);
               const Icon = item.icon;
